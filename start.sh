@@ -4,12 +4,12 @@ echo "Starting Docker Compose services..."
 docker-compose up -d
 
 echo "Starting React frontend..."
-cd ./frontend
+cd ./frontend || exit
 npm install
 npm start &
 
 echo "Starting Flask backend..."
-cd ../backend
+cd ../backend || exit
 
 if [ ! -d "venv" ]; then
   echo "Virtual environment not found, creating one..."
