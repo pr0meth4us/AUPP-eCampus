@@ -1,31 +1,32 @@
-from flask import Flask, request, jsonify
-from pymongo import MongoClient
-from flask_cors import CORS
+from flask import Flask, jsonify
 from routes.auth_routes import auth_bp
-from models import User, Authentication
-from utils import create_token
-import os
+from services.cors_service import init_cors
+from services.mongo_service import init_mongo
+from config import Config
 import traceback
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Allow only requests from the React app
 
-# MongoDB configuration
-mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb')
-mongo_client = MongoClient(mongo_uri)
-db = mongo_client.mydb
+def create_app():
+    flask_app = Flask(__name__)
 
-# Register authentication routes
-app.register_blueprint(auth_bp, url_prefix='/auth')
+    flask_app.config.from_object(Config)
 
-# Test endpoint
-@app.route('/test', methods=['GET'])
-def test_endpoint():
-    return jsonify({'message': 'Test endpoint is working!'}), 200
+    init_cors(flask_app)
+    init_mongo(flask_app)
 
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({'error': 'Internal Server Error', 'details': traceback.format_exc()}), 500
+    flask_app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    @flask_app.route('/test', methods=['GET'])
+    def test_endpoint():
+        return jsonify({'message': 'Test endpoint is working. Server is up!'}), 200
+
+    @flask_app.errorhandler(500)
+    def internal_error(error):
+        return jsonify({'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}), 500
+
+    return flask_app
+
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True, host='0.0.0.0', port=5001)
