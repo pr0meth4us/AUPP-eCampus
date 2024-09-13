@@ -16,3 +16,30 @@ backend/
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Docker setup for backend
 └── start.sh                      # Script to start backend services
+
+
+
+
+
+
+
+<!-- //start mongoDB -->
+
+brew services stop mongodb/brew/mongodb-community@6.0
+
+brew services list
+
+
+<!-- //connect mongodb compass -->
+mongodb://localhost:27017
+
+
+<!-- stop mongodb -->
+brew services stop mongodb/brew/mongodb-community@6.0
+
+
+<!-- our password -->
+= AuppeCampus2024@@--
+
+
+mongosh -u admin -p 'AuppeCampus2024@@--' --authenticationDatabase admin

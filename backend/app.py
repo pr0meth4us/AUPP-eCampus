@@ -5,6 +5,7 @@ from routes.auth_routes import auth_bp
 from models import User, Authentication
 from utils import create_token
 import os
+import traceback
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Allow only requests from the React app
@@ -21,6 +22,10 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 @app.route('/test', methods=['GET'])
 def test_endpoint():
     return jsonify({'message': 'Test endpoint is working!'}), 200
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal Server Error', 'details': traceback.format_exc()}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
