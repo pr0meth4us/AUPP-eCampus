@@ -5,6 +5,7 @@ import os
 client = MongoClient(os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb'))
 db = client.mydb
 
+
 class User:
     def __init__(self, name, email, password, role):
         self.name = name
