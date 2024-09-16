@@ -1,0 +1,66 @@
+# Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables
+.env
+*.env
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask-specific
+instance/
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Database
+*.sqlite3
+*.db
+
+# Configuration files
+config.py
+
+# Python Egg and Distribution
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# IDE settings
+*.swp
+
+# Security
+*.pem
+*.key
+*.crt
