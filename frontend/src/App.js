@@ -1,47 +1,22 @@
-import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+import Signin from './pages/Signin';
+import AdminDashboard from './pages/AdminDashboard';
+import Home from './pages/Home';
+import {AuthProvider} from "./middleware/AuthContext";
+import ProtectedRoute from "./middleware/ProtectedRoute";
 
 function App() {
-    const [file, setFile] = useState(null);
-    const [testMessage, setTestMessage] = useState('');
-
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
-
-    const uploadFile = async () => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('http://localhost:5001/files/upload', {
-            method: 'POST',
-            body: formData,
-        });
-        const result = await response.json();
-        alert(result.message || result.error);
-    };
-
-    const callTestEndpoint = async () => {
-        try {
-            const response = await fetch('http://localhost:5001/test', {
-                method: 'GET',
-            });
-            const result = await response.json();
-            setTestMessage(result.message);
-        } catch (error) {
-            setTestMessage('Error calling test endpoint');
-        }
-    };
-
     return (
-        <div className="App">
-            <h1>React + Flask + MongoDB + MinIO</h1>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={uploadFile}>Upload File</button>
-
-            <br />
-            <button onClick={callTestEndpoint}>Call Test Endpoint</button>
-            {testMessage && <p>Test Response: {testMessage}</p>}
-        </div>
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    <Route path="/signin" element={<Signin />} />
+                    <Route path="/admin/dashboard" element={<ProtectedRoute element={<AdminDashboard />} isAdmin={true} />} />
+                    <Route path="/"  element={<Home />} />
+                </Routes>
+            </Router>
+        </AuthProvider>
     );
 }
 
