@@ -1,8 +1,9 @@
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from config import Config
 from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
-from utils.token_utils import create_token
+from utils.token_utils import create_token, extract_role_from_token
+import jwt
 
 
 def register_user(role, data):
@@ -49,3 +50,39 @@ def login_user(data):
         return response
 
     return jsonify({'message': 'Invalid credentials'}), 401
+
+
+def check_auth():
+    token = request.cookies.get('auth_token')
+
+    if not token:
+        return jsonify({"authenticated": False}), 401
+
+    try:
+        decoded_token = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+        user_id = decoded_token['user_id']
+        role = decoded_token['role']
+    except jwt.ExpiredSignatureError:
+        return jsonify({"authenticated": False, "message": "Token expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"authenticated": False, "message": "Invalid token"}), 401
+
+    user = User.find_by_id(user_id)
+    if not user:
+        return jsonify({"authenticated": False, "message": "User not found"}), 401
+
+    return jsonify({
+        "authenticated": True,
+        "user": {
+            "id": str(user['_id']),
+            "name": user['name'],
+            "email": user['email'],
+            "role": user['role']
+        }
+    }), 200
+
+
+def logout():
+    response = make_response(jsonify({"message": "Successfully logged out"}), 200)
+    response.set_cookie('auth_token', '', expires=0, httponly=True, secure=True, samesite='Strict')
+    return response

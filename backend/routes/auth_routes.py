@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from controllers.auth_controller import register_user, login_user
+from controllers.auth_controller import register_user, login_user, check_auth
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,3 +20,8 @@ def register_admin():
 def login():
     data = request.get_json()
     return login_user(data)
+
+
+@auth_bp.route('/check', methods=['GET'])
+def auth_check():
+    return check_auth()
