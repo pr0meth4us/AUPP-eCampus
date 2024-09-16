@@ -2,7 +2,7 @@ from flask import jsonify, make_response
 from config import Config
 from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
-from utils.token_utils import create_token, extract_role_from_token
+from utils.token_utils import create_token
 
 
 def register_user(role, data):
