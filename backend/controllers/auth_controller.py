@@ -1,35 +1,31 @@
 from flask import jsonify, make_response
 from config import Config
 from models.authentication_model import Authentication
-from models.user_model import User, Student, Admin
-from utils.token_utils import create_token
+from models.user_model import User, Student, Admin, Instructor
+from utils.token_utils import create_token, extract_role_from_token
 
 
-def register_user(data):
-    role = data.get('role')
+def register_user(role, data):
     email = data.get('email')
-    if User.find_by_email_and_role(email, role):
+
+    if User.find_by_email(email):
         return jsonify({'message': 'Email already exists.'}), 409
 
-    if role == 'student':
-        new_student = Student(name=data['name'], email=data['email'], password=data['password'])
-        new_student.save_to_db()
-        return jsonify({'message': 'Student registered successfully'}), 201
+    user_classes = {
+        'student': Student,
+        'instructor': Instructor,
+        'admin': Admin
+    }
 
-    elif role == 'instructor':
-        """TO DO"""""
-
-    elif role == 'admin':
-        if data.get('token') != Config.ADMIN_TOKEN:
-            return jsonify({'message': 'Invalid admin token.'}), 403
-
-        new_admin = Admin(name=data['name'], email=data['email'], password=data['password'])
-        admin_id = new_admin.save_to_db()
-
-        return jsonify({'message': 'Admin registered successfully', 'id': admin_id}), 201
-
-    else:
+    user_class = user_classes.get(role)
+    if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
+        return jsonify({'message': 'Invalid admin token.'}), 403
+    elif user_class is None:
         return jsonify({'message': 'Invalid role specified.'}), 400
+
+    user = user_class(name=data['name'], email=email, password=data['password'])
+    user.save_to_db()
+    return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
 
 
 def login_user(data):
@@ -47,7 +43,6 @@ def login_user(data):
         auth = Authentication(user_id=user['_id'], token=token)
         auth.save_to_db()
 
-        # Create a response and set the token cookie
         response = make_response(jsonify({'message': 'Login successful', 'role': role}), 200)
         response.set_cookie('auth_token', token, httponly=True, secure=True)
 
