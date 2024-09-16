@@ -44,12 +44,21 @@ def login_user(data):
         auth = Authentication(user_id=user['_id'], token=token)
         auth.save_to_db()
 
-        response = make_response(jsonify({'message': 'Login successful', 'role': role}), 200)
+        response = make_response(jsonify({
+            'message': 'Login successful',
+            'token': token,
+            'user': {
+                '_id': user_id_str,
+                'email': user['email'],
+                'role': role
+            }
+        }), 200)
         response.set_cookie('auth_token', token, httponly=True, secure=True)
 
         return response
 
     return jsonify({'message': 'Invalid credentials'}), 401
+
 
 
 def check_auth():
