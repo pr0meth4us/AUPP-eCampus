@@ -37,8 +37,9 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
             />
             <select value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="user">User</option>
+                <option value="student">Student</option>
                 <option value="admin">Admin</option>
+                <option value="instructor">instructor</option>
             </select>
             <button onClick={handleLogin}>Login</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
