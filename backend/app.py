@@ -11,6 +11,7 @@ def create_app():
     flask_app = Flask(__name__)
 
     flask_app.config.from_object(Config)
+    print(init_cors)
 
     init_cors(flask_app)
     init_mongo(flask_app)
