@@ -1,6 +1,5 @@
 import os
-import random
-
+from bson import ObjectId
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -37,6 +36,16 @@ class User:
     @staticmethod
     def find_by_email(email):
         return db.users.find_one({'email': email})
+
+    @staticmethod
+    def get_all_users():
+        users = db.users.find()
+        return [{'id': str(user['_id']), 'name': user['name'], 'email': user['email'], 'role': user['role']} for user in
+                users]
+
+    @staticmethod
+    def find_by_id(user_id):
+        return db.users.find_one({'_id': ObjectId(user_id)})
 
 
 class Student(User):
