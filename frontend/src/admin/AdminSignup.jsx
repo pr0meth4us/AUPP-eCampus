@@ -13,12 +13,9 @@ const Signup = () => {
 
     const handleSignup = async () => {
         try {
-            const response = await register(name, email, password, "admin", token);
-            if (response.status === 200) {
-                navigate('/admin/dashboard');
-            } else {
-                setError('Registration failed. Please check your details.');
-            }
+            await register(name, email, password, "admin", token);
+            navigate('/admin/dashboard');
+
         } catch (err) {
             setError('Registration failed. Please check your credentials.');
         }
