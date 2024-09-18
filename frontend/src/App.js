@@ -6,6 +6,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import AdminSignup from "./admin/AdminSignup";
+import AdminLogin from "./admin/AdminLogin";
 
 const App = () => {
     return (
@@ -14,7 +15,7 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/admin-signup" element={<AdminSignup />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/admin/dashboard" element={<PrivateRoute element={<AdminPage />} allowedRoles={['admin']} />} />
             </Routes>
