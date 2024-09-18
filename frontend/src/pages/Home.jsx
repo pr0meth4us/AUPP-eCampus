@@ -1,4 +1,5 @@
 import LoginPage from "../components/Login";
+import Signup from "../components/Signup";
 
 const Home = () => {
     return (
@@ -6,7 +7,11 @@ const Home = () => {
             <button type="button" className="btn btn-primary cgds" data-bs-toggle="modal" data-bs-target="#login">
                 Sign in
             </button>
-            <LoginPage />
+            <button type="button" className="btn btn-primary cgds" data-bs-toggle="modal" data-bs-target="#signup">
+                Sign up
+            </button>
+            <LoginPage/>
+            <Signup/>
         </>
     )
 }
