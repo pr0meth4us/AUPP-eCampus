@@ -1,11 +1,16 @@
 import React from 'react';
 import Banner from "./Banner";
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import "../assets/css/components/search-bar.css"
-import "../assets/css/elements/header.css"
-import {Link} from "react-router-dom";
+import "../assets/css/components/search-bar.css";
+import "../assets/css/elements/header.css";
+import { Link } from "react-router-dom";
+import LoginPage from "./Login";
+import Signup from "./Signup";
+import { useAuth } from "../context/authContext";
 
 const Header = () => {
+    const { user } = useAuth();
+
     return (
         <>
             <Banner />
@@ -22,8 +27,8 @@ const Header = () => {
                             <input
                                 type="text"
                                 name="query"
-                                placeholder="Search..."
-                                className="form-control "
+                                placeholder="Search info..."
+                                className="form-control"
                                 required
                             />
                             <span className="input-group-text bg-white search-icon">
@@ -31,21 +36,28 @@ const Header = () => {
                             </span>
                         </div>
                     </form>
+
                     <div className="find-your-pathway">
                         <Link to="" className="color-primary">Find Your Pathway</Link>
                     </div>
-                    <div className="login">
-                        <button type="button" className="btn color-primary" data-bs-toggle="modal"
-                                data-bs-target="#login">
-                            Login
-                        </button>
-                    </div>
-                    <div className="signup">
-                        <button type="button" className="btn btn-danger signup cgds" data-bs-toggle="modal"
-                                data-bs-target="#signup">
-                            Join for free
-                        </button>
-                    </div>
+
+                    {user ? (
+                        <i className="bi bi-person-circle" style={{fontSize: "2em"}}></i>
+                    ) : (
+                        <>
+                            <button type="button" className="btn color-primary" data-bs-toggle="modal"
+                                    data-bs-target="#login">
+                                Login
+                            </button>
+                            <LoginPage />
+
+                            <button type="button" className="btn btn-danger signup" data-bs-toggle="modal"
+                                    data-bs-target="#signup">
+                                Join for free
+                            </button>
+                            <Signup />
+                        </>
+                    )}
                 </div>
             </header>
         </>
