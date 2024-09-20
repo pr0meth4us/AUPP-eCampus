@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/authContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ const LoginPage = () => {
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
+    const closeButtonRef = useRef(null);
     const handleLogin = async () => {
         try {
             if (!role) {
@@ -17,12 +17,14 @@ const LoginPage = () => {
                 return;
             }
             await login(email, password, role);
+
+            closeButtonRef.current.click();
+
             navigate(role === 'admin' ? '/admin/dashboard' : '/');
         } catch (err) {
             setError('Login failed. Please check your credentials.');
         }
     };
-
     return (
         <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
             <div className="modal-dialog">
@@ -82,13 +84,11 @@ const LoginPage = () => {
                                 />
                             </div>
 
-
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close
-                        </button>
+                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal" ref={closeButtonRef} >Close</button>
                         <button type="button" className="btn btn-primary" onClick={handleLogin}>Login</button>
                     </div>
                 </div>
@@ -98,3 +98,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
