@@ -29,12 +29,14 @@ const LoginPage = () => {
         <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div className="modal-header">
-                        <h3 className="modal-title" id="login">
-                            <i className="bi bi-exclamation-circle left me-2"></i>Login
-                        </h3>
+                    <div
+                        className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                        <div className="text-center flex-grow-1">
+                            <h2 className="modal-title" id="login">Welcome Back!</h2>
+                        </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+
                     <div className="modal-body">
                         <form onSubmit={(e) => {
                             e.preventDefault();
