@@ -7,7 +7,6 @@ import Signup from "./components/Signup";
 import Home from "./pages/Home";
 import AdminSignup from "./admin/AdminSignup";
 import AdminLogin from "./admin/AdminLogin";
-
 const App = () => {
     return (
         <Router>
