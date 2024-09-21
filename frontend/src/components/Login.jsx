@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/authContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';   // ** New import
 
 const LoginPage = () => {
     const { login } = useAuth();
@@ -8,19 +9,35 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
+    const [recaptchaToken, setRecaptchaToken] = useState('');  // NEW
     const navigate = useNavigate();
 
-    const handleLogin = async () => {
+   
+    const handleLogin = async (e) => { // i added "e" inside the bracket
+        e.preventDefault();
         try {
             if (!role) {
                 setError('Please select a role.');
                 return;
             }
+            //======================config captcha ======================
+             await axios.post('/login', {
+                email,
+                password,
+                role,
+                'g-recaptcha-response' : recaptchaToken
+             });
+            //======================config captcha ======================
+
             await login(email, password, role);
             navigate(role === 'admin' ? '/admin/dashboard' : '/');
         } catch (err) {
             setError('Login failed. Please check your credentials.');
         }
+    };
+
+    const handleRecaptchaChange = (token) => {
+        setRecaptchaToken(token);
     };
 
     return (
@@ -34,10 +51,7 @@ const LoginPage = () => {
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            handleLogin().then(null);
-                        }}>
+                        <form onSubmit={handleLogin}>
                             <div className="mb-3">
                                 <label className="form-label">Login as</label>
                                 <div className="d-flex gap-4">
@@ -81,15 +95,13 @@ const LoginPage = () => {
                                     required
                                 />
                             </div>
-
-
+                            <div className="g-recaptcha" data-sitekey="6LfdwUoqAAAAAL386KbkUWdJ2OG7GRNeaYj_DvhN" data-callback={handleRecaptchaChange}></div>
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close
-                        </button>
-                        <button type="button" className="btn btn-primary" onClick={handleLogin}>Login</button>
+                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" className="btn btn-primary" onClick={handleLogin}>Login</button>
                     </div>
                 </div>
             </div>
