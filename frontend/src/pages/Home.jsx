@@ -50,6 +50,9 @@ const Home = () => {
                 <p className="h1 color-primary">Our Instructors</p>
                 <Instructors />
             </div>
+            <div className="row partners">
+                <img src="/partners.png" alt=""/>
+            </div>
         </>
     );
 };
