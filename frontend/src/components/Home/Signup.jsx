@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 import React, {useState} from "react";
-import {register} from "../services/api";
+import {register} from "../../services/api";
 
 const Signup = () => {
     const [email, setEmail] = useState('');

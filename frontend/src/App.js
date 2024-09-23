@@ -1,12 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LoginPage from './components/Login';
+import LoginPage from './components/Home/Login';
 import AdminPage from './pages/AdminPage';
 import PrivateRoute from './components/PrivateRoute';
-import Signup from "./components/Signup";
+import Signup from "./components/Home/Signup";
 import Home from "./pages/Home";
 import AdminSignup from "./admin/AdminSignup";
 import AdminLogin from "./admin/AdminLogin";
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 const App = () => {
     return (
         <Router>
