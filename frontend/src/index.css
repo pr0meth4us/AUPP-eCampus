@@ -10,7 +10,7 @@ code {
 }
 
 .bg-primary{
-  background-color: #003070;
+  background-color: #003070 !important;
 }
 
 .color-primary{

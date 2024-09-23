@@ -1,5 +1,6 @@
 import Header from "../components/Home/Header";
 import Instructors from "../components/Home/Instructors";
+import Footer from "../components/Footer";
 
 const Home = () => {
     return (
@@ -53,6 +54,7 @@ const Home = () => {
             <div className="row partners">
                 <img src="/partners.png" alt=""/>
             </div>
+            <Footer />
         </>
     );
 };
