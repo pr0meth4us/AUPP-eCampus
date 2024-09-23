@@ -1,4 +1,5 @@
 import "../assets/css/elements/footer.css";
+import {Link} from "react-router-dom";
 
 const Footer = () => {
     return (
@@ -47,10 +48,10 @@ const Footer = () => {
                                     <li>Address: #278H, Street 201R, Kralokor Village, Sangkat Kilometer 6, Khan Russey Keo, Phnom Penh, Cambodia</li>
                                     <li>Phone: (+855) 23 990 023</li>
                                     <li>Email: <a href="mailto:info@aupp.edu.kh">info@aupp.edu.kh</a></li>
-                                    <li>
-                                        <a href="https://facebook.com" className="social-icon">Facebook</a>
-                                        <a href="https://telegram.org" className="social-icon">Telegram</a>
-                                        <a href="https://instagram.com" className="social-icon">Instagram</a>
+                                    <li className="d-inline-flex">
+                                        <Link to="https://facebook.com"><i className="bi bi-facebook fs-3"></i></Link>
+                                        <Link to="https://telegram.org"><i className="bi bi-telegram fs-3 mx-5"></i></Link>
+                                        <Link to="https://instagram.com"><i className="bi bi-instagram fs-3 "></i></Link>
                                     </li>
                                 </ul>
                             </div>
