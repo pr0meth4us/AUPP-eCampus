@@ -17,6 +17,14 @@ code {
   color: #003070 !important;
 }
 
+.bg-red{
+  background-color: #AD0000;
+}
+
 .color-red{
   color: #AD0000;
+}
+
+.border-straight{
+  border-radius: 0 !important;
 }

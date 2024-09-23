@@ -1,12 +1,11 @@
 import React from 'react';
 import Banner from "./Banner";
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import "../assets/css/components/search-bar.css";
-import "../assets/css/elements/header.css";
+import "../../assets/css/components/search-bar.css";
+import "../../assets/css/elements/header.css";
 import { Link } from "react-router-dom";
 import LoginPage from "./Login";
 import Signup from "./Signup";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../../context/authContext";
 
 const Header = () => {
     const { user } = useAuth();
