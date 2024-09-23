@@ -1,61 +1,49 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/authContext';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from "react-router-dom";
+import React, {useState} from "react";
+import {register} from "../../services/api";
 
-const LoginPage = () => {
-    const { login } = useAuth();
+const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [name, setName]= useState("");
 
-    const handleLogin = async () => {
+    const handleSignup = async () => {
         try {
-            if (!role) {
-                setError('Please select a role.');
-                return;
-            }
-            await login(email, password, role);
-            navigate(role === 'admin' ? '/admin/dashboard' : '/');
+            await register(name, email, password, "student");
+            navigate('/');
         } catch (err) {
-            setError('Login failed. Please check your credentials.');
+            setError('Sign up failed.');
         }
     };
 
     return (
-        <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
+        <div className="modal fade" id="signup" tabIndex="-1" aria-labelledby="signup" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div className="modal-header">
-                        <h3 className="modal-title" id="login">
-                            <i className="bi bi-exclamation-circle left me-2"></i>Login
-                        </h3>
+                    <div className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                        <div className="text-center flex-grow-1">
+                            <h2 className="modal-title" id="signup">Sign Up</h2>
+                        </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
                         <form onSubmit={(e) => {
                             e.preventDefault();
-                            handleLogin().then(null);
+                            handleSignup().then(null);
                         }}>
                             <div className="mb-3">
-                                <label className="form-label">Login as</label>
-                                <div className="d-flex gap-4">
-                                    <button
-                                        type="button"
-                                        className={`btn ${role === 'student' ? 'btn-primary' : 'btn-outline-primary'} w-50 `}
-                                        onClick={() => setRole('student')}
-                                    >
-                                        Student
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`btn ${role === 'professor' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
-                                        onClick={() => setRole('professor')}
-                                    >
-                                        Professor
-                                    </button>
-                                </div>
+                                <label htmlFor="email" className="form-label">Name</label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    className="form-control"
+                                    placeholder="Name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="email" className="form-label">Email</label>
@@ -81,15 +69,13 @@ const LoginPage = () => {
                                     required
                                 />
                             </div>
-
-
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close
                         </button>
-                        <button type="button" className="btn btn-primary" onClick={handleLogin}>Login</button>
+                        <button type="button" className="btn btn-primary" onClick={handleSignup}>Signup</button>
                     </div>
                 </div>
             </div>
@@ -97,4 +83,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default Signup;
