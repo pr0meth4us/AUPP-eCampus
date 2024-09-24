@@ -5,19 +5,6 @@ import Footer from "../components/Footer";
 const Home = () => {
     return (
         <>
-<<<<<<< HEAD
-            <button type="button" className="btn btn-primary cgds" data-bs-toggle="modal" data-bs-target="#login">
-                Login
-            </button>
-            <button type="button" className="btn btn-primary cgds" data-bs-toggle="modal" data-bs-target="#signup">
-                Sign up
-            </button>
-            <LoginPage/>
-            <Signup/>
-        </>
-    )
-}
-=======
             <Header />
                 <div className="row">
                     <div className="col-4 d-flex flex-column justify-content-center align-items-center">
@@ -39,7 +26,6 @@ const Home = () => {
                     <div className="col-8">
                         <img src="/humans.png" alt="humans" className="img-fluid" />
                     </div>
->>>>>>> 83736d4eac30d6a83a10e5cac7c3250b47be7cc9
 
                 {/* Ensure this section takes up the full width */}
                 <div className="row bg-red py-4 text-white w-100 mx-0">

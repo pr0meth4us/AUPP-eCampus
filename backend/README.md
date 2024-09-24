@@ -1,26 +1,3 @@
-
-
-(Saturday) 9/21/2024
-
-IMPORTANT***
-to config ur own recapthca go to google recaptcha site and create new one, use gpt for guide, it should be ez, make sure set domain name option to localhost in registering process
-
-file edited: 
-1. config.py      ** replace ur secret key secret key with mine here
-2. app.py
-3. login.jsx      ** replace me with ur public key in the return content section near bottom of the code. 
-4. index.html
-
-
-
-
-
-
-
-
-
-
-
 backend/
 ├── app.py                        # Main Flask application
 ├── models.py                     # Database models (if using a database like MongoDB or SQL)
@@ -48,7 +25,7 @@ backend/
 
 <!-- //start mongoDB -->
 
-brew services start mongodb/brew/mongodb-community@6.0
+brew services stop mongodb/brew/mongodb-community@6.0
 
 brew services list
 
@@ -66,5 +43,3 @@ brew services stop mongodb/brew/mongodb-community@6.0
 
 
 mongosh -u admin -p 'AuppeCampus2024@@--' --authenticationDatabase admin
-
-
