@@ -2,8 +2,17 @@ from flask import jsonify, make_response, request
 from config import Config
 from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
-from utils.token_utils import create_token, extract_role_from_token
+from utils.token_utils import create_token
 import jwt
+from random import randint
+from services.mail_service import send_mail
+
+
+def verify_email(data):
+    email = data.get('email')
+    otp = randint(10000, 99999)
+    send_mail(email, otp)
+    return otp
 
 
 def register_user(role, data):
@@ -11,6 +20,11 @@ def register_user(role, data):
 
     if User.find_by_email(email):
         return jsonify({'message': 'Email already exists.'}), 409
+
+    otp = verify_email(data)
+    received_otp = data.get('otp')
+    if received_otp != otp:  # Compare received OTP with the sent OTP
+        return jsonify({'message': 'Invalid email.'}), 401
 
     user_classes = {
         'student': Student,
@@ -33,8 +47,7 @@ def login_user(data):
     role = data.get('role')
 
     if not role or role not in ['student', 'instructor', 'admin']:
-        return jsonify(
-            {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
+        return jsonify({'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
     user = User.find_by_email_and_role(data['email'], role)
     if user and User.verify_password(user['password_hash'], data['password']):
@@ -60,7 +73,6 @@ def login_user(data):
     return jsonify({'message': 'Invalid credentials'}), 401
 
 
-
 def check_auth():
     token = request.cookies.get('auth_token')
 
@@ -69,7 +81,7 @@ def check_auth():
 
     try:
         decoded_token = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
-        user_id = decoded_token['user_id']
+        user_id = decoded_token['_id']
         role = decoded_token['role']
     except jwt.ExpiredSignatureError:
         return jsonify({"authenticated": False, "message": "Token expired"}), 401
