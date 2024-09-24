@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from controllers.auth_controller import login_user, check_auth, trigger_send_otp, register
+from controllers.auth_controller import login_user, check_auth, register,check_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -7,7 +7,7 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/send-otp', methods=['POST'])
 def send_otp():
     data = request.get_json()
-    return trigger_send_otp(data)
+    return check_email(data)
 
 
 @auth_bp.route('/login', methods=['POST'])
