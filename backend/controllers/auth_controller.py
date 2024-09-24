@@ -1,9 +1,7 @@
 import time
 from random import randint
-
 import jwt
 from flask import jsonify, make_response, request
-
 from config import Config
 from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
@@ -53,8 +51,6 @@ def register(data):
         user_class = user_classes.get(role)
         if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
             return jsonify({'message': 'Invalid admin token.'}), 403
-        elif user_class is None:
-            return jsonify({'message': 'Invalid role specified.'}), 400
 
         user = user_class(name=data['name'], email=email, password=data['password'])
         user.save_to_db()
@@ -102,7 +98,6 @@ def check_auth():
     try:
         decoded_token = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
         user_id = decoded_token['_id']
-        role = decoded_token['role']
     except jwt.ExpiredSignatureError:
         return jsonify({"authenticated": False, "message": "Token expired"}), 401
     except jwt.InvalidTokenError:
@@ -115,9 +110,6 @@ def check_auth():
     return jsonify({
         "authenticated": True,
         "user": {
-            "id": str(user['_id']),
-            "name": user['name'],
-            "email": user['email'],
             "role": user['role']
         }
     }), 200
