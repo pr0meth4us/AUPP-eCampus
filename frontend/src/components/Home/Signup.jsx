@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 import React, {useState} from "react";
-import {register} from "../services/api";
+import {register} from "../../services/api";
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -22,10 +22,10 @@ const Signup = () => {
         <div className="modal fade" id="signup" tabIndex="-1" aria-labelledby="signup" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div className="modal-header">
-                        <h3 className="modal-title" id="signup">
-                            <i className="bi bi-exclamation-circle left me-2"></i>Sign up
-                        </h3>
+                    <div className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                        <div className="text-center flex-grow-1">
+                            <h2 className="modal-title" id="signup">Sign Up</h2>
+                        </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
