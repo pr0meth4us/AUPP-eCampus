@@ -1,4 +1,4 @@
-from flask import jsonify, make_response, request
+from flask import jsonify, make_response, request, Blueprint
 from config import Config
 from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
@@ -6,25 +6,37 @@ from utils.token_utils import create_token
 import jwt
 from random import randint
 from services.mail_service import send_mail
+import time
+
+otp_storage = {}
 
 
-def verify_email(data):
+def email_otp(data):
     email = data.get('email')
     otp = randint(10000, 99999)
     send_mail(email, otp)
+    otp_storage[email] = {'otp': otp, 'timestamp': time.time()}  # Store OTP with timestamp
     return otp
 
 
-def register_user(role, data):
+def verify_otp(data):
     email = data.get('email')
+    received_otp = data.get('otp')
+
+    if email in otp_storage:
+        entry = otp_storage[email]
+        if entry['otp'] == int(received_otp) and (time.time() - entry['timestamp'] < 300):
+            del otp_storage[email]  # Remove the OTP after successful verification
+            return True
+    return False
+
+
+def trigger_send_otp(data):
+    email = data.get('email')
+    role = data.get('role')
 
     if User.find_by_email(email):
         return jsonify({'message': 'Email already exists.'}), 409
-
-    otp = verify_email(data)
-    received_otp = data.get('otp')
-    if received_otp != otp:  # Compare received OTP with the sent OTP
-        return jsonify({'message': 'Invalid email.'}), 401
 
     user_classes = {
         'student': Student,
@@ -38,21 +50,46 @@ def register_user(role, data):
     elif user_class is None:
         return jsonify({'message': 'Invalid role specified.'}), 400
 
-    user = user_class(name=data['name'], email=email, password=data['password'])
-    user.save_to_db()
-    return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+    email_otp(data)
+    return jsonify({'message': 'OTP sent to your email.'}), 200
+
+
+def verify_otp_route(data):
+    email = data.get('email')
+    received_otp = data.get('otp')
+    role = data.get('role')
+
+    if verify_otp({'email': email, 'otp': received_otp}):
+        user_classes = {
+            'student': Student,
+            'instructor': Instructor,
+            'admin': Admin
+        }
+
+        user_class = user_classes.get(role)
+        if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
+            return jsonify({'message': 'Invalid admin token.'}), 403
+        elif user_class is None:
+            return jsonify({'message': 'Invalid role specified.'}), 400
+
+        # Save the user to the database
+        user = user_class(name=data['name'], email=email, password=data['password'])
+        user.save_to_db()
+        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+    else:
+        return jsonify({'message': 'Invalid or expired OTP.'}), 401
 
 
 def login_user(data):
     role = data.get('role')
 
     if not role or role not in ['student', 'instructor', 'admin']:
-        return jsonify({'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
+        return jsonify(
+            {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
     user = User.find_by_email_and_role(data['email'], role)
     if user and User.verify_password(user['password_hash'], data['password']):
         user_id_str = str(user['_id'])
-
         token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
         auth = Authentication(user_id=user['_id'], token=token)
         auth.save_to_db()
