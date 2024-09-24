@@ -13,26 +13,31 @@ const LoginPage = () => {
     const navigate = useNavigate();
 
    
-    const handleLogin = async (e) => { // i added "e" inside the bracket
+    const handleLogin = async (e) => {
         e.preventDefault();
         try {
             if (!role) {
                 setError('Please select a role.');
                 return;
             }
-            //======================config captcha ======================
-             await axios.post('/login', {
+    
+            // Attempt login
+            const response = await axios.post('/auth/login/student', {
                 email,
                 password,
                 role,
-                'g-recaptcha-response' : recaptchaToken
-             });
-            //======================config captcha ======================
-
-            await login(email, password, role);
-            navigate(role === 'admin' ? '/admin/dashboard' : '/');
+                'g-recaptcha-response': recaptchaToken
+            });
+    
+            // Use response to store the token
+            if (response.data.token) {
+                localStorage.setItem('authToken', response.data.token);
+                // Optionally call your login context function
+                await login(email, password, role); 
+                navigate(role === 'admin' ? '/admin/dashboard' : '/');
+            }
         } catch (err) {
-            setError('Login failed. Please check your credentials.');
+            setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         }
     };
 
