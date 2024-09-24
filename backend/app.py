@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from routes.auth_routes import auth_bp
 from routes.admin_routes import admin_bp
 from services.cors_service import init_cors
@@ -33,10 +33,10 @@ def create_app():
     
     @flask_app.route('/login', methods=['POST']) # configure captcha in login
     def login():
-        recaptcha_responses = requests.json.get('g-recaptcha-response')
+        recaptcha_response = request.json.get('g-recaptcha-response')  # Correct way
         data = {
             'secret' : flask_app.config['RECAPTCHA_SECRET_KEY'],
-            'response' : recaptcha_responses 
+            'response' : recaptcha_response 
         }
         r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
         result = r.json()
