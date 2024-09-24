@@ -1,19 +1,13 @@
 from flask import Blueprint, request
-from controllers.auth_controller import register_user, login_user, check_auth, verify_email
+from controllers.auth_controller import login_user, check_auth, trigger_send_otp, verify_otp_route
 
 auth_bp = Blueprint('auth', __name__)
 
 
-@auth_bp.route('/register/student', methods=['POST'])
-def register_student():
+@auth_bp.route('/send-otp', methods=['POST'])
+def send_otp():
     data = request.get_json()
-    return register_user('student', data)
-
-
-@auth_bp.route('/register/admin', methods=['POST'])
-def register_admin():
-    data = request.get_json()
-    return register_user('admin', data)
+    return trigger_send_otp(data)
 
 
 @auth_bp.route('/login', methods=['POST'])
@@ -27,7 +21,7 @@ def auth_check():
     return check_auth()
 
 
-@auth_bp.route('/verify', methods=['POST'])
-def send_otp():
+@auth_bp.route('/register', methods=['POST'])
+def verify_otp_and_register():
     data = request.get_json()
-    return verify_email(data)
+    return verify_otp_route(data)

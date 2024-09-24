@@ -1,16 +1,15 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import config
-
+from config import Config  # Make sure to import Config from config.py
 
 def send_mail(email_to, otp):
     sender_email = "auppecampus@icloud.com"
     receiver_email = email_to
-    app_specific_password = config.EMAIL_PASSWORD
+    app_specific_password = Config.EMAIL_PASSWORD  # Access the password from Config
 
     subject = "Test Email"
-    body = otp
+    body = str(otp)
 
     message = MIMEMultipart()
     message["From"] = sender_email
