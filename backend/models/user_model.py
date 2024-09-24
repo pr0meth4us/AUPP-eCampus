@@ -1,12 +1,7 @@
-import os
 from bson import ObjectId
-from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from services.mongo_service import db
 from config import Config
-
-client = MongoClient(os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb'))
-db = client.mydb
 
 
 class User:

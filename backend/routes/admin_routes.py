@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from middleware.admin_middleware import require_admin
-from controllers.auth_controller import register_user
+from controllers.auth_controller import register
 from controllers.admin_controller import get_all_users as fetch_all_users
 
 admin_bp = Blueprint('admin', __name__)
@@ -16,4 +16,4 @@ def get_all_users():
 @require_admin
 def register_instructor():
     data = request.get_json()
-    return register_user('instructor', data)
+    return register(data)
