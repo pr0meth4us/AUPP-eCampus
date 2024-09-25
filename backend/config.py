@@ -7,3 +7,4 @@ class Config:
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,*').split(',')
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+    RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '6LfdwUoqAAAAAHCRdmcEU8bWC0WZQKz49AonoUvA')
