@@ -33,7 +33,21 @@ def register(data):
 
         user = user_class(name=data['name'], email=email, password=data['password'])
         user.save_to_db()
-        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+
+        user_id_str = str(user.get_id())
+        token = create_token({'_id': user_id_str, 'role': role})
+
+        auth = Authentication(user_id=user.get_id(), token=token)
+        auth.save_to_db()
+
+        response = make_response(jsonify({
+            'message': f'{role.capitalize()} registered successfully',
+            'token': token,
+            'user': {'_id': user_id_str, 'role': role}
+        }), 201)
+        response.set_cookie('auth_token', token, httponly=True, secure=True)
+
+        return response
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
 
@@ -41,19 +55,20 @@ def register(data):
 def login_user(data):
     role = data.get('role')
     if not role or role not in ['student', 'instructor', 'admin']:
-        return jsonify({'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
+        return jsonify(
+            {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
     user = User.find_by_email_and_role(data['email'], role)
     if user and User.verify_password(user['password_hash'], data['password']):
         user_id_str = str(user['_id'])
-        token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
+        token = create_token({'_id': user_id_str, 'role': role})
         auth = Authentication(user_id=user['_id'], token=token)
         auth.save_to_db()
 
         response = make_response(jsonify({
             'message': 'Login successful',
             'token': token,
-            'user': {'_id': user_id_str, 'email': user['email'], 'role': role}
+            'user': {'_id': user_id_str, 'role': role}
         }), 200)
         response.set_cookie('auth_token', token, httponly=True, secure=True)
 
@@ -78,7 +93,7 @@ def check_auth():
     if not user:
         return jsonify({"authenticated": False, "message": "User not found"}), 401
 
-    return jsonify({"authenticated": True, "user": {"role": user['role']} }), 200
+    return jsonify({"authenticated": True, "user": {"role": user['role']}}), 200
 
 
 def logout():

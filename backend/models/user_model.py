@@ -10,6 +10,7 @@ class User:
         self.email = email
         self.password_hash = generate_password_hash(password)
         self.role = None
+        self._id = None
 
     def save_to_db(self):
         user_data = {
@@ -18,7 +19,11 @@ class User:
             'password_hash': self.password_hash,
             'role': self.role
         }
-        db.users.insert_one(user_data)
+        result = db.users.insert_one(user_data)
+        self._id = result.inserted_id
+
+    def get_id(self):
+        return str(self._id)
 
     @staticmethod
     def find_by_email_and_role(email, role):
@@ -75,4 +80,8 @@ class Admin(User):
             'role': self.role,
             'token': self.token
         }
-        db.users.insert_one(admin_data)
+        result = db.users.insert_one(admin_data)
+        self._id = result.inserted_id
+
+    def get_id(self):
+        return str(self._id)

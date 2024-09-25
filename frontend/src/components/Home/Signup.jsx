@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import {login, register, send_otp} from "../../services/api";
+import {send_otp} from "../../services/api";
+import {useAuth} from "../../context/authContext";
 
 const Signup = () => {
+    const {signup} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
@@ -26,9 +28,8 @@ const Signup = () => {
 
     const handleSignup = async () => {
         try {
-            await register(name, email, password, "student", verificationCode);
+            await signup(name, email, password, "student", verificationCode);
             navigate('/');
-            await login(email, password, "student")
         } catch (err) {
             setError('Sign up failed.');
         }

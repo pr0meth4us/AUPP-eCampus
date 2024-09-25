@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { checkAuth, login as apiLogin, logout as apiLogout } from "../services/api";
+import {checkAuth, login as apiLogin, register as apiSignup, logout as apiLogout} from "../services/api";
 
 const AuthContext = createContext();
 
@@ -46,6 +46,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const signup = async (email, password, role, otp, token = null) => {
+        try {
+            const data = await apiSignup(email, password, role, otp, token);
+            if (data.user) {
+                setUser(data.user);
+                localStorage.setItem('user', JSON.stringify(data.user));
+            } else {
+                throw new Error("Signup failed: No user data received");
+            }
+        } catch (error) {
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
             await apiLogout();
@@ -59,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     console.log("Current auth state:", { user, loading });
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
