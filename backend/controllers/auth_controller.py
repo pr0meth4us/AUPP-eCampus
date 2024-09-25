@@ -1,4 +1,3 @@
-import time
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
