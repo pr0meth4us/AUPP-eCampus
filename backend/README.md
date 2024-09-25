@@ -25,7 +25,7 @@ backend/
 
 <!-- //start mongoDB -->
 
-brew services stop mongodb/brew/mongodb-community@6.0
+brew services start mongodb/brew/mongodb-community@6.0
 
 brew services list
 

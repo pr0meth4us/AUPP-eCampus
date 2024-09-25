@@ -1,36 +1,66 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useNavigate } from 'react-router-dom';
 
+
 const LoginPage = () => {
-    const { login } = useAuth();
+    const { login } = useAuth(); // Assuming you want to use this function
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
+    const [recaptchaToken, setRecaptchaToken] = useState(''); // State for reCAPTCHA token
     const navigate = useNavigate();
     const closeButtonRef = useRef(null);
+
+    // Load reCAPTCHA script when the component mounts
+    useEffect(() => {
+        const loadRecaptchaScript = () => {
+            const script = document.createElement('script');
+            script.src = 'https://www.google.com/recaptcha/api.js';
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+        };
+
+        loadRecaptchaScript();
+    }, []);
+
+    // Handle the reCAPTCHA success
+    const handleRecaptchaChange = (token) => {
+        setRecaptchaToken(token); // Update the state with the reCAPTCHA token
+    };
+
     const handleLogin = async () => {
         try {
             if (!role) {
                 setError('Please select a role.');
                 return;
             }
-            await login(email, password, role);
 
-            closeButtonRef.current.click();
+            if (!recaptchaToken) {
+                setError('Please complete the reCAPTCHA.');
+                return;
+            }
 
-            navigate(role === 'admin' ? '/admin/dashboard' : '/');
+            // You can use the login function if it's set up to handle the API call
+            const response = await login(email, password, role, recaptchaToken); // Update this line as per your login logic
+
+            // Handle success response
+            console.log('Login successful:', response.data);
+            closeButtonRef.current.click(); // Close modal on successful login
+            navigate(role === 'admin' ? '/admin/dashboard' : '/'); // Redirect based on role
+
         } catch (err) {
             setError('Login failed. Please check your credentials.');
         }
     };
+
     return (
         <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div
-                        className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                    <div className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
                         <div className="text-center flex-grow-1">
                             <h2 className="modal-title" id="login">Welcome Back!</h2>
                         </div>
@@ -40,7 +70,7 @@ const LoginPage = () => {
                     <div className="modal-body">
                         <form onSubmit={(e) => {
                             e.preventDefault();
-                            handleLogin().then(null);
+                            handleLogin();
                         }}>
                             <div className="mb-3">
                                 <label className="form-label">Login as</label>
@@ -86,11 +116,13 @@ const LoginPage = () => {
                                 />
                             </div>
 
+                            {/* reCAPTCHA widget */}
+                            <div className="g-recaptcha" data-sitekey="6LfdwUoqAAAAAL386KbkUWdJ2OG7GRNeaYj_DvhN" data-callback={handleRecaptchaChange}></div>
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal" ref={closeButtonRef} >Close</button>
+                        <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal" ref={closeButtonRef}>Close</button>
                         <button type="button" className="btn btn-primary" onClick={handleLogin}>Login</button>
                     </div>
                 </div>
@@ -100,4 +132,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
