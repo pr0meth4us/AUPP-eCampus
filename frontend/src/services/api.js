@@ -7,12 +7,16 @@ const api = axios.create({
 });
 
 export const login = async (email, password, role) => {
-    const response = await api.post('http://localhost:5001/auth/login', { email, password, role });
+    const response = await api.post('/auth/login', { email, password, role });
     return response.data;
 };
 
-export const register = async (name, email, password, role, token = null) => {
-    const response = await api.post(`/auth/register/${role}`, { name, email, password, token });
+export const send_otp = async (email) => {
+    await api.post('/auth/send-otp', {email})
+}
+
+export const register = async (name, email, password, role, otp, token = null) => {
+    const response = await api.post(`/auth/register`, { name, email, password,role, otp, token });
     return response.data;
 };
 
