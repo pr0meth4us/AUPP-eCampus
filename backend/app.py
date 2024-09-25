@@ -17,7 +17,7 @@ def create_app():
     flask_app.register_blueprint(auth_bp, url_prefix='/auth')
     flask_app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    @flask_app.route('/login', methods=['POST'])  # configure captcha in login
+    @flask_app.route('/login', methods=['POST'])
     def login():
         recaptcha_responses = requests.json.get('g-recaptcha-response')
         data = {
@@ -28,9 +28,9 @@ def create_app():
         result = r.json()
 
         if result['success']:
-            return jsonify({'message': 'login successful'}), 200  # pass
+            return jsonify({'message': 'login successful'}), 200
         else:
-            return jsonify({'message': 'reCAPTCHA verification faild'}), 400  # fail
+            return jsonify({'message': 'reCAPTCHA verification faild'}), 400
 
     @flask_app.errorhandler(500)
     def internal_error(error):
