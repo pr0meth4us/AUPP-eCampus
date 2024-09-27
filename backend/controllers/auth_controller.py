@@ -1,4 +1,3 @@
-import time
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
@@ -41,7 +40,8 @@ def register(data):
 def login_user(data):
     role = data.get('role')
     if not role or role not in ['student', 'instructor', 'admin']:
-        return jsonify({'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
+        return jsonify(
+            {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
     user = User.find_by_email_and_role(data['email'], role)
     if user and User.verify_password(user['password_hash'], data['password']):
@@ -78,7 +78,7 @@ def check_auth():
     if not user:
         return jsonify({"authenticated": False, "message": "User not found"}), 401
 
-    return jsonify({"authenticated": True, "user": {"role": user['role']} }), 200
+    return jsonify({"authenticated": True, "user": {"role": user['role']}}), 200
 
 
 def logout():
