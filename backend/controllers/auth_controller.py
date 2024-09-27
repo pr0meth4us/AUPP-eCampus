@@ -36,6 +36,46 @@ def register(data):
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
 
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    # Validate if data is received
+    if not data:
+        return jsonify({'message': 'No input data provided'}), 400
+
+    recaptcha_response = data.get('g-recaptcha-response')
+
+    # Check if the reCAPTCHA response is provided
+    if not recaptcha_response:
+        logging.warning('reCAPTCHA response is missing.')
+        return jsonify({'message': 'reCAPTCHA response is missing'}), 400
+
+    # Verify reCAPTCHA
+    recaptcha_verification_data = {
+        'secret': Config.RECAPTCHA_SECRET_KEY,  # Accessing the secret key from config
+        'response': recaptcha_response
+    }
+
+    try:
+        logging.info('Sending reCAPTCHA verification request...')
+        r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=recaptcha_verification_data)
+        result = r.json()
+
+        # Log the reCAPTCHA verification response
+        logging.info(f'reCAPTCHA verification response: {result}')
+
+        if result.get('success'):
+            # Proceed with your login logic (you might want to validate user credentials here)
+            return jsonify({'message': 'Login successful'}), 200
+        else:
+            logging.error(f'reCAPTCHA verification failed: {result.get("error-codes")}')
+            return jsonify({'message': 'reCAPTCHA verification failed', 'error-codes': result.get('error-codes')}), 400
+
+    except requests.exceptions.RequestException as e:
+        logging.exception("Error verifying reCAPTCHA")
+        return jsonify({'message': 'Error verifying reCAPTCHA', 'error': str(e)}), 500
+
 
 def login_user(data):
     role = data.get('role')
