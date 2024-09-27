@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import {login, register, send_otp} from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/authContext";
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -11,27 +11,30 @@ const Signup = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { signup, sendOtp } = useAuth();
 
     const handleSendOtp = async () => {
         setIsLoading(true);
+        setError('');
         try {
-            await send_otp(email);
+            await sendOtp(email);
             setOtpSent(true);
-            setIsLoading(false);
         } catch (err) {
-            setError('Failed to send verification code.');
-            setIsLoading(false);
+            setError(err.response.data.message);
         }
+        setIsLoading(false);
     };
 
     const handleSignup = async () => {
+        setIsLoading(true);
+        setError('');
         try {
-            await register(name, email, password, "student", verificationCode);
+            await signup(name, email, password, "student", verificationCode);
             navigate('/');
-            await login(email, password, "student")
         } catch (err) {
-            setError('Sign up failed.');
+            setError(err.response.data.message);
         }
+        setIsLoading(false);
     };
 
     return (
@@ -69,7 +72,7 @@ const Signup = () => {
                                     className="btn btn-primary ms-2"
                                     onClick={handleSendOtp}
                                     disabled={otpSent || isLoading}
-                                    style={{width: "40%"}}
+                                    style={{ width: "40%" }}
                                 >
                                     {isLoading ? (
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -131,8 +134,12 @@ const Signup = () => {
                     <div className="modal-footer">
                         <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                         {otpSent && (
-                            <button type="button" className="btn btn-primary" onClick={handleSignup}>
-                                Signup
+                            <button type="button" className="btn btn-primary" onClick={handleSignup} disabled={isLoading}>
+                                {isLoading ? (
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                ) : (
+                                    'Signup'
+                                )}
                             </button>
                         )}
                     </div>
