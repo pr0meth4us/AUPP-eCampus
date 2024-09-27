@@ -14,7 +14,7 @@ else
     fi
   done
 fi
-docker-compose up -d
+#docker-compose up -d
 
 cd ./frontend || exit 1
 npm install

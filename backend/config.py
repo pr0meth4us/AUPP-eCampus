@@ -7,3 +7,6 @@ class Config:
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,*').split(',')
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+    REDIS_HOST = os.getenv('REDIS_HOST')
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
