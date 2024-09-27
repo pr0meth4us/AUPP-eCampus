@@ -35,7 +35,7 @@ class User:
     @staticmethod
     def get_all_users():
         users = db.users.find()
-        return [{'id': str(user['_id']), 'name': user['name'], 'email': user['email'], 'role': user['role']} for user in
+        return [{'id': user['_id'], 'name': user['name'], 'email': user['email'], 'role': user['role']} for user in
                 users]
 
     @staticmethod
@@ -54,12 +54,6 @@ class Instructor(User):
         super().__init__(name, email, password)
         self.role = 'instructor'
 
-    @classmethod
-    def create_by_admin(cls, admin_user, name, email, password):
-        if admin_user.role != 'admin':
-            raise PermissionError("Only admins can create instructors.")
-        return cls(name, email, password)
-
 
 class Admin(User):
     def __init__(self, name, email, password):
@@ -76,3 +70,23 @@ class Admin(User):
             'token': self.token
         }
         db.users.insert_one(admin_data)
+
+    @staticmethod
+    def delete_user(user_id):
+        result = db.users.delete_one({'_id': ObjectId(user_id)})
+        if result.deleted_count == 0:
+            raise ValueError("User not found.")
+
+    @staticmethod
+    def update_user(user_id, new_name=None, new_email=None, new_password=None):
+        update_data = {}
+        if new_name:
+            update_data['name'] = new_name
+        if new_email:
+            update_data['email'] = new_email
+        if new_password:
+            update_data['password_hash'] = generate_password_hash(new_password)
+
+        result = db.users.update_one({'_id': ObjectId(user_id)}, {'$set': update_data})
+        if result.modified_count == 0:
+            raise ValueError("User not found or no changes made.")

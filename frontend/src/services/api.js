@@ -39,3 +39,13 @@ export const registerInstructor = async (instructorData) => {
     const response = await api.post('/admin/instructor-register', instructorData);
     return response.data;
 };
+
+export const deleteUser = async (userId) => {
+    const response = await api.delete(`/admin/delete-user/${userId}`);
+    return response.data;
+};
+
+export const updateUser = async (userId, userData) => {
+    const response = await api.put(`/admin/update-user/${userId}`, userData);
+    return response.data;
+};
