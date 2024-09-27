@@ -15,8 +15,8 @@ export const send_otp = async (email) => {
     await api.post('/auth/send-otp', {email})
 }
 
-export const register = async (name, email, password, role, otp, token = null) => {
-    const response = await api.post(`/auth/register`, { name, email, password,role, otp, token });
+export const register = async (name, email, password, role, otp, token = null, captchaValue) => {
+    const response = await api.post(`/auth/register`, { name, email, password,role, otp, token,captchaValue });
     return response.data;
 };
 

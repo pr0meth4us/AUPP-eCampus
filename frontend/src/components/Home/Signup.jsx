@@ -36,7 +36,7 @@ const Signup = () => {
                 setIsLoading(false);
                 return;
             }
-            await signup(name, email, password, "student", verificationCode);
+            await signup(name, email, password, "student", verificationCode, captchaValue);
             navigate('/');
         } catch (err) {
             setError(err.response.data.message);
@@ -134,7 +134,7 @@ const Signup = () => {
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <Recaptcha onVerify={setCaptchaValue} /> {/* Use Recaptcha component */}
+                                        <Recaptcha onVerify={setCaptchaValue} />
                                     </div>
                                 </>
                             )}
