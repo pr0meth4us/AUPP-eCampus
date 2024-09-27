@@ -15,6 +15,12 @@ export const send_otp = async (email) => {
     await api.post('/auth/send-otp', {email})
 }
 
+export const registerInstructor = async (name, email, password) => {
+    const response = await api.post(`/admin/instructor-register`, { name, email, password });
+    return response.data;
+};
+
+
 export const register = async (name, email, password, role, otp, token = null) => {
     const response = await api.post(`/auth/register`, { name, email, password,role, otp, token });
     return response.data;
@@ -35,10 +41,6 @@ export const getAllUsers = async () => {
     return response.data;
 };
 
-export const registerInstructor = async (instructorData) => {
-    const response = await api.post('/admin/instructor-register', instructorData);
-    return response.data;
-};
 
 export const deleteUser = async (userId) => {
     const response = await api.delete(`/admin/delete-user/${userId}`);

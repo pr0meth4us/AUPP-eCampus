@@ -8,6 +8,8 @@ const AdminPage = () => {
     const [updateData, setUpdateData] = useState({ id: '', name: '', email: '', password: '' });
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [activeTab, setActiveTab] = useState('register'); // Track the active tab
+    const [error, setError] = useState(''); // Error message state
+    const [success, setSuccess] = useState(''); // Success message state
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -25,13 +27,21 @@ const AdminPage = () => {
     }, []);
 
     const handleInstructorRegister = async () => {
+        if (!newInstructor.name || !newInstructor.email || !newInstructor.password) {
+            setError('All fields are required.');
+            return;
+        }
+
         try {
-            await registerInstructor(newInstructor);
+            await registerInstructor(newInstructor.name, newInstructor.email, newInstructor.password);
             const data = await getAllUsers();
             setUsers(data);
             setNewInstructor({ name: '', email: '', password: '' });
+            setSuccess('Instructor registered successfully.');
+            setError('');
         } catch (error) {
             console.error('Failed to register instructor:', error);
+            setError('Failed to register instructor.');
         }
     };
 
@@ -46,19 +56,29 @@ const AdminPage = () => {
             const data = await getAllUsers();
             setUsers(data);
             setConfirmDeleteId(null);
+            setSuccess('User deleted successfully.');
         } catch (error) {
             console.error('Failed to delete user:', error);
+            setError('Failed to delete user.');
         }
     };
 
     const handleUpdateUser = async () => {
+        if (!updateData.name || !updateData.email || !updateData.password) {
+            setError('All fields are required for updating.');
+            return;
+        }
+
         try {
             await updateUser(updateData.id, updateData);
             const data = await getAllUsers();
             setUsers(data);
             setUpdateData({ id: '', name: '', email: '', password: '' });
+            setSuccess('User updated successfully.');
+            setError('');
         } catch (error) {
             console.error('Failed to update user:', error);
+            setError('Failed to update user.');
         }
     };
 
@@ -105,6 +125,8 @@ const AdminPage = () => {
                         onChange={(e) => setNewInstructor({ ...newInstructor, password: e.target.value })}
                     />
                     <button onClick={handleInstructorRegister}>Register Instructor</button>
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {success && <p style={{ color: 'green' }}>{success}</p>}
                 </div>
             )}
 
