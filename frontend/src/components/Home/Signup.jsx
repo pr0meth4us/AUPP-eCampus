@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
+import Recaptcha from '../Recaptcha';
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ const Signup = () => {
     const [error, setError] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [captchaValue, setCaptchaValue] = useState(null);
     const navigate = useNavigate();
     const { signup, sendOtp } = useAuth();
 
@@ -29,6 +31,11 @@ const Signup = () => {
         setIsLoading(true);
         setError('');
         try {
+            if (!captchaValue) {
+                setError("Please complete the reCAPTCHA.");
+                setIsLoading(false);
+                return;
+            }
             await signup(name, email, password, "student", verificationCode);
             navigate('/');
         } catch (err) {
@@ -125,6 +132,9 @@ const Signup = () => {
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
                                         />
+                                    </div>
+                                    <div className="mb-3">
+                                        <Recaptcha onVerify={setCaptchaValue} /> {/* Use Recaptcha component */}
                                     </div>
                                 </>
                             )}
