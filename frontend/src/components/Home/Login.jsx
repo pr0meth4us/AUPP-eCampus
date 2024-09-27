@@ -23,7 +23,7 @@ const LoginPage = () => {
                 setError('Please complete the reCAPTCHA.');
                 return;
             }
-            await login(email, password, role);
+            await login(email, password, role, captchaValue);
             closeButtonRef.current.click();
             navigate(role === 'admin' ? '/admin/dashboard' : '/');
         } catch (err) {
@@ -58,11 +58,12 @@ const LoginPage = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn ${role === 'professor' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
-                                        onClick={() => setRole('professor')}
+                                        className={`btn ${role === 'instructor' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
+                                        onClick={() => setRole('instructor')}
                                     >
-                                        Professor
+                                        Instructor
                                     </button>
+
                                 </div>
                             </div>
                             <div className="mb-3">
@@ -89,7 +90,7 @@ const LoginPage = () => {
                                     required
                                 />
                             </div>
-                            <Recaptcha onVerify={setCaptchaValue} /> {/* Include the Recaptcha component */}
+                            <Recaptcha onVerify={setCaptchaValue} />
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>

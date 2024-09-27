@@ -6,8 +6,8 @@ const api = axios.create({
     withCredentials: true
 });
 
-export const login = async (email, password, role) => {
-    const response = await api.post('/auth/login', { email, password, role });
+export const login = async (email, password, role, recaptchaResponse) => {
+    const response = await api.post('/auth/login', { email, password, role, recaptcha_response: recaptchaResponse });
     return response.data;
 };
 
