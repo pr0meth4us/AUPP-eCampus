@@ -13,8 +13,9 @@ MarkupSafe==2.1.5
 minio==7.2.8
 pycparser==2.22
 pycryptodome==3.20.0
+PyJWT==2.9.0
 pymongo==4.8.0
-pyjwt==2.9.0
+redis==5.0.8
 typing_extensions==4.12.2
 urllib3==2.2.2
 Werkzeug==3.0.4
