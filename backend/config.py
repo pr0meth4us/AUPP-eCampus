@@ -8,3 +8,6 @@ class Config:
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
     RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '6LfdwUoqAAAAAHCRdmcEU8bWC0WZQKz49AonoUvA')
+    REDIS_HOST = os.getenv('REDIS_HOST')
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
