@@ -6,8 +6,8 @@ const api = axios.create({
     withCredentials: true
 });
 
-export const login = async (email, password, role) => {
-    const response = await api.post('/auth/login', { email, password, role });
+export const login = async (email, password, role, recaptchaResponse) => {
+    const response = await api.post('/auth/login', { email, password, role, recaptcha_response: recaptchaResponse });
     return response.data;
 };
 
@@ -15,14 +15,13 @@ export const send_otp = async (email) => {
     await api.post('/auth/send-otp', {email})
 }
 
-export const registerInstructor = async (name, email, password) => {
-    const response = await api.post(`/admin/instructor-register`, { name, email, password });
+export const register = async (name, email, password, role, otp, token = null, captchaValue) => {
+    const response = await api.post(`/auth/register`, { name, email, password,role, otp, token,captchaValue });
     return response.data;
 };
 
-
-export const register = async (name, email, password, role, otp, token = null) => {
-    const response = await api.post(`/auth/register`, { name, email, password,role, otp, token });
+export const registerInstructor = async (name, email, password) => {
+    const response = await api.post(`/admin/instructor-register`, { name, email, password });
     return response.data;
 };
 
@@ -42,12 +41,13 @@ export const getAllUsers = async () => {
 };
 
 
+
 export const deleteUser = async (userId) => {
     const response = await api.delete(`/admin/delete-user/${userId}`);
     return response.data;
 };
 
 export const updateUser = async (userId, userData) => {
-    const response = await api.put(`/admin/update-user/${userId}`, userData);
+    const response = await api.put(`/admin/update-user/${userId}`, userData)
     return response.data;
 };
