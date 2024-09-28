@@ -20,6 +20,11 @@ export const register = async (name, email, password, role, otp, token = null, c
     return response.data;
 };
 
+export const registerInstructor = async (name, email, password) => {
+    const response = await api.post(`/admin/instructor-register`, { name, email, password });
+    return response.data;
+};
+
 export const logout = async () => {
     const response = await api.post('/auth/logout');
     return response.data;
@@ -35,7 +40,14 @@ export const getAllUsers = async () => {
     return response.data;
 };
 
-export const registerInstructor = async (instructorData) => {
-    const response = await api.post('/admin/instructor-register', instructorData);
+
+
+export const deleteUser = async (userId) => {
+    const response = await api.delete(`/admin/delete-user/${userId}`);
+    return response.data;
+};
+
+export const updateUser = async (userId, userData) => {
+    const response = await api.put(`/admin/update-user/${userId}`, userData)
     return response.data;
 };

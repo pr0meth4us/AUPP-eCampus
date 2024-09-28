@@ -8,7 +8,7 @@ def create_token(user):
     secret_key = current_app.config['SECRET_KEY']
 
     payload = {
-        'user_id': user['_id'],
+        '_id': user['_id'],
         'role': user['role'],
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }

@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from controllers.auth_controller import login_user, check_auth, register, check_email
+from controllers.auth_controller import login_user, check_auth, register, check_email, logout
 from middleware.auth_middleware import require_recaptcha
 
 auth_bp = Blueprint('auth', __name__)
@@ -28,3 +28,8 @@ def auth_check():
 def verify_otp_and_register():
     data = request.get_json()
     return register(data)
+
+
+@auth_bp.route('/signout', methods=['POST'])
+def signout():
+    return logout()
