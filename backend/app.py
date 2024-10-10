@@ -14,8 +14,10 @@ def create_app():
 
     from routes.auth_routes import auth_bp
     from routes.admin_routes import admin_bp
+    from routes.student_routes import student_bp
     flask_app.register_blueprint(auth_bp, url_prefix='/auth')
     flask_app.register_blueprint(admin_bp, url_prefix='/admin')
+    flask_app.register_blueprint(student_bp, url_prefix='/')
 
     @flask_app.errorhandler(500)
     def internal_error(error):
