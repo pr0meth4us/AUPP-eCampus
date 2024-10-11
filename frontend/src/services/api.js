@@ -51,3 +51,26 @@ export const updateUser = async (userId, userData) => {
     const response = await api.put(`/admin/update-user/${userId}`, userData)
     return response.data;
 };
+
+export const createCourse = async (formData) => {
+    const response = await api.post('/courses/', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+export const getAllCourses = async () => {
+    const response = await api.get('/admin/get-all-courses');
+    return response.data;
+};
+
+export const updateCourse = async (courseId, courseData) => {
+    const response = await api.put(`/admin/update-course/${courseId}`, courseData);
+    return response.data;
+};
+
+export const deleteCourse = async (courseId) => {
+    const response = await api.delete(`/admin/delete-course/${courseId}`);
+    return response.data;
+};
