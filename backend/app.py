@@ -6,9 +6,9 @@ import traceback
 
 def create_app():
     flask_app = Flask(__name__)
-
     flask_app.config.from_object(Config)
     init_mongo(flask_app)
+
     from services.cors_service import init_cors
     init_cors(flask_app)
 
@@ -20,7 +20,19 @@ def create_app():
     @flask_app.errorhandler(500)
     def internal_error(error):
         return jsonify(
-            {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}), 500
+            {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
+        ), 500
+
+    @flask_app.after_request
+    def add_csp_headers(response):
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "  # Allow resources from the same origin
+            "script-src 'self' https://www.google.com https://www.gstatic.com; "  # Allow Google scripts
+            "frame-src 'self' https://www.google.com; "  # Allow frames from Google (reCAPTCHA)
+            "style-src 'self' https://fonts.googleapis.com; "  # Allow Google Fonts
+            "font-src 'self' https://fonts.gstatic.com;"  # Allow Google Fonts
+        )
+        return response
 
     return flask_app
 
