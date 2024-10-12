@@ -4,10 +4,11 @@ from datetime import datetime, UTC
 
 
 class Course:
-    def __init__(self, title, description, instructor_id, video_url=None):
+    def __init__(self, title, description, instructor_id, video_url, uploader_id):
         self.title = title
         self.description = description
         self.instructor_id = instructor_id
+        self.uploader_id = uploader_id
         self.video_url = video_url
         self.created_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
@@ -16,6 +17,7 @@ class Course:
         course_data = {
             'title': self.title,
             'description': self.description,
+            'uploader_id': self.uploader_id,
             'instructor_id': self.instructor_id,
             'video_url': self.video_url,
             'created_at': self.created_at,
@@ -36,8 +38,9 @@ class Course:
                 'id': str(course['_id']),
                 'title': course['title'],
                 'description': course['description'],
-                'instructor_id': course['instructor_id'],
                 'video_url': course['video_url'],
+                'uploader_id': courses['uploader_id'],
+                'instructor_id': courses['instructor_id'],
                 'created_at': course['created_at'],
                 'updated_at': course['updated_at']
             }

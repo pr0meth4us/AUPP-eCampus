@@ -5,9 +5,9 @@ import AdminPage from './pages/AdminPage';
 import PrivateRoute from './components/PrivateRoute';
 import Signup from "./components/Home/Signup";
 import Home from "./pages/Home";
-import AdminSignup from "./admin/AdminSignup";
-import AdminLogin from "./admin/AdminLogin";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import AdminSignup from "./components/Admin/AdminSignup";
+import AdminLogin from "./components/Admin/AdminLogin";
 
 const App = () => {
     return (

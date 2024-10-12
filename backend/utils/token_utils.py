@@ -7,7 +7,7 @@ def create_token(user):
     secret_key = current_app.config['SECRET_KEY']
 
     payload = {
-        '_id': str(user['_id']),  # Ensure _id is string if it's an ObjectId
+        '_id': str(user['_id']),
         'role': user['role'],
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
@@ -19,10 +19,8 @@ def extract_role_from_token(token):
     try:
         secret_key = current_app.config['SECRET_KEY']
         decoded = jwt.decode(token, secret_key, algorithms=['HS256'])
-        return decoded['role']
+        return decoded['role'], decoded['_id']
     except jwt.ExpiredSignatureError:
-        # Token has expired
         return None
     except jwt.InvalidTokenError:
-        # Token is invalid (for example, due to being tampered with)
         return None
