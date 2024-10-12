@@ -2,18 +2,14 @@ from flask import Flask, jsonify
 from services.mongo_service import init_mongo
 from config import Config
 import traceback
-from flask_jwt_extended import JWTManager
 
 
 def create_app():
     flask_app = Flask(__name__)
-
     flask_app.config.from_object(Config)
     init_mongo(flask_app)
-
     from services.cors_service import init_cors
     init_cors(flask_app)
-    JWTManager(flask_app)
 
     from routes.auth_routes import auth_bp
     from routes.admin_routes import admin_bp
@@ -24,14 +20,24 @@ def create_app():
 
     @flask_app.errorhandler(500)
     def internal_error(error):
-        return jsonify({'error': 'Internal Server Error'}), 500
+        return jsonify(
+            {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
+        ), 500
 
-    @flask_app.errorhandler(404)
-    def not_found_error(error):
-        return jsonify({'error': 'Not Found'}), 404
+    @flask_app.after_request
+    def add_csp_headers(response):
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; " 
+            "script-src 'self' https://www.google.com https://www.gstatic.com; "  
+            "frame-src 'self' https://www.google.com; "  
+            "style-src 'self' https://fonts.googleapis.com; "  
+            "font-src 'self' https://fonts.gstatic.com;"
+        )
+        return response
 
+    return flask_app
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=Config.DEBUG, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5001)

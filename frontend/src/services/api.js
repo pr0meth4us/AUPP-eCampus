@@ -55,11 +55,13 @@ export const updateUser = async (userId, userData) => {
 export const createCourse = async (formData) => {
     const response = await api.post('/courses/', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'multipart/form-data' // This is necessary for file uploads
         }
     });
     return response.data;
 };
+
+
 export const getAllCourses = async () => {
     const response = await api.get('/admin/get-all-courses');
     return response.data;
