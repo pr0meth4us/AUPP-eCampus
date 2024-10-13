@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { createCourse, deleteCourse, getAllCourses, updateCourse } from '../../services/api';
 import { useAuth } from '../../context/authContext';
+import Notification from "../Notification";
 
 const ManageCourses = () => {
     const { user: currentUser } = useAuth();
-
     const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', video_url: '' });
     const [editCourse, setEditCourse] = useState({ title: '', description: '', instructor_id: '', video_url: '' });
     const [courseVideo, setCourseVideo] = useState(null);
     const [editCourseId, setEditCourseId] = useState(null);
     const [confirmDeleteCourseId, setConfirmDeleteCourseId] = useState(null);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [notification, setNotification] = useState({ message: '', type: '' });
     const [courses, setCourses] = useState([]);
 
     useEffect(() => {
@@ -55,11 +55,11 @@ const ManageCourses = () => {
             }
 
             await createCourse(formData);
-            setSuccess('Course created successfully.');
+            setNotification({ message: 'Course created successfully!', type: 'success' });
             await fetchCourses();
             resetCreateForm();
         } catch (error) {
-            setError('Failed to create course. Please try again.');
+            setNotification({ message: 'Failed to create course. Please try again.', type: 'error' });
         }
     };
 
@@ -82,11 +82,11 @@ const ManageCourses = () => {
             }
 
             await updateCourse(editCourseId, formData);
-            setSuccess('Course updated successfully.');
+            setNotification({ message: 'Course updated successfully!', type: 'success' });
             await fetchCourses();
             resetEditForm();
         } catch (error) {
-            setError('Failed to update course. Please try again.');
+            setNotification({ message: 'Failed to update course. Please try again.', type: 'error' });
         }
     };
 
@@ -122,19 +122,19 @@ const ManageCourses = () => {
             await deleteCourse(courseId);
             await fetchCourses();
             setConfirmDeleteCourseId(null);
-            setSuccess('Course deleted successfully.');
+            setNotification({ message: 'Course deleted successfully!', type: 'success' });
         } catch (error) {
-            setError('Failed to delete course. Please try again.');
+            setNotification({ message: 'Failed to delete course. Please try again.', type: 'error' });
         }
     };
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setSuccess('');
+            setNotification({ message: '', type: '' });
             setError('');
         }, 3000);
         return () => clearTimeout(timer);
-    }, [success, error]);
+    }, [notification, error]);
 
     return (
         <div>
@@ -162,7 +162,6 @@ const ManageCourses = () => {
                     <option value="">Select Instructor</option>
                     <option value={currentUser.id}>{currentUser.name} (You)</option>
                 </select>
-
                 <input
                     type="file"
                     accept="video/*"
@@ -175,10 +174,8 @@ const ManageCourses = () => {
                 <label htmlFor="video-upload-create" style={{ cursor: 'pointer', color: 'blue' }}>
                     {courseVideo ? courseVideo.name : 'Upload Video'}
                 </label>
-
                 <button type="submit">Create Course</button>
             </form>
-
             {editCourseId && (
                 <>
                     <h3>Edit Course</h3>
@@ -205,13 +202,11 @@ const ManageCourses = () => {
                             <option value="">Select Instructor</option>
                             <option value={currentUser.id}>{currentUser.name} (You)</option>
                         </select>
-
                         {editCourse.video_url && (
                             <div>
                                 <a href={editCourse.video_url} target="_blank" rel="noopener noreferrer">View Current Video</a>
                             </div>
                         )}
-
                         <input
                             type="file"
                             accept="video/*"
@@ -224,12 +219,10 @@ const ManageCourses = () => {
                         <label htmlFor="video-upload-edit" style={{ cursor: 'pointer', color: 'blue' }}>
                             {courseVideo ? courseVideo.name : 'Replace Video'}
                         </label>
-
                         <button type="submit">Update Course</button>
                     </form>
                 </>
             )}
-
             <h3>All Courses</h3>
             <table>
                 <thead>
@@ -272,8 +265,8 @@ const ManageCourses = () => {
                 ))}
                 </tbody>
             </table>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {success && <p style={{ color: 'green' }}>{success}</p>}
+            <Notification message={notification.message} type={notification.type} />
+            {error && <div style={{ color: 'red' }}>{error}</div>}
         </div>
     );
 };
