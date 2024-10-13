@@ -39,7 +39,8 @@ def require_admin_or_instructor_or_uploader(f):
             return jsonify({'message': 'Course not found'}), 404
 
         if role != 'admin' and user_id != str(course['instructor_id']) and user_id != str(course['uploader_id']):
-            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this action.'}), 403
+            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this '
+                                       'action.'}), 403
 
         g.role = role
         g.user_id = user_id

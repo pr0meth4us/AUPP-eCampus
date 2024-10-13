@@ -3,6 +3,7 @@ from services.mongo_service import db
 from datetime import datetime, UTC
 from models.user_model import User
 
+
 class Course:
     def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url):
         self.title = title
