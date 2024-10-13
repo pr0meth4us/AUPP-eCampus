@@ -16,7 +16,6 @@ def require_admin_or_instructor(f):
         if not role or role not in ['admin', 'instructor']:
             return jsonify({'message': 'Unauthorized. Admins or Instructors only.'}), 403
 
-        # Store role and user_id in the g context
         g.role = role
         g.user_id = user_id
 

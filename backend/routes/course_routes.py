@@ -1,4 +1,4 @@
-from flask import Blueprint, g, request
+from flask import Blueprint
 from controllers.course_controller import CourseController
 from middleware.admin_middleware import require_admin
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
@@ -13,7 +13,6 @@ def create_course():
 
 
 @course_bp.route('/', methods=['GET'])
-@require_admin
 def get_all_courses():
     return CourseController.get_all_courses()
 

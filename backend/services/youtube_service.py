@@ -7,6 +7,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from google.oauth2 import service_account
 from config import Config
+from .cloudinary_service import upload_to_cloudinary
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ def initialize_upload(youtube, options):
     )
 
     logger.info("Starting resumable upload.")
-    return resumable_upload(insert_request)  # Return the video URL
+    return resumable_upload(insert_request)
 
 
 def resumable_upload(insert_request):
@@ -111,7 +112,30 @@ def upload_video_to_youtube(video_file, title, description, category_id='27', pr
 
     try:
         video_url = initialize_upload(youtube, options)
-        return video_url
+
+        video_id = video_url.split("=")[-1]
+
+        video_details = youtube.videos().list(
+            part='snippet',
+            id=video_id
+        ).execute()
+
+        thumbnail_url = video_details['items'][0]['snippet']['thumbnails']['high']['url']
+
+        return video_url, thumbnail_url
+
     except HttpError as e:
         logger.error(f"An HTTP error {e.resp.status} occurred:\n{e.content}")
-        raise
+        logger.info("Attempting fallback upload to Cloudinary.")
+
+        video_url, thumbnail_url = upload_to_cloudinary(video_file, title)
+        return video_url, thumbnail_url
+
+
+def delete_from_youtube(video_id):
+    try:
+        youtube = get_authenticated_service()
+        youtube.videos().delete(id=video_id).execute()
+        logging.info(f"Video with ID {video_id} deleted from YouTube.")
+    except Exception as e:
+        logging.error(f"Failed to delete video from YouTube: {str(e)}")

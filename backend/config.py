@@ -14,3 +14,6 @@ class Config:
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'
     GOOGLE_SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', 'youtube-credentials.json')
+    CLOUDINARY_CLOUD_NAME = 'dpjhgw3sd'
+    CLOUDINARY_API_KEY = '293292133628933'
+    CLOUDINARY_API_SECRET = 'BHAS5TcukTsbpSzGbi4sx_jqwqs'

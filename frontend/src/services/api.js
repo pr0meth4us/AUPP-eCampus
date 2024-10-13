@@ -55,7 +55,7 @@ export const updateUser = async (userId, userData) => {
 export const createCourse = async (formData) => {
     const response = await api.post('/courses/', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data' // This is necessary for file uploads
+            'Content-Type': 'multipart/form-data'
         }
     });
     return response.data;
@@ -63,16 +63,19 @@ export const createCourse = async (formData) => {
 
 
 export const getAllCourses = async () => {
-    const response = await api.get('/admin/get-all-courses');
+    const response = await api.get('/courses/');
     return response.data;
 };
 
 export const updateCourse = async (courseId, courseData) => {
-    const response = await api.put(`/admin/update-course/${courseId}`, courseData);
+    const response = await api.put(`/courses/${courseId}`, courseData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
     return response.data;
 };
-
 export const deleteCourse = async (courseId) => {
-    const response = await api.delete(`/admin/delete-course/${courseId}`);
+    const response = await api.delete(`/courses/${courseId}`);
     return response.data;
 };
