@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { createCourse, deleteCourse, getAllCourses, updateCourse } from '../../services/api';
+import React, { useState } from 'react';
+import { createCourse, deleteCourse, updateCourse } from '../../services/api';
 import { useAuth } from '../../context/authContext';
 import Notification from "../Notification";
 
-const ManageCourses = () => {
+const ManageCourses = ({ users, courses, setCourses, fetchData }) => {
     const { user: currentUser } = useAuth();
     const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', video_url: '' });
     const [editCourse, setEditCourse] = useState({ title: '', description: '', instructor_id: '', video_url: '' });
@@ -12,20 +12,6 @@ const ManageCourses = () => {
     const [confirmDeleteCourseId, setConfirmDeleteCourseId] = useState(null);
     const [error, setError] = useState('');
     const [notification, setNotification] = useState({ message: '', type: '' });
-    const [courses, setCourses] = useState([]);
-
-    useEffect(() => {
-        fetchCourses();
-    }, []);
-
-    const fetchCourses = async () => {
-        try {
-            const fetchedCourses = await getAllCourses();
-            setCourses(fetchedCourses);
-        } catch (error) {
-            setError('Failed to fetch courses. Please try again.');
-        }
-    };
 
     const handleInputChange = (field, isEdit = false) => (e) => {
         if (isEdit) {
@@ -56,7 +42,7 @@ const ManageCourses = () => {
 
             await createCourse(formData);
             setNotification({ message: 'Course created successfully!', type: 'success' });
-            await fetchCourses();
+            await fetchData();
             resetCreateForm();
         } catch (error) {
             setNotification({ message: 'Failed to create course. Please try again.', type: 'error' });
@@ -83,7 +69,7 @@ const ManageCourses = () => {
 
             await updateCourse(editCourseId, formData);
             setNotification({ message: 'Course updated successfully!', type: 'success' });
-            await fetchCourses();
+            await fetchData();
             resetEditForm();
         } catch (error) {
             setNotification({ message: 'Failed to update course. Please try again.', type: 'error' });
@@ -120,7 +106,7 @@ const ManageCourses = () => {
 
         try {
             await deleteCourse(courseId);
-            await fetchCourses();
+            await fetchData();
             setConfirmDeleteCourseId(null);
             setNotification({ message: 'Course deleted successfully!', type: 'success' });
         } catch (error) {
@@ -128,145 +114,149 @@ const ManageCourses = () => {
         }
     };
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setNotification({ message: '', type: '' });
-            setError('');
-        }, 3000);
-        return () => clearTimeout(timer);
-    }, [notification, error]);
-
     return (
         <div>
-            <h3>Create New Course</h3>
-            <form onSubmit={handleCreateCourse}>
-                <input
-                    type="text"
-                    placeholder="Title"
-                    value={newCourse.title}
-                    onChange={handleInputChange('title')}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Description"
-                    value={newCourse.description}
-                    onChange={handleInputChange('description')}
-                    required
-                />
-                <select
-                    value={newCourse.instructor_id}
-                    onChange={handleInputChange('instructor_id')}
-                    required
-                >
-                    <option value="">Select Instructor</option>
-                    <option value={currentUser.id}>{currentUser.name} (You)</option>
-                </select>
-                <input
-                    type="file"
-                    accept="video/*"
-                    style={{ display: 'none' }}
-                    id="video-upload-create"
-                    onChange={(e) => {
-                        setCourseVideo(e.target.files[0]);
-                    }}
-                />
-                <label htmlFor="video-upload-create" style={{ cursor: 'pointer', color: 'blue' }}>
-                    {courseVideo ? courseVideo.name : 'Upload Video'}
-                </label>
-                <button type="submit">Create Course</button>
-            </form>
-            {editCourseId && (
-                <>
-                    <h3>Edit Course</h3>
-                    <form onSubmit={handleUpdateCourse}>
+            <section className="mb-4">
+                <h3>Create New Course</h3>
+                <form onSubmit={handleCreateCourse} className="mb-3">
+                    <div className="mb-3">
                         <input
                             type="text"
+                            className="form-control"
                             placeholder="Title"
-                            value={editCourse.title}
-                            onChange={handleInputChange('title', true)}
+                            value={newCourse.title}
+                            onChange={handleInputChange('title')}
                             required
                         />
-                        <input
-                            type="text"
+                    </div>
+                    <div className="mb-3">
+                        <textarea
+                            className="form-control"
                             placeholder="Description"
-                            value={editCourse.description}
-                            onChange={handleInputChange('description', true)}
+                            value={newCourse.description}
+                            onChange={handleInputChange('description')}
                             required
                         />
+                    </div>
+                    <div className="mb-3">
                         <select
-                            value={editCourse.instructor_id}
-                            onChange={handleInputChange('instructor_id', true)}
+                            className="form-select"
+                            value={newCourse.instructor_id}
+                            onChange={handleInputChange('instructor_id')}
                             required
                         >
                             <option value="">Select Instructor</option>
-                            <option value={currentUser.id}>{currentUser.name} (You)</option>
+                            {users.filter(user => user.role === 'instructor').map(instructor => (
+                                <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
+                            ))}
                         </select>
-                        {editCourse.video_url && (
-                            <div>
-                                <a href={editCourse.video_url} target="_blank" rel="noopener noreferrer">View Current Video</a>
-                            </div>
-                        )}
+                    </div>
+                    <div className="mb-3">
                         <input
                             type="file"
                             accept="video/*"
-                            style={{ display: 'none' }}
-                            id="video-upload-edit"
-                            onChange={(e) => {
-                                setCourseVideo(e.target.files[0]);
-                            }}
+                            className="form-control"
+                            onChange={(e) => setCourseVideo(e.target.files[0])}
                         />
-                        <label htmlFor="video-upload-edit" style={{ cursor: 'pointer', color: 'blue' }}>
-                            {courseVideo ? courseVideo.name : 'Replace Video'}
-                        </label>
-                        <button type="submit">Update Course</button>
+                    </div>
+                    <button type="submit" className="btn btn-primary">Create Course</button>
+                </form>
+            </section>
+
+            {editCourseId && (
+                <section className="mb-4">
+                    <h3>Edit Course</h3>
+                    <form onSubmit={handleUpdateCourse} className="mb-3">
+                        <div className="mb-3">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Title"
+                                value={editCourse.title}
+                                onChange={handleInputChange('title', true)}
+                                required
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <textarea
+                                className="form-control"
+                                placeholder="Description"
+                                value={editCourse.description}
+                                onChange={handleInputChange('description', true)}
+                                required
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <select
+                                className="form-select"
+                                value={editCourse.instructor_id}
+                                onChange={handleInputChange('instructor_id', true)}
+                                required
+                            >
+                                <option value="">Select Instructor</option>
+                                {users.filter(user => user.role === 'instructor').map(instructor => (
+                                    <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                type="file"
+                                accept="video/*"
+                                className="form-control"
+                                onChange={(e) => setCourseVideo(e.target.files[0])}
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-primary me-2">Update Course</button>
+                        <button type="button" className="btn btn-secondary" onClick={resetEditForm}>Cancel</button>
                     </form>
-                </>
+                </section>
             )}
-            <h3>All Courses</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Instructor</th>
-                    <th>Uploader</th>
-                    <th>Video URL</th>
-                    <th>Thumbnail</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {courses.map(course => (
-                    <tr key={course.id}>
-                        <td>{course.title}</td>
-                        <td>{course.description}</td>
-                        <td>{course.instructor}</td>
-                        <td>{course.uploader}</td>
-                        <td>
-                            {course.video_url && (
-                                <a href={course.video_url} target="_blank" rel="noopener noreferrer">
-                                    View Video
-                                </a>
-                            )}
-                        </td>
-                        <td>
-                            {course.thumbnail_url && (
-                                <img src={course.thumbnail_url} alt="Thumbnail" style={{ width: '100px', height: 'auto' }} />
-                            )}
-                        </td>
-                        <td>
-                            <button onClick={() => handleEditCourse(course)}>Edit</button>
-                            <button onClick={() => handleDeleteCourse(course.id)}>
-                                {confirmDeleteCourseId === course.id ? 'Confirm Delete' : 'Delete'}
-                            </button>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+
+            <section>
+                <h3>All Courses</h3>
+                <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Instructor</th>
+                            <th>Video</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {courses.map(course => (
+                            <tr key={course.id}>
+                                <td>{course.title}</td>
+                                <td>{course.description}</td>
+                                <td>{users.find(user => user.id === course.instructor_id)?.name}</td>
+                                <td>
+                                    {course.video_url && (
+                                        <a href={course.video_url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
+                                            View Video
+                                        </a>
+                                    )}
+                                </td>
+                                <td>
+                                    <button onClick={() => handleEditCourse(course)} className="btn btn-sm btn-outline-secondary me-1">Edit</button>
+                                    <button
+                                        onClick={() => handleDeleteCourse(course.id)}
+                                        className={`btn btn-sm ${confirmDeleteCourseId === course.id ? 'btn-danger' : 'btn-outline-danger'}`}
+                                    >
+                                        {confirmDeleteCourseId === course.id ? 'Confirm Delete' : 'Delete'}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <Notification message={notification.message} type={notification.type} />
-            {error && <div style={{ color: 'red' }}>{error}</div>}
+            {error && <div className="alert alert-danger mt-3">{error}</div>}
         </div>
     );
 };

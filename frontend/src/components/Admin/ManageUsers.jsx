@@ -65,93 +65,117 @@ const ManageUsers = ({ users, setUsers, fetchData }) => {
 
     return (
         <div>
-            <h3>Register New Instructor</h3>
-            <form onSubmit={handleInstructorRegister}>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={newInstructor.name}
-                    onChange={(e) => setNewInstructor({ ...newInstructor, name: e.target.value })}
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={newInstructor.email}
-                    onChange={(e) => setNewInstructor({ ...newInstructor, email: e.target.value })}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={newInstructor.password}
-                    onChange={(e) => setNewInstructor({ ...newInstructor, password: e.target.value })}
-                />
-                <button type="submit">Register Instructor</button>
-            </form>
-
-            <h3>All Users</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {users.map((user) => (
-                    <tr key={user.id}>
-                        <td>{user.name}</td>
-                        <td>{user.email}</td>
-                        <td>{user.role}</td>
-                        <td>
-                            {confirmDeleteUserId === user.id ? (
-                                <>
-                                    <span>Are you sure?</span>
-                                    <button onClick={() => handleDeleteUser(user.id)}>Yes</button>
-                                    <button onClick={() => setConfirmDeleteUserId(null)}>No</button>
-                                </>
-                            ) : (
-                                <>
-                                    <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
-                                    <button onClick={() => setUpdateUserData({ id: user.id, name: user.name, email: user.email, password: '' })}>Edit</button>
-                                </>
-                            )}
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-
-            {updateUserData.id && (
-                <div>
-                    <h3>Update User</h3>
-                    <form onSubmit={handleUpdateUser}>
+            <section className="mb-4">
+                <h3>Register New Instructor</h3>
+                <form onSubmit={handleInstructorRegister} className="mb-3">
+                    <div className="mb-3">
                         <input
                             type="text"
+                            className="form-control"
                             placeholder="Name"
-                            value={updateUserData.name}
-                            onChange={(e) => setUpdateUserData({ ...updateUserData, name: e.target.value })}
+                            value={newInstructor.name}
+                            onChange={(e) => setNewInstructor({ ...newInstructor, name: e.target.value })}
                         />
+                    </div>
+                    <div className="mb-3">
                         <input
                             type="email"
+                            className="form-control"
                             placeholder="Email"
-                            value={updateUserData.email}
-                            onChange={(e) => setUpdateUserData({ ...updateUserData, email: e.target.value })}
+                            value={newInstructor.email}
+                            onChange={(e) => setNewInstructor({ ...newInstructor, email: e.target.value })}
                         />
+                    </div>
+                    <div className="mb-3">
                         <input
                             type="password"
-                            placeholder="New Password (optional)"
-                            value={updateUserData.password}
-                            onChange={(e) => setUpdateUserData({ ...updateUserData, password: e.target.value })}
+                            className="form-control"
+                            placeholder="Password"
+                            value={newInstructor.password}
+                            onChange={(e) => setNewInstructor({ ...newInstructor, password: e.target.value })}
                         />
-                        <button type="submit">Update User</button>
-                        <button onClick={() => setUpdateUserData({ id: '', name: '', email: '', password: '' })}>Cancel</button>
-                    </form>
+                    </div>
+                    <button type="submit" className="btn btn-primary">Register Instructor</button>
+                </form>
+            </section>
+
+            <section>
+                <h3>All Users</h3>
+                <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {users.map((user) => (
+                            <tr key={user.id}>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                                <td>{user.role}</td>
+                                <td>
+                                    {confirmDeleteUserId === user.id ? (
+                                        <>
+                                            <span className="me-2">Are you sure?</span>
+                                            <button onClick={() => handleDeleteUser(user.id)} className="btn btn-sm btn-danger me-1">Yes</button>
+                                            <button onClick={() => setConfirmDeleteUserId(null)} className="btn btn-sm btn-secondary">No</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => handleDeleteUser(user.id)} className="btn btn-sm btn-outline-danger me-1">Delete</button>
+                                            <button onClick={() => setUpdateUserData({ id: user.id, name: user.name, email: user.email, password: '' })} className="btn btn-sm btn-outline-secondary">Edit</button>
+                                        </>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                 </div>
+            </section>
+
+            {updateUserData.id && (
+                <section className="mt-4">
+                    <h3>Update User</h3>
+                    <form onSubmit={handleUpdateUser} className="mb-3">
+                        <div className="mb-3">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Name"
+                                value={updateUserData.name}
+                                onChange={(e) => setUpdateUserData({ ...updateUserData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                type="email"
+                                className="form-control"
+                                placeholder="Email"
+                                value={updateUserData.email}
+                                onChange={(e) => setUpdateUserData({ ...updateUserData, email: e.target.value })}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                type="password"
+                                className="form-control"
+                                placeholder="New Password (optional)"
+                                value={updateUserData.password}
+                                onChange={(e) => setUpdateUserData({ ...updateUserData, password: e.target.value })}
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-primary me-2">Update User</button>
+                        <button onClick={() => setUpdateUserData({ id: '', name: '', email: '', password: '' })} className="btn btn-secondary">Cancel</button>
+                    </form>
+                </section>
             )}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {success && <p style={{ color: 'green' }}>{success}</p>}
+            {error && <div className="alert alert-danger mt-3">{error}</div>}
+            {success && <div className="alert alert-success mt-3">{success}</div>}
         </div>
     );
 };
