@@ -84,6 +84,9 @@ class CourseController:
         if not current_course:
             return jsonify({'message': 'Course not found.'}), 404
 
+        if instructor_id == "(You)":
+            instructor_id = g.user_id
+
         current_video_url = current_course.get('video_url')
 
         try:
@@ -121,7 +124,6 @@ class CourseController:
         except ValueError as e:
             logger.error(f"Error updating course: {str(e)}")
             return jsonify({'message': str(e)}), 404
-
 
     @staticmethod
     def delete_course(course_id):
