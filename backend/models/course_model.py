@@ -1,15 +1,16 @@
 from bson import ObjectId
 from services.mongo_service import db
 from datetime import datetime, UTC
-
+from models.user_model import User
 
 class Course:
-    def __init__(self, title, description, instructor_id, video_url, uploader_id):
+    def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url):
         self.title = title
         self.description = description
-        self.instructor_id = instructor_id
-        self.uploader_id = uploader_id
+        self.instructor_id = ObjectId(instructor_id)
+        self.uploader_id = ObjectId(uploader_id)
         self.video_url = video_url
+        self.thumbnail_url = thumbnail_url
         self.created_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
 
@@ -17,9 +18,10 @@ class Course:
         course_data = {
             'title': self.title,
             'description': self.description,
-            'uploader_id': self.uploader_id,
             'instructor_id': self.instructor_id,
+            'uploader_id': self.uploader_id,
             'video_url': self.video_url,
+            'thumbnail_url': self.thumbnail_url,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
@@ -33,19 +35,22 @@ class Course:
     @staticmethod
     def get_all_courses():
         courses = db.courses.find()
-        return [
-            {
+        course_list = []
+        for course in courses:
+            instructor = User.find_by_id(course['instructor_id'])
+            uploader = User.find_by_id(course['uploader_id'])
+            course_list.append({
                 'id': str(course['_id']),
-                'title': course['title'],
-                'description': course['description'],
-                'video_url': course['video_url'],
-                'uploader_id': courses['uploader_id'],
-                'instructor_id': courses['instructor_id'],
-                'created_at': course['created_at'],
-                'updated_at': course['updated_at']
-            }
-            for course in courses
-        ]
+                'title': course.get('title', 'N/A'),
+                'description': course.get('description', 'N/A'),
+                'video_url': course.get('video_url', None),
+                'instructor': instructor.get('name'),
+                'uploader': uploader.get('name'),
+                'created_at': course.get('created_at', None),
+                'updated_at': course.get('updated_at', None),
+                'thumbnail_url': course.get('thumbnail_url', None)
+            })
+        return course_list
 
     @staticmethod
     def update_course(course_id, **kwargs):
