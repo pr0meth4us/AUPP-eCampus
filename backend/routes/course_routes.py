@@ -1,6 +1,5 @@
 from flask import Blueprint
 from controllers.course_controller import CourseController
-from middleware.admin_middleware import require_admin
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 
 course_bp = Blueprint('course', __name__)
