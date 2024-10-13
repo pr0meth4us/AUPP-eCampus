@@ -27,26 +27,49 @@ const AdminPage = () => {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="container mt-5">
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h2>Admin Dashboard</h2>
+        <div className="container mt-4">
+            <h2 className="mb-4">Admin Dashboard</h2>
 
-            <nav>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '20px' }}>
-                    <li style={{ cursor: 'pointer', fontWeight: activeTab === 'users' ? 'bold' : 'normal' }} onClick={() => setActiveTab('users')}>
-                        Manage Users
-                    </li>
-                    <li style={{ cursor: 'pointer', fontWeight: activeTab === 'courses' ? 'bold' : 'normal' }} onClick={() => setActiveTab('courses')}>
-                        Manage Courses
-                    </li>
-                </ul>
+            <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div className="container-fluid">
+                    <span className="navbar-brand">Manage</span>
+                    <ul className="navbar-nav">
+                        <li className="nav-item">
+                            <a
+                                className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
+                                href="#"
+                                onClick={() => setActiveTab('users')}
+                            >
+                                Users
+                            </a>
+                        </li>
+                        <li className="nav-item">
+                            <a
+                                className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
+                                href="#"
+                                onClick={() => setActiveTab('courses')}
+                            >
+                                Courses
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </nav>
 
             {activeTab === 'users' && <ManageUsers users={users} setUsers={setUsers} fetchData={fetchData} />}
-            {activeTab === 'courses'  && <ManageCourses users={users} courses={courses} setCourses={setCourses} fetchData={fetchData} />}
+            {activeTab === 'courses' && <ManageCourses users={users} courses={courses} setCourses={setCourses} fetchData={fetchData} />}
         </div>
     );
 };
