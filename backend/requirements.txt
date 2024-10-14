@@ -1,0 +1,11 @@
+cloudinary==1.41.0
+Flask==3.0.3
+flask_cors==5.0.0
+google_api_python_client==2.149.0
+httplib2==0.22.0
+protobuf==5.28.2
+PyJWT==2.9.0
+pymongo==4.10.1
+redis==5.1.1
+Requests==2.32.3
+Werkzeug==3.0.4
