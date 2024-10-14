@@ -6,6 +6,8 @@ from models.user_model import User, Student, Admin, Instructor
 from services.mail_service import send_mail
 from utils.token_utils import create_token
 from models.otp_model import OTP
+from controllers.student_controller import StudentController  # Import the StudentController
+from models.student import Student
 
 
 def check_email(data):
@@ -32,9 +34,27 @@ def register(data):
 
         user = user_class(name=data['name'], email=email, password=data['password'])
         user.save_to_db()
+
+        if role == 'student':
+            student_data = {
+                "student_id": data.get("student_id"),  # Ensure this data is provided in the request
+                "name": data['name'],
+                "email": email,
+                "bio": data.get("bio", ""),  # Optional bio
+                "courses_enrolled": [],  # Initialize as empty, can be updated later
+                "profile_image": data.get("profile_image", "")  # Optional image path
+            }
+
+            # Create student profile using the StudentController
+            student_response = StudentController.create_student_profile(student_data)
+
+            if student_response[1] != 201:  # Check if the student creation was successful
+                return jsonify({"message": "User registered, but student profile creation failed."}), 500
+
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
+
 
 
 def login_user(data):
