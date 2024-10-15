@@ -43,5 +43,9 @@ def admin_register(data):
     user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
     user_class = user_classes.get(role)
     user = user_class(name=data['name'], email=email, password=data['password'])
-    user.save_to_db()
-    return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+    try:
+        user.save_to_db()
+        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
+

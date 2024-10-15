@@ -17,14 +17,18 @@ const ManageUsers = ({ users, fetchData }) => {
         e.preventDefault();
         try {
             await registerUser(newUser.name, newUser.email, newUser.password, newUser.role);
+
             fetchData();
-            setNewUser({ name: '', email: '', password: '', role: '' }); // Reset form fields
+            setNewUser({ name: '', email: '', password: '', role: '' });
             setNotification({ message: 'User registered successfully.', type: 'success' });
         } catch (error) {
-            setNotification({ message: 'Failed to register user.', type: 'error' });
+            if (error.response && error.response.data && error.response.data.message) {
+                setNotification({ message: error.response.data.message, type: 'error' });
+            } else {
+                setNotification({ message: 'Failed to register user. Please try again.', type: 'error' });
+            }
         }
     };
-
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
@@ -43,10 +47,12 @@ const ManageUsers = ({ users, fetchData }) => {
             await updateUser(editUser.id, editUser);
             fetchData();
             setEditUser(null);
-            setShowEditModal(false); // Close the modal
+            setShowEditModal(false);
             setNotification({ message: 'User updated successfully.', type: 'success' });
         } catch (error) {
-            setNotification({ message: 'Failed to update user.', type: 'error' });
+            setNotification({ message: error.response.data.message, type: 'error' });
+            console.log(error)
+
         }
     };
 
