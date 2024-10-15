@@ -1,8 +1,8 @@
-# controllers/student_controller.py
 from flask import jsonify, request
-from models.student import Student
 from services.mongo_service import db
-from datetime import datetime
+from datetime import datetime, timezone  # Import timezone
+from models.user_model import Student
+import os
 
 
 class StudentController:
@@ -10,19 +10,16 @@ class StudentController:
     def create_student_profile():
         data = request.json
         student = Student(
-            student_id=data.get("student_id"),
             name=data.get("name"),
             email=data.get("email"),
+            password=data.get("password"),  # Password will be hashed in the Student class
             bio=data.get("bio"),
             courses_enrolled=data.get("courses_enrolled", []),
             profile_image=data.get("profile_image", "")
         )
-        student_data = student.to_dict()
-        student_data["created_at"] = datetime.utcnow()
-        student_data["updated_at"] = datetime.utcnow()
-
-        result = db.students.insert_one(student_data)
-        return jsonify({"message": "Student profile created", "id": str(result.inserted_id)}), 201
+        # Save student to the database
+        student.save_to_db()
+        return jsonify({"message": "Student profile created successfully"}), 201
 
     @staticmethod
     def get_student_profile(student_id):
@@ -42,13 +39,48 @@ class StudentController:
             "bio": data.get("bio"),
             "courses_enrolled": data.get("courses_enrolled"),
             "profile_image": data.get("profile_image"),
-            "updated_at": datetime.utcnow()
+            "updated_at": datetime.now(timezone.utc)
         }
-        result = db.students.update_one({"student_id": student_id}, {"$set": updated_data})
-        if result.matched_count > 0:
-            return jsonify({"message": "Student profile updated"})
+        # Use the User model's update_user method to update the student's info
+        try:
+            Student.update_user(student_id,
+                                 new_name=updated_data.get("name"),
+                                 new_email=updated_data.get("email"),
+                                 new_password=data.get("password"))  # Pass password if updating
+            return jsonify({"message": "Student profile updated successfully"}), 200
+        except ValueError:
+            return jsonify({"message": "Student not found or no changes made."}), 404
+
+    @staticmethod
+    def upload_profile_image(student_id):
+        # Check if an image was uploaded
+        if 'image' not in request.files:
+            return jsonify({"message": "No image file provided"}), 400
+
+        image = request.files['image']
+
+        # Validate the image (you may want to add more checks for file types, size, etc.)
+        if image.filename == '':
+            return jsonify({"message": "No selected file"}), 400
+
+        # Save the image (update this path as needed for your project)
+        upload_folder = 'path/to/upload/folder'  # Define the upload folder
+        image_path = os.path.join(upload_folder, image.filename)
+        image.save(image_path)
+
+        # Update the student's profile with the new image path
+        updated_data = {
+            "profile_image": image_path,
+            "updated_at": datetime.now(timezone.utc)  # Ensure you're using timezone-aware datetime
+        }
+
+        result = db.users.update_one({"student_id": student_id}, {"$set": updated_data})
+        if result.modified_count > 0:
+            return jsonify({"message": "Profile image uploaded successfully", "image_path": image_path}), 200
         else:
             return jsonify({"message": "Student not found"}), 404
+
+
 
     @staticmethod
     def delete_student_profile(student_id):
