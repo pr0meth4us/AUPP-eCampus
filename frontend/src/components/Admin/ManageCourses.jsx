@@ -97,6 +97,8 @@ const ManageCourses = ({ users, courses, setCourses, fetchData }) => {
         setEditCourseId(course.id);
         setCourseVideo(null);
     };
+    console.log(users)
+    console.log(courses)
 
     const handleDeleteCourse = async (courseId) => {
         if (confirmDeleteCourseId !== courseId) {
@@ -222,6 +224,7 @@ const ManageCourses = ({ users, courses, setCourses, fetchData }) => {
                             <th>Title</th>
                             <th>Description</th>
                             <th>Instructor</th>
+                            <th>Uploader</th>
                             <th>Video</th>
                             <th>Actions</th>
                         </tr>
@@ -231,16 +234,20 @@ const ManageCourses = ({ users, courses, setCourses, fetchData }) => {
                             <tr key={course.id}>
                                 <td>{course.title}</td>
                                 <td>{course.description}</td>
-                                <td>{users.find(user => user.id === course.instructor_id)?.name}</td>
+                                <td>{course.instructor}</td>
+                                <td>{course.uploader}</td>
                                 <td>
                                     {course.video_url && (
-                                        <a href={course.video_url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
-                                            View Video
+                                        <a href={course.video_url} target="_blank" rel="noopener noreferrer"
+                                           className="btn btn-sm btn-outline-primary">
+                                            Watch Video
                                         </a>
                                     )}
                                 </td>
                                 <td>
-                                    <button onClick={() => handleEditCourse(course)} className="btn btn-sm btn-outline-secondary me-1">Edit</button>
+                                    <button onClick={() => handleEditCourse(course)}
+                                            className="btn btn-sm btn-outline-secondary me-1">Edit
+                                    </button>
                                     <button
                                         onClick={() => handleDeleteCourse(course.id)}
                                         className={`btn btn-sm ${confirmDeleteCourseId === course.id ? 'btn-danger' : 'btn-outline-danger'}`}
