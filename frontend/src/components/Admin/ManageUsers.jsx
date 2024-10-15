@@ -15,9 +15,8 @@ const ManageUsers = ({ users, fetchData }) => {
     const handleUserRegister = async (e) => {
         e.preventDefault();
         try {
-            // Pass each field of newUser to the registerUser function
             await registerUser(newUser.name, newUser.email, newUser.password, newUser.role);
-            fetchData(); // Refresh the user list
+            fetchData();
             setNewUser({ name: '', email: '', password: '', role: '' }); // Reset form fields
             setNotification({ message: 'User registered successfully.', type: 'success' });
         } catch (error) {
