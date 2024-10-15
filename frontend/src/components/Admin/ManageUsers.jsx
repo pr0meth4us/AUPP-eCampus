@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { Form, Button, Accordion, Table } from 'react-bootstrap';
-import { registerInstructor, deleteUser, updateUser } from '../../services/api';
+import { deleteUser, updateUser, registerUser } from '../../services/api';
 
 const ManageUsers = ({ users, fetchData }) => {
-    const [newInstructor, setNewInstructor] = useState({ name: '', email: '', password: '' });
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: '' });
     const [editUser, setEditUser] = useState(null);
     const [notification, setNotification] = useState({ message: '', type: '' });
 
     const handleInputChange = (e, isEdit = false) => {
         const { name, value } = e.target;
-        isEdit ? setEditUser({ ...editUser, [name]: value }) : setNewInstructor({ ...newInstructor, [name]: value });
+        isEdit ? setEditUser({ ...editUser, [name]: value }) : setNewUser({ ...newUser, [name]: value });
     };
 
-    const handleInstructorRegister = async (e) => {
+    const handleUserRegister = async (e) => {
         e.preventDefault();
         try {
-            await registerInstructor(newInstructor);
-            fetchData();
-            setNewInstructor({ name: '', email: '', password: '' });
-            setNotification({ message: 'Instructor registered successfully.', type: 'success' });
+            // Pass each field of newUser to the registerUser function
+            await registerUser(newUser.name, newUser.email, newUser.password, newUser.role);
+            fetchData(); // Refresh the user list
+            setNewUser({ name: '', email: '', password: '', role: '' }); // Reset form fields
+            setNotification({ message: 'User registered successfully.', type: 'success' });
         } catch (error) {
-            setNotification({ message: 'Failed to register instructor.', type: 'error' });
+            setNotification({ message: 'Failed to register user.', type: 'error' });
         }
     };
 
@@ -52,19 +53,27 @@ const ManageUsers = ({ users, fetchData }) => {
         <div>
             <Accordion className="mb-4">
                 <Accordion.Item eventKey="0">
-                    <Accordion.Header>Register New Instructor</Accordion.Header>
+                    <Accordion.Header>Register New User</Accordion.Header>
                     <Accordion.Body>
-                        <Form onSubmit={handleInstructorRegister}>
+                        <Form onSubmit={handleUserRegister}>
                             <Form.Group className="mb-3">
-                                <Form.Control type="text" name="name" placeholder="Name" value={newInstructor.name} onChange={handleInputChange} required />
+                                <Form.Control type="text" name="name" placeholder="Name" value={newUser.name} onChange={handleInputChange} required />
                             </Form.Group>
                             <Form.Group className="mb-3">
-                                <Form.Control type="email" name="email" placeholder="Email" value={newInstructor.email} onChange={handleInputChange} required />
+                                <Form.Control type="email" name="email" placeholder="Email" value={newUser.email} onChange={handleInputChange} required />
                             </Form.Group>
                             <Form.Group className="mb-3">
-                                <Form.Control type="password" name="password" placeholder="Password" value={newInstructor.password} onChange={handleInputChange} required />
+                                <Form.Control type="password" name="password" placeholder="Password" value={newUser.password} onChange={handleInputChange} required />
                             </Form.Group>
-                            <Button type="submit">Register Instructor</Button>
+                            <Form.Group className="mb-3">
+                                <Form.Select name="role" value={newUser.role} onChange={handleInputChange} required>
+                                    <option value="">Select Role</option>
+                                    <option value="student">Student</option>
+                                    <option value="instructor">Instructor</option>
+                                    <option value="admin">Admin</option>
+                                </Form.Select>
+                            </Form.Group>
+                            <Button type="submit">Register User</Button>
                         </Form>
                     </Accordion.Body>
                 </Accordion.Item>

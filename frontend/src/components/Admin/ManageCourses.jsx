@@ -99,6 +99,7 @@ const ManageCourses = ({ users, courses, fetchData }) => {
                     <th>Title</th>
                     <th>Description</th>
                     <th>Instructor</th>
+                    <th>Video</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -108,6 +109,13 @@ const ManageCourses = ({ users, courses, fetchData }) => {
                         <td>{course.title}</td>
                         <td>{course.description}</td>
                         <td>{course.instructor}</td>
+                        <td>
+                            {course.video_url && (
+                                <Button variant="link" href={course.video_url} target="_blank" rel="noopener noreferrer">
+                                    Watch Video
+                                </Button>
+                            )}
+                        </td>
                         <td>
                             <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => setEditCourse(course)}>Edit</Button>
                             <Button variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</Button>

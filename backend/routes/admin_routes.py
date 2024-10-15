@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from middleware.admin_middleware import require_admin
-from controllers.admin_controller import get_all_users as fetch_all_users, delete_user, update_user, register_instructor
+from controllers.admin_controller import get_all_users as fetch_all_users, delete_user, update_user, admin_register
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -11,11 +11,11 @@ def get_all_users():
     return fetch_all_users()
 
 
-@admin_bp.route('/instructor-register', methods=['POST'])
-@require_admin
-def register_instructor_route():
+@admin_bp.route('/register', methods=['POST'])
+def register_route():
     data = request.get_json()
-    return register_instructor(data)
+    print(data)
+    return admin_register(data)
 
 
 @admin_bp.route('/delete-user/<user_id>', methods=['DELETE'])
