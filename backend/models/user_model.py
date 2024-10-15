@@ -61,7 +61,6 @@ class Admin(User):
             'email': self.email,
             'password_hash': self.password_hash,
             'role': self.role,
-            'token': self.token
         }
         db.users.insert_one(admin_data)
 

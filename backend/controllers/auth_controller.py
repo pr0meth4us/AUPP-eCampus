@@ -22,7 +22,8 @@ def register(data):
     email = data.get('email')
     received_otp = data.get('otp')
     role = data.get('role')
-
+    if User.find_by_email(email):
+        return jsonify({'message': 'Email already exists.'}), 409
     if OTP.verify_otp(email, int(received_otp)):
         user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
         user_class = user_classes.get(role)
