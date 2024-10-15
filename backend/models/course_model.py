@@ -1,7 +1,8 @@
-from bson import ObjectId
-from services.mongo_service import db
 from datetime import datetime, UTC
-from models.user_model import User
+
+from bson import ObjectId
+
+from services.mongo_service import db
 
 
 class Course:
@@ -16,6 +17,10 @@ class Course:
         self.tag_ids = [ObjectId(tid) for tid in tag_ids]
         self.created_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
+
+    @staticmethod
+    def get_all():
+        return db.courses.find()
 
     def save_to_db(self):
         course_data = {
@@ -38,28 +43,6 @@ class Course:
         return db.courses.find_one({'_id': ObjectId(course_id)})
 
     @staticmethod
-    def get_all_courses():
-        courses = db.courses.find()
-        course_list = []
-        for course in courses:
-            instructor = User.find_by_id(course['instructor_id'])
-            uploader = User.find_by_id(course['uploader_id'])
-            course_list.append({
-                'id': str(course['_id']),
-                'title': course.get('title', 'N/A'),
-                'description': course.get('description', 'N/A'),
-                'video_url': course.get('video_url', None),
-                'instructor': instructor.get('name'),
-                'uploader': uploader.get('name'),
-                'major_ids': course.get('major_ids', []),
-                'tag_ids': course.get('tag_ids', []),
-                'created_at': course.get('created_at', None),
-                'updated_at': course.get('updated_at', None),
-                'thumbnail_url': course.get('thumbnail_url', None)
-            })
-        return course_list
-
-    @staticmethod
     def update_course(course_id, **kwargs):
         kwargs['updated_at'] = datetime.now(UTC)
         result = db.courses.update_one({'_id': ObjectId(course_id)}, {'$set': kwargs})
@@ -71,16 +54,14 @@ class Course:
         result = db.courses.delete_one({'_id': ObjectId(course_id)})
         if result.deleted_count == 0:
             raise ValueError("Course not found.")
-
-
 class BaseModel:
     COLLECTION = None
 
-    def __init__(self, name, _id=None):
+    def __init__(self, name, _id=None, created_at=None, updated_at=None):
         self._id = ObjectId(_id) if _id else None
         self.name = name
-        self.created_at = datetime.now(UTC)
-        self.updated_at = datetime.now(UTC)
+        self.created_at = created_at if created_at else datetime.now(UTC)
+        self.updated_at = updated_at if updated_at else datetime.now(UTC)
 
     def to_dict(self):
         return {
@@ -111,7 +92,7 @@ class BaseModel:
     @classmethod
     def get_all(cls):
         records = db[cls.COLLECTION].find()
-        return [cls(name=record['name'], _id=record.get('_id')) for record in records]
+        return [cls(**record) for record in records]
 
 
 class Major(BaseModel):
