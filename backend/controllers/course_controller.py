@@ -2,6 +2,7 @@ import logging
 import os
 import tempfile
 from flask import jsonify, request, g
+from models.user_model import User
 from models.course_model import Course, Major, Tag
 from services.youtube_service import upload_video_to_youtube, delete_from_youtube
 from services.cloudinary_service import delete_from_cloudinary
@@ -13,19 +14,37 @@ logger = logging.getLogger(__name__)
 
 
 class CourseController:
+
     @staticmethod
     def get_all_courses():
         try:
-            courses = Course.get_all_courses()
-            return jsonify(courses), 200
+            courses = Course.get_all()  # Fetch all courses from the model
+
+            serialized_courses = []
+            for course in courses:
+                # Directly using instructor_id and uploader_id
+                serialized_course = {
+                    'title': course.get('title'),
+                    'description': course.get('description'),
+                    'instructor_id': str(course['instructor_id']),  # Use instructor_id directly
+                    'uploader_id': str(course['uploader_id']),      # Use uploader_id directly
+                    'video_url': course.get('video_url'),
+                    'thumbnail_url': course.get('thumbnail_url'),
+                    'major_ids': [str(mid) for mid in course.get('major_ids', [])],
+                    'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
+                    'created_at': course.get('created_at'),
+                    'updated_at': course.get('updated_at')
+                }
+                serialized_courses.append(serialized_course)
+
+            return jsonify(serialized_courses), 200
         except Exception as e:
             logger.error(f"Error fetching courses: {e}")
             return jsonify({"error": "Failed to fetch courses"}), 500
-
     @staticmethod
     def validate_majors(major_ids):
-        valid_majors = Major.get_all()
-        return [major_id for major_id in major_ids if major_id not in valid_majors]
+        valid_majors = [str(major._id) for major in Major.get_all()]  # Get valid major IDs as strings
+        return [major_id for major_id in major_ids if str(major_id) not in valid_majors]  # Return invalid IDs
 
     @staticmethod
     def create_major():
@@ -104,14 +123,6 @@ class CourseController:
         }
 
     @staticmethod
-    def validate_majors_and_return(major_ids):
-        invalid_majors = CourseController.validate_majors(major_ids)
-        if invalid_majors:
-            logger.warning(f"Invalid major IDs provided: {invalid_majors}")
-            return invalid_majors
-        return None
-
-    @staticmethod
     def create_course():
         logger.info("Create course request received.")
 
@@ -136,7 +147,6 @@ class CourseController:
         except Exception as e:
             return jsonify({'message': f'Error uploading video: {str(e)}'}), 500
 
-        tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
 
         course = Course(
             title=title,
@@ -145,8 +155,8 @@ class CourseController:
             video_url=video_url,
             uploader_id=ObjectId(g.user_id),
             thumbnail_url=thumbnail_url,
-            major_ids=major_ids,
-            tag_ids=tag_ids
+            major_ids=[ObjectId(id) for id in data['major_ids']],
+            tag_ids=[ObjectId(tag['tag_id']) for tag in created_tags]
         )
         course_id = course.save_to_db()
         logger.info(f"Course created successfully with ID: {course_id}")
@@ -172,8 +182,7 @@ class CourseController:
 
         current_video_url = current_course.get('video_url')
 
-        if CourseController.validate_majors_and_return(major_ids):
-            return jsonify({'message': f'Invalid major IDs provided'}), 400
+        majors = CourseController.validate_majors(major_ids)
 
         created_tags, tag_errors = CourseController.create_tags(tag_names)
         if tag_errors:
@@ -184,13 +193,12 @@ class CourseController:
                 'title': title,
                 'description': description,
                 'instructor_id': ObjectId(instructor_id),
-                'major_ids': major_ids,
+                'major_ids': [ObjectId(id) for id in majors],
                 'tag_ids': [ObjectId(tag['tag_id']) for tag in created_tags]
             }
 
             Course.update_course(course_id, **update_data)
 
-            # Handle video upload if a new video is provided
             if video_file:
                 logger.info("New video file received. Attempting to upload to YouTube.")
                 try:
