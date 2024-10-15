@@ -1,13 +1,15 @@
+from datetime import datetime
+
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
 from models.authentication_model import Authentication
-from models.user_model import User, Student, Admin, Instructor
+from models.user_model import User, Admin, Instructor
 from services.mail_service import send_mail
 from utils.token_utils import create_token
 from models.otp_model import OTP
-from controllers.student_controller import StudentController  # Import the StudentController
-from models.student import Student
+
+
 
 
 def check_email(data):
@@ -24,32 +26,40 @@ def register(data):
     email = data.get('email')
     received_otp = data.get('otp')
     role = data.get('role')
-
     if OTP.verify_otp(email, int(received_otp)):
-        user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
+        user_classes = {'student': User, 'instructor': Instructor, 'admin': Admin}
         user_class = user_classes.get(role)
 
+        # Verify admin token for admin role
         if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
             return jsonify({'message': 'Invalid admin token.'}), 403
 
-        user = user_class(name=data['name'], email=email, password=data['password'])
-        user.save_to_db()
+        # General user creation
+        user_data = {
+            "name": data['name'],
+            "email": email,
+            "password": data['password'],  # Assuming password hashing elsewhere
+            "role": role,
+            "profile_image": data.get("profile_image", ""),  # Optional
+            "created_at": datetime.now(),
+        }
 
+        # Role-specific data
         if role == 'student':
-            student_data = {
-                "student_id": data.get("student_id"),  # Ensure this data is provided in the request
-                "name": data['name'],
-                "email": email,
-                "bio": data.get("bio", ""),  # Optional bio
-                "courses_enrolled": [],  # Initialize as empty, can be updated later
-                "profile_image": data.get("profile_image", "")  # Optional image path
+            user_data['student_profile'] = {
+                "student_id": data.get("student_id"),
+                "bio": data.get("bio", ""),
+                "courses_enrolled": [],  # Initialize as empty
+            }
+        elif role == 'instructor':
+            user_data['instructor_profile'] = {
+                "expertise": data.get("expertise", ""),
+                "courses_taught": []  # Initialize as empty
             }
 
-            # Create student profile using the StudentController
-            student_response = StudentController.create_student_profile(student_data)
-
-            if student_response[1] != 201:  # Check if the student creation was successful
-                return jsonify({"message": "User registered, but student profile creation failed."}), 500
+        # Save user to the database
+        user = user_class(**user_data)
+        user.save_to_db() # Resolved!
 
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
     else:
