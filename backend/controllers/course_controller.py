@@ -18,16 +18,15 @@ class CourseController:
     @staticmethod
     def get_all_courses():
         try:
-            courses = Course.get_all()  # Fetch all courses from the model
+            courses = Course.get_all()
 
             serialized_courses = []
             for course in courses:
-                # Directly using instructor_id and uploader_id
                 serialized_course = {
                     'title': course.get('title'),
                     'description': course.get('description'),
-                    'instructor_id': str(course['instructor_id']),  # Use instructor_id directly
-                    'uploader_id': str(course['uploader_id']),      # Use uploader_id directly
+                    'instructor_id': str(course['instructor_id']),
+                    'uploader_id': str(course['uploader_id']),
                     'video_url': course.get('video_url'),
                     'thumbnail_url': course.get('thumbnail_url'),
                     'major_ids': [str(mid) for mid in course.get('major_ids', [])],
@@ -108,7 +107,7 @@ class CourseController:
         instructor_id = request.form.get('instructor_id')
         video_file = request.files.get('video')
         major_ids = request.form.getlist('major_ids')
-        tag_names = request.form.getlist('tags')
+        tag_names = request.form.getlist('tag_names')
 
         if instructor_id == "(You)":
             instructor_id = g.user_id
@@ -140,7 +139,7 @@ class CourseController:
             logger.warning("Title, description, or instructor_id is missing.")
             return jsonify({'message': 'Title, description, and instructor are required.'}), 400
 
-        created_tags, tag_errors = CourseController.create_tags(tag_names)
+        created_tags = CourseController.create_tags(tag_names)
 
         try:
             video_url, thumbnail_url = CourseController.handle_video_upload(video_file, title, description)
@@ -184,7 +183,7 @@ class CourseController:
 
         majors = CourseController.validate_majors(major_ids)
 
-        created_tags, tag_errors = CourseController.create_tags(tag_names)
+        created_tags = CourseController.create_tags(tag_names)
         if tag_errors:
             return jsonify({'message': 'Error creating tags', 'errors': tag_errors}), 400
 

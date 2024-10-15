@@ -5,14 +5,15 @@ import { Button, Form } from 'react-bootstrap';
 const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, allowAdd }) => {
     const [inputValue, setInputValue] = useState('');
     const [customOptions, setCustomOptions] = useState(options);
+    console.log(options,"pipui")
 
     const handleChange = (selected) => {
-        onChange(selected.map(option => option.value));
+        onChange(selected.map(option => option.name));
     };
 
     const handleCreate = () => {
-        if (inputValue && !customOptions.find(option => option.value === inputValue)) {
-            const newOption = { value: inputValue, label: inputValue };
+        if (inputValue && !customOptions.find(option => option.name === inputValue)) {
+            const newOption = { name: inputValue };
             setCustomOptions(prev => [...prev, newOption]);
             handleChange([...selectedOptions, newOption]);
             setInputValue('');
@@ -20,8 +21,7 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
     };
 
     const formattedOptions = customOptions.map(option => ({
-        value: option.value,
-        label: option.label,
+        name: option.name,
     }));
 
     return (
@@ -29,7 +29,7 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
             <Select
                 isMulti
                 options={formattedOptions}
-                value={formattedOptions.filter(option => selectedOptions.includes(option.value))}
+                value={formattedOptions.filter(option => selectedOptions.includes(option.name))}
                 onChange={handleChange}
                 onInputChange={(newValue) => setInputValue(newValue)}
                 placeholder="Select or add tags..."

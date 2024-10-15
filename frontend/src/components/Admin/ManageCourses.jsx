@@ -8,7 +8,7 @@ import MultiSelect from 'react-select';
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const { user: currentUser } = useAuth();
-    const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', tag_ids: [], major_ids: [] });
+    const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
     const [editCourse, setEditCourse] = useState(null);
     const [courseVideo, setCourseVideo] = useState(null);
     const [notification, setNotification] = useState({ message: '', type: '' });
@@ -32,14 +32,13 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         try {
             const formData = new FormData();
             Object.keys(newCourse).forEach(key => formData.append(key, newCourse[key]));
-            formData.append('uploader', currentUser.id);
             if (courseVideo) formData.append('video', courseVideo);
-
             await createCourse(formData);
             setNotification({ message: 'Course created successfully!', type: 'success' });
             fetchData();
-            setNewCourse({ title: '', description: '', instructor_id: '', tag_ids: [], major_ids: [] }); // Reset all fields
+            setNewCourse({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
             setCourseVideo(null);
+            console.log(formData)
         } catch (error) {
             setNotification({ message: 'Failed to create course.', type: 'error' });
         }
@@ -115,10 +114,10 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                 </Form.Select>
                             </Form.Group>
                             <MultiSelectWithSearchAndCreate
-                                options={tags} // For adding new tags
-                                selectedOptions={newCourse.tag_ids}
-                                onChange={(selectedIds) => setNewCourse({ ...newCourse, tag_ids: selectedIds })}
-                                allowAdd={true} // Allow adding new tags
+                                options={tags}
+                                selectedOptions={newCourse.tag_names}
+                                onChange={(selectedIds) => setNewCourse({ ...newCourse, tag_names: selectedIds })}
+                                allowAdd={true}
                             />
                             <MultiSelect
                                 isMulti
@@ -162,8 +161,6 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                 const courseUploader = users.find(user => user.id === course.uploader_id)?.name || 'Unknown';
                                 const courseTags = course.tag_ids.map(tagId => tags.find(tag => tag.id === tagId)?.name || 'Unknown').join(', ');
                                 const courseMajors = course.major_ids.map(majorId => majors.find(major => major.id === majorId)?.name || 'Unknown').join(', ');
-                                console.log(users)
-                                console.log(course)
                                 return (
                                     <tr key={course.id}>
                                         <td>{course.title}</td>
@@ -171,9 +168,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                         <td>{courseUploader}</td>
                                         <td>{courseInstructor}</td>
                                         <td>{courseTags}</td>
-                                        {/* Display tags as comma-separated */}
                                         <td>{courseMajors}</td>
-                                        {/* Display majors as comma-separated */}
                                         <td>
                                             {course.video_url && (
                                                 <Button variant="link" href={course.video_url} target="_blank"
@@ -253,8 +248,8 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                             </Form.Group>
                             <MultiSelectWithSearchAndCreate
                                 options={tags}
-                                selectedOptions={editCourse.tag_ids}
-                                onChange={(selectedIds) => setEditCourse({ ...editCourse, tag_ids: selectedIds })}
+                                selectedOptions={editCourse.tag_names}
+                                onChange={(selectedIds) => setEditCourse({ ...editCourse, tag_names: selectedIds })}
                                 allowAdd={true} // Allow adding new tags
                             />
                             <MultiSelect
