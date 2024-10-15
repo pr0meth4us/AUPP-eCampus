@@ -40,7 +40,6 @@ export const getAllUsers = async () => {
 };
 
 
-
 export const deleteUser = async (userId) => {
     const response = await api.delete(`/admin/delete-user/${userId}`);
     return response.data;
@@ -78,3 +77,15 @@ export const deleteCourse = async (courseId) => {
     const response = await api.delete(`/courses/${courseId}`);
     return response.data;
 };
+
+
+export const fetchTags = async () =>{
+    const response = await api.get(`/courses/tags`)
+    return response.data;
+}
+
+
+export const fetchMajors = async () =>{
+    const response = await api.get('/courses/majors')
+    return response.data;
+}
