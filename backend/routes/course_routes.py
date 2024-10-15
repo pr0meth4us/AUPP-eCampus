@@ -1,7 +1,8 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from controllers.course_controller import CourseController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
-
+from middleware.admin_middleware import require_admin
+from models.course_model import Major, Tag
 course_bp = Blueprint('course', __name__)
 
 
@@ -26,3 +27,31 @@ def update_course(course_id):
 @require_admin_or_instructor_or_uploader
 def delete_course(course_id):
     return CourseController.delete_course(course_id)
+
+
+@course_bp.route('/major', methods=['POST'])
+@require_admin
+def create_major():
+    return CourseController.create_major()
+
+
+@course_bp.route('/majors', methods=['GET'])
+def get_all_majors():
+    majors = Major.get_all()
+    return jsonify([
+        {
+            'id': str(major._id),
+            'name': major.name
+        } for major in majors
+    ]), 200
+
+
+@course_bp.route('/tags', methods=['GET'])
+def get_all_tags():
+    tags = Tag.get_all()
+    return jsonify([
+        {
+            'id': str(tag._id),
+            'name': tag.name
+        } for tag in tags
+    ]), 200
