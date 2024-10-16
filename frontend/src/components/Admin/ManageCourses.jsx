@@ -29,20 +29,29 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         e.preventDefault();
         try {
             const formData = new FormData();
-            Object.keys(newCourse).forEach(key => {
-                if (Array.isArray(newCourse[key])) {
-                    newCourse[key].forEach(item => formData.append(`${key}[]`, item));
-                } else {
-                    formData.append(key, newCourse[key]);
-                }
-            });
+            formData.append('title', newCourse.title);
+            formData.append('description', newCourse.description);
+            formData.append('instructor_id', newCourse.instructor_id);
+
+            // Send tag_names as a single array entry
+            formData.append('tag_names', JSON.stringify(newCourse.tag_names));
+
+            formData.append('major_ids', JSON.stringify(newCourse.major_ids));
+
             if (courseVideo) formData.append('video', courseVideo);
+
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
             await createCourse(formData);
             setNotification({ message: 'Course created successfully!', type: 'success' });
             fetchData();
             setNewCourse({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
             setCourseVideo(null);
         } catch (error) {
+            console.error('Error creating course:', error);
             setNotification({ message: 'Failed to create course.', type: 'error' });
         }
     };
