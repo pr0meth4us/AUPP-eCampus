@@ -1,7 +1,6 @@
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
-from models.authentication_model import Authentication
 from models.user_model import User, Student, Admin, Instructor
 from services.mail_service import send_mail
 from utils.token_utils import create_token
@@ -53,8 +52,6 @@ def login_user(data):
     if user and User.verify_password(user['password_hash'], data['password']):
         user_id_str = str(user['_id'])
         token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
-        auth = Authentication(user_id=user['_id'], token=token)
-        auth.save_to_db()
 
         response = make_response(jsonify({
             'message': 'Login successful',
