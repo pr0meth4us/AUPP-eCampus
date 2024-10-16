@@ -15,7 +15,8 @@ cloudinary.config(
 def upload_to_cloudinary(video_file, title):
     upload_result = cloudinary.uploader.upload(
         video_file,
-        resource_type='video'
+        resource_type='video',
+        public_id=title
     )
 
     video_url = upload_result['secure_url']
