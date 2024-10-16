@@ -29,6 +29,7 @@ const Header = () => {
                                 placeholder="Search info..."
                                 className="form-control"
                                 required
+                                style={{width: "300px"}}  // Adjust the width as needed
                             />
                             <span className="input-group-text bg-white search-icon">
                                 <i className="bi bi-search"></i>
@@ -36,8 +37,9 @@ const Header = () => {
                         </div>
                     </form>
 
+
                     <div className="find-your-pathway">
-                        <Link to="" className="color-primary">Find Your Pathway</Link>
+                        <Link to="" className="color-primary" style={{fontWeight: "500"}}>Find Your Pathway</Link>
                     </div>
 
                     {user ? (
@@ -45,10 +47,10 @@ const Header = () => {
                     ) : (
                         <>
                             <button type="button" className="btn color-primary" data-bs-toggle="modal"
-                                    data-bs-target="#login">
+                                    data-bs-target="#login" style={{fontWeight: "500"}}>
                                 Login
                             </button>
-                            <LoginPage />
+                            <LoginPage/>
 
                             <button type="button" className="btn btn-danger signup" data-bs-toggle="modal"
                                     data-bs-target="#signup">
