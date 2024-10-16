@@ -3,13 +3,22 @@ import cloudinary.uploader
 import cloudinary.api
 from config import Config
 import logging
+import requests
+from requests.adapters import HTTPAdapter
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+session = requests.Session()
+
+adapter = HTTPAdapter(pool_connections=10, pool_maxsize=10)
+session.mount('https://', adapter)
 
 cloudinary.config(
     cloud_name=Config.CLOUDINARY_CLOUD_NAME,
     api_key=Config.CLOUDINARY_API_KEY,
     api_secret=Config.CLOUDINARY_API_SECRET,
+    session=session  # If cloudinary accepts a session parameter
 )
 
 
