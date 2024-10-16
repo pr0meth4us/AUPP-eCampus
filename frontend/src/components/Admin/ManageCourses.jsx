@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Button, Accordion, Table, Modal } from 'react-bootstrap';
 import { createCourse, deleteCourse, updateCourse } from '../../services/api';
-import { useAuth } from '../../context/authContext';
 import Notification from "../Notification";
 import MultiSelectWithSearchAndCreate from './MultiSelectWithSearchAndCreate';
-import MultiSelect from 'react-select';
+import Select from 'react-select';
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
-    const { user: currentUser } = useAuth();
     const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
     const [editCourse, setEditCourse] = useState(null);
     const [courseVideo, setCourseVideo] = useState(null);
@@ -31,14 +29,19 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         e.preventDefault();
         try {
             const formData = new FormData();
-            Object.keys(newCourse).forEach(key => formData.append(key, newCourse[key]));
+            Object.keys(newCourse).forEach(key => {
+                if (Array.isArray(newCourse[key])) {
+                    newCourse[key].forEach(item => formData.append(`${key}[]`, item));
+                } else {
+                    formData.append(key, newCourse[key]);
+                }
+            });
             if (courseVideo) formData.append('video', courseVideo);
             await createCourse(formData);
             setNotification({ message: 'Course created successfully!', type: 'success' });
             fetchData();
             setNewCourse({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
             setCourseVideo(null);
-            console.log(formData)
         } catch (error) {
             setNotification({ message: 'Failed to create course.', type: 'error' });
         }
@@ -48,7 +51,13 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         e.preventDefault();
         try {
             const formData = new FormData();
-            Object.keys(editCourse).forEach(key => formData.append(key, editCourse[key]));
+            Object.keys(editCourse).forEach(key => {
+                if (Array.isArray(editCourse[key])) {
+                    editCourse[key].forEach(item => formData.append(`${key}[]`, item));
+                } else {
+                    formData.append(key, editCourse[key]);
+                }
+            });
             if (courseVideo) formData.append('video', courseVideo);
 
             await updateCourse(editCourse.id, formData);
@@ -113,19 +122,23 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                     ))}
                                 </Form.Select>
                             </Form.Group>
-                            <MultiSelectWithSearchAndCreate
-                                options={tags}
-                                selectedOptions={newCourse.tag_names}
-                                onChange={(selectedIds) => setNewCourse({ ...newCourse, tag_names: selectedIds })}
-                                allowAdd={true}
-                            />
-                            <MultiSelect
-                                isMulti
-                                options={majors.map(major => ({ value: major.id, label: major.name }))} // Use existing majors
-                                value={newCourse.major_ids.map(id => ({ value: id, label: majors.find(major => major.id === id)?.name }))}
-                                onChange={(selectedOptions) => setNewCourse({ ...newCourse, major_ids: selectedOptions.map(option => option.value) })}
-                                placeholder="Select Majors"
-                            />
+                            <Form.Group className="mb-3">
+                                <MultiSelectWithSearchAndCreate
+                                    options={tags}
+                                    selectedOptions={newCourse.tag_names}
+                                    onChange={(selected) => setNewCourse({ ...newCourse, tag_names: selected })}
+                                    allowAdd={true}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Select
+                                    isMulti
+                                    options={majors.map(major => ({ value: major.id, label: major.name }))}
+                                    value={newCourse.major_ids.map(id => ({ value: id, label: majors.find(major => major.id === id)?.name }))}
+                                    onChange={(selected) => setNewCourse({ ...newCourse, major_ids: selected.map(option => option.value) })}
+                                    placeholder="Select Majors"
+                                />
+                            </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Control
                                     type="file"
@@ -138,6 +151,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>
+
             <Accordion className="mb-4">
                 <Accordion.Item eventKey="0">
                     <Accordion.Header>Course List</Accordion.Header>
@@ -171,17 +185,14 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                         <td>{courseMajors}</td>
                                         <td>
                                             {course.video_url && (
-                                                <Button variant="link" href={course.video_url} target="_blank"
-                                                        rel="noopener noreferrer">
+                                                <Button variant="link" href={course.video_url} target="_blank" rel="noopener noreferrer">
                                                     Watch Video
                                                 </Button>
                                             )}
                                         </td>
                                         <td>
-                                            <Button variant="outline-secondary" size="sm" className="me-1"
-                                                    onClick={() => setEditCourse(course)}>Edit</Button>
-                                            <Button variant="outline-danger" size="sm"
-                                                    onClick={() => handleDeleteCourse(course.id)}>Delete</Button>
+                                            <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => setEditCourse(course)}>Edit</Button>
+                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</Button>
                                         </td>
                                     </tr>
                                 );
@@ -193,19 +204,17 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
             </Accordion>
 
             {editCourse && (
-                <Modal show={showEditModal} backdrop="static" keyboard={false}>
+                <Modal show={showEditModal} onHide={() => setEditCourse(null)}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit {editCourse.title}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Form onSubmit={handleUpdateCourse} className="mt-4">
-                            <h3>Edit Course</h3>
+                        <Form onSubmit={handleUpdateCourse}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="title"
-                                    placeholder="Title"
                                     value={editCourse.title}
                                     onChange={(e) => handleInputChange(e, true)}
                                     required
@@ -216,20 +225,9 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                 <Form.Control
                                     as="textarea"
                                     name="description"
-                                    placeholder="Description"
                                     value={editCourse.description}
                                     onChange={(e) => handleInputChange(e, true)}
                                     required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Uploader</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="uploader"
-                                    placeholder="Uploader"
-                                    value={editCourse.uploader}
-                                    readOnly
                                 />
                             </Form.Group>
                             <Form.Group className="mb-3">
@@ -240,25 +238,31 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                     onChange={(e) => handleInputChange(e, true)}
                                     required
                                 >
-                                    <option value={editCourse.instructor}>{editCourse.instructor}</option>
+                                    <option value="">Select Instructor</option>
                                     {users.filter(user => user.role === 'instructor').map(instructor => (
                                         <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
                                     ))}
                                 </Form.Select>
                             </Form.Group>
-                            <MultiSelectWithSearchAndCreate
-                                options={tags}
-                                selectedOptions={editCourse.tag_names}
-                                onChange={(selectedIds) => setEditCourse({ ...editCourse, tag_names: selectedIds })}
-                                allowAdd={true} // Allow adding new tags
-                            />
-                            <MultiSelect
-                                isMulti
-                                options={majors.map(major => ({ value: major.id, label: major.name }))}
-                                value={editCourse.major_ids.map(id => ({ value: id, label: majors.find(major => major.id === id)?.name }))}
-                                onChange={(selectedOptions) => setEditCourse({ ...editCourse, major_ids: selectedOptions.map(option => option.value) })}
-                                placeholder="Select Majors"
-                            />
+                            <Form.Group className="mb-3">
+                                <Form.Label>Tags</Form.Label>
+                                <MultiSelectWithSearchAndCreate
+                                    options={tags}
+                                    selectedOptions={editCourse.tag_names}
+                                    onChange={(selected) => setEditCourse({ ...editCourse, tag_names: selected })}
+                                    allowAdd={true}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Majors</Form.Label>
+                                <Select
+                                    isMulti
+                                    options={majors.map(major => ({ value: major.id, label: major.name }))}
+                                    value={editCourse.major_ids.map(id => ({ value: id, label: majors.find(major => major.id === id)?.name }))}
+                                    onChange={(selected) => setEditCourse({ ...editCourse, major_ids: selected.map(option => option.value) })}
+                                    placeholder="Select Majors"
+                                />
+                            </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Update Video (optional)</Form.Label>
                                 <Form.Control
