@@ -25,7 +25,7 @@ const LoginPage = () => {
             }
             await login(email, password, role, captchaValue);
             closeButtonRef.current.click();
-            navigate(role === 'admin' ? '/admin/dashboard' : '/');
+            navigate('/');
         } catch (err) {
             setError('Login failed. Please check your credentials.');
         }

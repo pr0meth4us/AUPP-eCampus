@@ -1,14 +1,13 @@
 import jwt
 import datetime
 from flask import current_app
-from config import Config
 
 
 def create_token(user):
     secret_key = current_app.config['SECRET_KEY']
 
     payload = {
-        '_id': user['_id'],
+        '_id': str(user['_id']),
         'role': user['role'],
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
@@ -18,8 +17,9 @@ def create_token(user):
 
 def extract_role_from_token(token):
     try:
-        decoded = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
-        return decoded['role']
+        secret_key = current_app.config['SECRET_KEY']
+        decoded = jwt.decode(token, secret_key, algorithms=['HS256'])
+        return decoded['role'], decoded['_id']
     except jwt.ExpiredSignatureError:
         return None
     except jwt.InvalidTokenError:
