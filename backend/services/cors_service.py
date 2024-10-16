@@ -1,5 +1,4 @@
 from flask_cors import CORS
-from config import Config
 
 cors = CORS()
 
@@ -9,4 +8,3 @@ def init_cors(app):
         "origins": "*",
         "supports_credentials": True
     }})
-

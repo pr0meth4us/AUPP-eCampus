@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from models.user_model import Admin, Instructor, User
+from models.user_model import Admin, Instructor, User, Student
 
 
 def get_all_users():
@@ -35,18 +35,17 @@ def update_user(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-def register_instructor(data):
+def admin_register(data):
     email = data.get('email')
     if User.find_by_email(email):
         return jsonify({'message': 'Email already exists.'}), 409
-    name = data.get('name')
-    password = data.get('password')
+    role = data.get('role')
+    user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
+    user_class = user_classes.get(role)
+    user = user_class(name=data['name'], email=email, password=data['password'])
+    try:
+        user.save_to_db()
+        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
 
-    if not all([name, email, password]):
-        return jsonify({'message': 'Name, email, and password are required.'}), 400
-
-    user_class = Instructor
-    user = user_class(name=name, email=email, password=password)
-    user.save_to_db()
-
-    return jsonify({'message': 'Instructor registered successfully'}), 201

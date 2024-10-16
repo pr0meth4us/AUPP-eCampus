@@ -1,5 +1,5 @@
 import jwt
-import datetime
+from datetime import datetime, timedelta, UTC
 from flask import current_app
 
 
@@ -9,7 +9,7 @@ def create_token(user):
     payload = {
         '_id': str(user['_id']),
         'role': user['role'],
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        'exp': datetime.now(UTC) + timedelta(hours=1)
     }
 
     return jwt.encode(payload, secret_key, algorithm='HS256')

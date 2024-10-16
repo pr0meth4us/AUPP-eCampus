@@ -20,11 +20,10 @@ export const register = async (name, email, password, role, otp, token = null, c
     return response.data;
 };
 
-export const registerInstructor = async (name, email, password) => {
-    const response = await api.post(`/admin/instructor-register`, { name, email, password });
+export const registerUser = async (name, email, password, role) => {
+    const response = await api.post(`/admin/register`, { name, email, password, role });
     return response.data;
 };
-
 export const logout = async () => {
     const response = await api.post('/auth/logout');
     return response.data;
@@ -39,7 +38,6 @@ export const getAllUsers = async () => {
     const response = await api.get('/admin/getall');
     return response.data;
 };
-
 
 
 export const deleteUser = async (userId) => {
@@ -79,3 +77,25 @@ export const deleteCourse = async (courseId) => {
     const response = await api.delete(`/courses/${courseId}`);
     return response.data;
 };
+
+
+export const fetchTags = async () =>{
+    const response = await api.get(`/courses/tags`)
+    return response.data;
+}
+
+
+export const fetchMajors = async () =>{
+    const response = await api.get('/courses/majors')
+    return response.data;
+}
+
+export const fetchAllVideos = async () =>{
+    const response = await api.get('/admin/get-video')
+    return response.data
+}
+
+export const deleteVideo = async (video_id) =>{
+    const response = await api.delete(`/admin/delete-video/${video_id}`)
+    return response.data
+}
