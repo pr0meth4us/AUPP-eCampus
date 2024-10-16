@@ -4,6 +4,7 @@ import tempfile
 from flask import jsonify, request, g
 import json
 from models.course_model import Course, Major, Tag
+from models.user_model import User
 from services.youtube_service import upload_video_to_youtube, delete_from_youtube
 from services.cloudinary_service import delete_from_cloudinary
 from bson import ObjectId
@@ -23,7 +24,7 @@ class CourseController:
                     'title': course.get('title'),
                     'description': course.get('description'),
                     'instructor_id': str(course['instructor_id']),
-                    'uploader_id': str(course['uploader_id']),
+                    'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',                    'uploader_id': str(course['uploader_id']),
                     'video_url': course.get('video_url'),
                     'thumbnail_url': course.get('thumbnail_url'),
                     'major_ids': [str(mid) for mid in course.get('major_ids', [])],

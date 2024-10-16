@@ -26,8 +26,6 @@ const AdminPage = () => {
             setTags(tags);
             const courseData = await getAllCourses();
             setCourses(courseData);
-            console.log(majors)
-            console.log(courseData)
         } catch (error) {
             console.error('Failed to fetch data:', error);
         } finally {
