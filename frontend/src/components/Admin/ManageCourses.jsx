@@ -4,6 +4,7 @@ import { createCourse, deleteCourse, updateCourse } from '../../services/api';
 import Notification from "../Notification";
 import MultiSelectWithSearchAndCreate from './MultiSelectWithSearchAndCreate';
 import Select from 'react-select';
+import ManageVideos from "./ManageVideos";
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [newCourse, setNewCourse] = useState({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
@@ -211,6 +212,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>
+            <ManageVideos />
 
             {editCourse && (
                 <Modal show={showEditModal} onHide={() => setEditCourse(null)}>
