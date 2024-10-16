@@ -1,52 +1,41 @@
 import React, { useState } from 'react';
-import Select from 'react-select';
-import { Button, Form } from 'react-bootstrap';
+import CreatableSelect from 'react-select/creatable';  // Use CreatableSelect for creating new options
 
 const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, allowAdd }) => {
-    const [inputValue, setInputValue] = useState('');
     const [customOptions, setCustomOptions] = useState(options);
-    console.log(options,"pipui")
 
+    // Handle option change
     const handleChange = (selected) => {
-        onChange(selected.map(option => option.name));
+        onChange(selected ? selected.map(option => option.value) : []);
     };
 
-    const handleCreate = () => {
-        if (inputValue && !customOptions.find(option => option.name === inputValue)) {
-            const newOption = { name: inputValue };
-            setCustomOptions(prev => [...prev, newOption]);
-            handleChange([...selectedOptions, newOption]);
-            setInputValue('');
-        }
+    // Handle creating a new option and auto-select it
+    const handleCreateOption = (inputValue) => {
+        const newOption = { value: inputValue, label: inputValue };
+        setCustomOptions(prev => [...prev, newOption]);  // Add the new option to the list
+        handleChange([...formattedOptions.filter(option => selectedOptions.includes(option.value)), newOption]); // Auto-select new option
     };
 
+    // Format the options for react-select
     const formattedOptions = customOptions.map(option => ({
-        name: option.name,
+        value: option.value || option.name,  // Ensure 'value' is used correctly
+        label: option.label || option.name,  // Ensure 'label' is used correctly
     }));
 
     return (
         <div className="mb-3">
-            <Select
+            <CreatableSelect
                 isMulti
                 options={formattedOptions}
-                value={formattedOptions.filter(option => selectedOptions.includes(option.name))}
+                value={formattedOptions.filter(option => selectedOptions.includes(option.value))}
                 onChange={handleChange}
-                onInputChange={(newValue) => setInputValue(newValue)}
                 placeholder="Select or add tags..."
                 isClearable
+                onCreateOption={allowAdd ? handleCreateOption : undefined}  // Enable option creation if allowed
+                isValidNewOption={(inputValue) =>
+                    inputValue && !customOptions.some(option => option.value === inputValue)
+                }
             />
-            {allowAdd && (
-                <div className="d-flex mt-2">
-                    <Form.Control
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Add new tag"
-                        className="me-2"
-                    />
-                    <Button variant="primary" onClick={handleCreate}>Add</Button>
-                </div>
-            )}
         </div>
     );
 };
