@@ -89,3 +89,13 @@ export const fetchMajors = async () =>{
     const response = await api.get('/courses/majors')
     return response.data;
 }
+
+export const fetchAllVideos = async () =>{
+    const response = await api.get('/admin/get-video')
+    return response.data
+}
+
+export const deleteVideo = async (video_id) =>{
+    const response = await api.delete(`/admin/delete-video/${video_id}`)
+    return response.data
+}

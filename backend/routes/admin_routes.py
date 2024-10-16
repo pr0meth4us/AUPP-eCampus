@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from services.cloudinary_service import retrieve_all_video_from_cloudinary, delete_from_cloudinary
 from middleware.admin_middleware import require_admin
 from controllers.admin_controller import get_all_users as fetch_all_users, delete_user, update_user, admin_register
@@ -40,4 +40,8 @@ def get_video():
 @admin_bp.route('/delete-video/<video_id>', methods=['DELETE'])
 @require_admin
 def delete_video_route(video_id):
-    return delete_from_cloudinary(video_id)
+    try:
+        delete_from_cloudinary(video_id)
+        return jsonify({"message": "Video deleted successfully."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
