@@ -101,3 +101,8 @@ class Major(BaseModel):
 
 class Tag(BaseModel):
     COLLECTION = 'tags'
+
+    @classmethod
+    def find_by_name(cls, tag_name):
+        tag_data = db[cls.COLLECTION].find_one({'name': tag_name})
+        return tag_data['_id'] if tag_data else None
