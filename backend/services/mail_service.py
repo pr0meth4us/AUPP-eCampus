@@ -3,6 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config import Config
 
+
 def send_mail(email_to, otp):
     sender_email = "auppecampus@icloud.com"
     receiver_email = email_to

@@ -54,6 +54,8 @@ class Course:
         result = db.courses.delete_one({'_id': ObjectId(course_id)})
         if result.deleted_count == 0:
             raise ValueError("Course not found.")
+
+
 class BaseModel:
     COLLECTION = None
 
