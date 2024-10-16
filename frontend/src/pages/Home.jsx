@@ -1,6 +1,7 @@
 import Header from "../components/Home/Header";
 import Instructors from "../components/Home/Instructors";
 import Footer from "../components/Footer";
+import {Link} from "react-router-dom";
 
 const Home = () => {
     return (
@@ -20,9 +21,9 @@ const Home = () => {
                         </div>
                         <div className="container-fluid mt-4">
                             <div className="d-flex justify-content-start w-100">
-                                <button className="btn btn-danger border-straight flex-grow-1 me-2">
+                                <Link to="/course-catalog" className="btn btn-danger border-straight flex-grow-1 me-2">
                                     Start Learning
-                                </button>
+                                </Link>
                                 <button className="btn border-straight btn-outline-danger color-red flex-grow-1 mx-2">
                                     Explore Subjects
                                 </button>
