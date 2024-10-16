@@ -1,3 +1,5 @@
+import uuid
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -23,9 +25,11 @@ cloudinary.config(
 
 
 def upload_to_cloudinary(video_file, title):
+    public_id = title.strip()
     upload_result = cloudinary.uploader.upload(
         video_file,
-        resource_type='video'
+        resource_type='video',
+        public_id=public_id
     )
 
     video_url = upload_result['secure_url']
