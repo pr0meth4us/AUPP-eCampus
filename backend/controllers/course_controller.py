@@ -133,11 +133,9 @@ class CourseController:
         if not current_course:
             return jsonify({'message': 'Course not found.'}), 404
 
-        # Validate and create tags
         created_tags = CourseController.create_tags(data['tag_names'])
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
 
-        # Update course details
         Course.update_course(
             course_id,
             title=data['title'],
@@ -147,7 +145,6 @@ class CourseController:
             tag_ids=tag_ids
         )
 
-        # Handle video upload
         if data['video_file']:
             new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
 
