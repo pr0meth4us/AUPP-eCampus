@@ -12,6 +12,9 @@ class User:
         self.role = None
 
     def save_to_db(self):
+        if self.is_email_taken(self.email):
+            raise ValueError(f"Email '{self.email}' is already in use.")
+
         user_data = {
             'name': self.name,
             'email': self.email,
@@ -19,6 +22,10 @@ class User:
             'role': self.role
         }
         db.users.insert_one(user_data)
+
+    @staticmethod
+    def is_email_taken(email):
+        return db.users.find_one({'email': email}) is not None
 
     @staticmethod
     def find_by_email_and_role(email, role):
@@ -56,12 +63,15 @@ class Admin(User):
         self.token = Config.ADMIN_TOKEN
 
     def save_to_db(self):
+        # Check if the email already exists globally
+        if self.is_email_taken(self.email):
+            raise ValueError(f"Email '{self.email}' is already in use.")
+
         admin_data = {
             'name': self.name,
             'email': self.email,
             'password_hash': self.password_hash,
             'role': self.role,
-            'token': self.token
         }
         db.users.insert_one(admin_data)
 
@@ -90,6 +100,8 @@ class Admin(User):
         if new_name:
             update_data['name'] = new_name
         if new_email:
+            if User.is_email_taken(new_email):
+                raise ValueError(f"Email '{new_email}' is already in use.")
             update_data['email'] = new_email
         if new_password:
             update_data['password_hash'] = generate_password_hash(new_password)

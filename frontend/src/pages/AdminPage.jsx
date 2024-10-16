@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, getAllCourses } from '../services/api';
+import {getAllUsers, getAllCourses, fetchMajors, fetchTags} from '../services/api';
 import ManageCourses from "../components/Admin/ManageCourses";
 import ManageUsers from "../components/Admin/ManageUsers";
 
@@ -8,17 +8,26 @@ const AdminPage = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('users');
+    const [majors, setMajors] = useState([]);
+    const [tags, setTags] = useState([]);
 
     useEffect(() => {
         fetchData();
     }, []);
 
+
     const fetchData = async () => {
         try {
             const userData = await getAllUsers();
+            const majors = await fetchMajors()
+            const tags = await fetchTags()
             setUsers(userData);
+            setMajors(majors);
+            setTags(tags);
             const courseData = await getAllCourses();
             setCourses(courseData);
+            console.log(majors)
+            console.log(courseData)
         } catch (error) {
             console.error('Failed to fetch data:', error);
         } finally {
@@ -69,7 +78,7 @@ const AdminPage = () => {
             </nav>
 
             {activeTab === 'users' && <ManageUsers users={users} setUsers={setUsers} fetchData={fetchData} />}
-            {activeTab === 'courses' && <ManageCourses users={users} courses={courses} setCourses={setCourses} fetchData={fetchData} />}
+            {activeTab === 'courses' && <ManageCourses users={users} courses={courses} setCourses={setCourses} fetchData={fetchData} majors={majors} tags={tags}/>}
         </div>
     );
 };

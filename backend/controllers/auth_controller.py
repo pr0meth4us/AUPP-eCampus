@@ -10,8 +10,10 @@ from models.otp_model import OTP
 
 def check_email(data):
     email = data.get('email')
-    if User.find_by_email(email):
-        return jsonify({'message': 'Email already exists.'}), 409
+    try:
+        User.is_email_taken(email)
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
 
     otp = OTP.create_otp(email)
     send_mail(email, otp)
@@ -22,7 +24,8 @@ def register(data):
     email = data.get('email')
     received_otp = data.get('otp')
     role = data.get('role')
-
+    if User.find_by_email(email):
+        return jsonify({'message': 'Email already exists.'}), 409
     if OTP.verify_otp(email, int(received_otp)):
         user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
         user_class = user_classes.get(role)
@@ -31,8 +34,11 @@ def register(data):
             return jsonify({'message': 'Invalid admin token.'}), 403
 
         user = user_class(name=data['name'], email=email, password=data['password'])
-        user.save_to_db()
-        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+        try:
+            user.save_to_db()
+            return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+        except ValueError as e:
+            return jsonify({'message': str(e)}), 400
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
 

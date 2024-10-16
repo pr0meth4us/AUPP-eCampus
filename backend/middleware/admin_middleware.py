@@ -1,7 +1,6 @@
 from functools import wraps
 from flask import request, jsonify
 from utils.token_utils import extract_role_from_token
-from models.course_model import Course
 
 
 def require_admin(f):
