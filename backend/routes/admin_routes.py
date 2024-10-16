@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from services.cloudinary_service import retrieve_all_video_from_cloudinary, delete_from_cloudinary
 from middleware.admin_middleware import require_admin
 from controllers.admin_controller import get_all_users as fetch_all_users, delete_user, update_user, admin_register
 
@@ -28,3 +29,15 @@ def delete_user_route(user_id):
 @require_admin
 def update_user_route(user_id):
     return update_user(user_id)
+
+
+@admin_bp.route('/get-video', methods=['GET'])
+@require_admin
+def get_video():
+    return retrieve_all_video_from_cloudinary()
+
+
+@admin_bp.route('/delete-video/<video_id>', methods=['DELETE'])
+@require_admin
+def delete_video_route(video_id):
+    return delete_from_cloudinary(video_id)

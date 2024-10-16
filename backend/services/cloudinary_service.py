@@ -1,5 +1,6 @@
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
 from config import Config
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -31,3 +32,20 @@ def delete_from_cloudinary(public_id):
         logging.info(f"Video with public ID {public_id} deleted from Cloudinary.")
     except Exception as e:
         logging.error(f"Failed to delete video from Cloudinary: {str(e)}")
+
+
+def retrieve_all_video_from_cloudinary():
+    try:
+        resources = cloudinary.api.resources(resource_type="video")
+        video_urls = []
+        for resource in resources.get('resources', []):
+            public_id = resource.get('public_id')
+            url = resource.get('secure_url')
+            thumbnail_url = url.replace('/upload/', '/upload/c_scale,w_300,h_300,f_jpg/')
+            video_urls.append({'public_id': public_id, 'url': url, 'thumbnail_url': thumbnail_url})
+
+        logger.info(f"Retrieved resources: {video_urls}")
+        return video_urls
+    except Exception as e:
+        logger.error(f"Failed to retrieve videos from Cloudinary: {str(e)}")
+        return None
