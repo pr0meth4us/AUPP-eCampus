@@ -8,4 +8,3 @@ def init_cors(app):
         "origins": "*",
         "supports_credentials": True
     }})
-

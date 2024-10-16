@@ -3,6 +3,7 @@ from controllers.course_controller import CourseController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 from middleware.admin_middleware import require_admin
 from models.course_model import Major, Tag
+
 course_bp = Blueprint('course', __name__)
 
 
