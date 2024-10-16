@@ -9,5 +9,4 @@ def init_cors(app):
         "origins": "*",
         "supports_credentials": True
     }})
-    print("CORS allowed origins: All (*)")
 
