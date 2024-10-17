@@ -203,8 +203,8 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                             )}
                                         </td>
                                         <td>
-                                            <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => setEditCourse(course)}>Edit</Button>
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</Button>
+                                            <Button color="success" variant="bordered" size="sm" onClick={() => setEditCourse(course)}>Edit</Button>
+                                            <Button color="danger" variant="bordered" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</Button>
                                         </td>
                                     </tr>
                                 );
@@ -261,8 +261,8 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                 <Form.Label>Tags</Form.Label>
                                 <MultiSelectWithSearchAndCreate
                                     options={tags}
-                                    selectedOptions={editCourse.tag_names}
-                                    onChange={(selected) => setEditCourse({ ...editCourse, tag_names: selected })}
+                                    selectedOptions={editCourse.tag_ids}
+                                    onChange={(selected) => setEditCourse({ ...editCourse, tag_ids: selected })}
                                     allowAdd={true}
                                 />
                             </Form.Group>

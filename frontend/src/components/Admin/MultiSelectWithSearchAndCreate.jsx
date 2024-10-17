@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CreatableSelect from 'react-select/creatable';  // Use CreatableSelect for creating new options
+import CreatableSelect from 'react-select/creatable';
 
 const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, allowAdd }) => {
     const [customOptions, setCustomOptions] = useState(options);
