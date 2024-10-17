@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 
 const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, allowAdd }) => {
+    console.log("selectedOptions", selectedOptions);
     const [customOptions, setCustomOptions] = useState(options);
 
     const handleChange = (selected) => {
@@ -19,12 +20,27 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
         label: option.label || option.name,
     }));
 
+    const selectedNames = () => {
+        return options
+            .filter(option => selectedOptions.includes(option.id))
+            .map(option => ({
+                value: option.name,
+                label: option.name
+            }));
+    };
+    console.log(options, "options");
+    console.log(selectedOptions, "selectedOptions");
+    console.log(formattedOptions, "formattedOptions");
+
+    console.log("kkk", selectedNames());
+
+
     return (
         <div className="mb-3">
             <CreatableSelect
                 isMulti
                 options={formattedOptions}
-                value={formattedOptions.filter(option => selectedOptions.includes(option.value))}
+                value={selectedNames(formattedOptions)}
                 onChange={handleChange}
                 placeholder="Select or add tags..."
                 isClearable
