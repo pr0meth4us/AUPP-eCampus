@@ -112,7 +112,7 @@ const ManageUsers = ({ users, fetchData }) => {
                                             className="me-1"
                                             onClick={() => {
                                                 setEditUser(user);
-                                                setShowEditModal(true); // Show the modal
+                                                setShowEditModal(true);
                                             }}
                                         >
                                             Edit
