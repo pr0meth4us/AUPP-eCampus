@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Button, Accordion, Table, Modal } from 'react-bootstrap';
+import { Form, Accordion, Table, Modal } from 'react-bootstrap';
+import {Button} from "@nextui-org/button";
 import { createCourse, deleteCourse, updateCourse } from '../../services/api';
 import Notification from "../Notification";
 import MultiSelectWithSearchAndCreate from './MultiSelectWithSearchAndCreate';
@@ -12,6 +13,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [courseVideo, setCourseVideo] = useState(null);
     const [notification, setNotification] = useState({ message: '', type: '' });
     const [showEditModal, setShowEditModal] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleInputChange = (e, isEdit = false) => {
         const { name, value } = e.target;
@@ -28,20 +30,19 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
 
     const handleCreateCourse = async (e) => {
         e.preventDefault();
+        setLoading(true)
         try {
             const formData = new FormData();
             formData.append('title', newCourse.title);
             formData.append('description', newCourse.description);
             formData.append('instructor_id', newCourse.instructor_id);
 
-            // Send tag_names as a single array entry
             formData.append('tag_names', JSON.stringify(newCourse.tag_names));
 
             formData.append('major_ids', JSON.stringify(newCourse.major_ids));
 
             if (courseVideo) formData.append('video', courseVideo);
 
-            console.log('FormData contents:');
             for (let [key, value] of formData.entries()) {
                 console.log(key, value);
             }
@@ -52,8 +53,9 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
             setNewCourse({ title: '', description: '', instructor_id: '', tag_names: [], major_ids: [] });
             setCourseVideo(null);
         } catch (error) {
-            console.error('Error creating course:', error);
             setNotification({ message: 'Failed to create course.', type: 'error' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -156,7 +158,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                     onChange={(e) => setCourseVideo(e.target.files[0])}
                                 />
                             </Form.Group>
-                            <Button type="submit">Create Course</Button>
+                            <Button type="submit" isLoading={loading}>Create Course</Button>
                         </Form>
                     </Accordion.Body>
                 </Accordion.Item>
@@ -282,7 +284,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                     onChange={(e) => setCourseVideo(e.target.files[0])}
                                 />
                             </Form.Group>
-                            <Button type="submit">Update Course</Button>
+                            <Button type="submit" isLoading={loading}>Update Course</Button>
                         </Form>
                     </Modal.Body>
                 </Modal>
