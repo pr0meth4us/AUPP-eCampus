@@ -4,53 +4,47 @@ const Instructors = () => {
             <div id="instructors" className="carousel slide" data-bs-ride="carousel">
                 <div className="carousel-inner py-8 text-center">
                     <div className="carousel-item active">
-                        <div
-                            className="d-flex flex-column align-items-center w-75 mx-auto">
+                        <div className="d-flex flex-column align-items-center w-75 mx-auto">
                             <div className="circular-image">
-                                <img src="/picture.png" className="rounded-circle img-fluid" alt="Instructor 1"
-                                     style={{width: "200px", height: "200px"}}/>
+                                <img src="/MV5BMzdiYWE1NDgtMmZhZS00ZmU4LWI5ZmItMTEzZDlkY2ViYzBlXkEyXkFqcGdeQWFybm8@._V1_QL75_UY281_CR0,0,500,281_.jpg" className="rounded-circle img-fluid" alt="Robert Oppenheimer"
+                                     style={{width: "200px", height: "200px", objectFit: "cover"}}/>
                             </div>
-                            <h3 className="mt-4 text-center">Aruna Shankar, Ph.D.</h3>
-                            <p className="text-center">Professor, Digital Technologies</p>
+                            <h3 className="mt-4 text-center">Robert Oppenheimer, Ph.D.</h3>
+                            <p className="text-center">Physicist, Theoretical Science</p>
                             <p className="px-4 text-center">
-                                Dr. Aruna Shankar is an accomplished professional with diverse expertise in the fields
-                                of Information Technology Management and Software Engineering. With a passion for
-                                technology and research, Mrs. Shankar has made significant contributions to the software
-                                industry and academia over the years.
+                                Dr. Robert Oppenheimer is renowned as the "father of the atomic bomb" for his role in
+                                the Manhattan Project. A distinguished theoretical physicist, Oppenheimer's work
+                                revolutionized modern physics and laid the groundwork for quantum mechanics.
                             </p>
                         </div>
                     </div>
-                    <div className="carousel-item active">
-                        <div
-                            className="d-flex flex-column align-items-center w-75 mx-auto">
+                    <div className="carousel-item">
+                        <div className="d-flex flex-column align-items-center w-75 mx-auto">
                             <div className="circular-image">
-                                <img src="/picture.png" className="rounded-circle img-fluid" alt="Instructor 1"
-                                     style={{width: "200px", height: "200px"}}/>
+                                <img src="/x-men-first-class-james-mcavoy-as-charles-xavier.avif" className="rounded-circle img-fluid" alt="Charles Xavier"
+                                     style={{width: "200px", height: "200px", objectFit: "cover"}}/>
                             </div>
-                            <h3 className="mt-4 text-center">Aruna Shankar, Ph.D.</h3>
-                            <p className="text-center">Professor, Digital Technologies</p>
+                            <h3 className="mt-4 text-center">Charles Xavier, Ph.D.</h3>
+                            <p className="text-center">Professor, Mutant Genetics</p>
                             <p className="px-4 text-center">
-                                Dr. Aruna Shankar is an accomplished professional with diverse expertise in the fields
-                                of Information Technology Management and Software Engineering. With a passion for
-                                technology and research, Mrs. Shankar has made significant contributions to the software
-                                industry and academia over the years.
+                                Professor Charles Xavier, also known as Professor X, is a visionary leader and founder
+                                of the X-Men. His research into human mutation has helped bridge the gap between
+                                mutants and humans, advocating for peace and understanding.
                             </p>
                         </div>
                     </div>
-                    <div className="carousel-item active">
-                        <div
-                            className="d-flex flex-column align-items-center w-75 mx-auto">
+                    <div className="carousel-item">
+                        <div className="d-flex flex-column align-items-center w-75 mx-auto">
                             <div className="circular-image">
-                                <img src="/picture.png" className="rounded-circle img-fluid" alt="Instructor 1"
-                                     style={{width: "200px", height: "200px"}}/>
+                                <img src="/Austrian-psychoanalyst-Sigmund-Freud-1935.webp" className="rounded-circle img-fluid" alt="Sigmund Freud"
+                                     style={{width: "200px", height: "200px", objectFit: "cover"}}/>
                             </div>
-                            <h3 className="mt-4 text-center">Aruna Shankar, Ph.D.</h3>
-                            <p className="text-center">Professor, Digital Technologies</p>
+                            <h3 className="mt-4 text-center">Sigmund Freud, M.D.</h3>
+                            <p className="text-center">Neurologist, Psychoanalysis</p>
                             <p className="px-4 text-center">
-                                Dr. Aruna Shankar is an accomplished professional with diverse expertise in the fields
-                                of Information Technology Management and Software Engineering. With a passion for
-                                technology and research, Mrs. Shankar has made significant contributions to the software
-                                industry and academia over the years.
+                                Dr. Sigmund Freud is the founder of psychoanalysis, a groundbreaking approach to human
+                                psychology. His theories on the unconscious mind, repression, and dreams have
+                                fundamentally changed our understanding of mental processes.
                             </p>
                         </div>
                     </div>
