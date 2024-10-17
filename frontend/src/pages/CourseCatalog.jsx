@@ -3,6 +3,7 @@ import { getAllCourses } from "../services/api";
 import Header from "../components/Home/Header";
 import Footer from "../components/Footer";
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import CardVideoSkeleton from "../components/Course/CardVideoSkeleton";
 
 const CourseCatalog = () => {
     const [courses, setCourses] = useState([]);
@@ -23,30 +24,34 @@ const CourseCatalog = () => {
         }
     };
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
-
     return (
         <>
             <Header />
-            <Container>
-                <Row className="g-4">
-                    {courses.map(course => (
-                        <Col key={course.id} xs={12} md={6} lg={4}>
-                            <Card>
-                                <Card.Img variant="top" src={course.thumbnail_url} alt={`Thumbnail for ${course.title}`} />
-                                <Card.Body>
-                                    <i className="bi bi-person-workspace text-muted"></i><small className="p-2 text-muted">{course.instructor_name}</small>
-                                    <Card.Title>{course.title}</Card.Title>
-                                    <Card.Text>{course.description}</Card.Text>
-                                    <Button variant="primary" href={course.video_url} target="_blank">Watch</Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
-            </Container>
+            <div style={{ minHeight: '100vh' }}>
+                {loading ? (
+                    <CardVideoSkeleton />
+                ) : (
+                    <Container>
+                        <Row className="g-4">
+                            {courses.map(course => (
+                                <Col key={course.id} xs={12} md={6} lg={4}>
+                                    <Card>
+                                        <Card.Img variant="top" src={course.thumbnail_url}
+                                                  alt={`Thumbnail for ${course.title}`} />
+                                        <Card.Body>
+                                            <i className="bi bi-person-workspace text-muted"></i><small
+                                            className="p-2 text-muted">{course.instructor_name}</small>
+                                            <Card.Title>{course.title}</Card.Title>
+                                            <Card.Text>{course.description}</Card.Text>
+                                            <Button variant="primary" href={course.video_url} target="_blank">Watch</Button>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
+                )}
+            </div>
             <Footer />
         </>
     );
