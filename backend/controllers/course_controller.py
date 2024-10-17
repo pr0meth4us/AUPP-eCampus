@@ -130,6 +130,7 @@ class CourseController:
     @staticmethod
     def update_course(course_id):
         data = CourseController.extract_request_data()
+        print(data)
         current_course = Course.find_by_id(course_id)
 
         if not current_course:

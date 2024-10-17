@@ -28,11 +28,6 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
                 label: option.name
             }));
     };
-    console.log(options, "options");
-    console.log(selectedOptions, "selectedOptions");
-    console.log(formattedOptions, "formattedOptions");
-
-    console.log("kkk", selectedNames());
 
 
     return (
