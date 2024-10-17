@@ -4,8 +4,12 @@
   "private": true,
   "dependencies": {
     "@dgtdept/rachana": "^1.0.3",
+    "@nextui-org/button": "^2.0.38",
+    "@nextui-org/system": "^2.2.6",
+    "@nextui-org/theme": "^2.2.11",
     "axios": "^1.7.7",
     "bootstrap-icons": "^1.11.3",
+    "framer-motion": "^11.11.9",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.5",
     "react-dom": "^18.2.0",
