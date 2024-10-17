@@ -63,7 +63,6 @@ class Admin(User):
         self.token = Config.ADMIN_TOKEN
 
     def save_to_db(self):
-        # Check if the email already exists globally
         if self.is_email_taken(self.email):
             raise ValueError(f"Email '{self.email}' is already in use.")
 
