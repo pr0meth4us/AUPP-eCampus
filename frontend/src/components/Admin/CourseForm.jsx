@@ -4,34 +4,59 @@ import { Button } from "@nextui-org/button";
 import MultiSelectWithSearchAndCreate from './MultiSelectWithSearchAndCreate';
 import Select from 'react-select';
 
-const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initialData = {} }) => {
+const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, buttonText, initialData = {} }) => {
     const [course, setCourse] = useState({
         title: '',
         description: '',
         instructor_id: '',
         tag_names: [],
         major_ids: [],
-        ...initialData
     });
     const [courseVideo, setCourseVideo] = useState(null);
 
+    const getUniqueTags = (data, allTags) => {
+        let uniqueTags = new Set();
+
+        if (data && data.tag_names && Array.isArray(data.tag_names)) {
+            data.tag_names.forEach(name => uniqueTags.add(name));
+        }
+
+        if (data && data.tag_ids && Array.isArray(data.tag_ids)) {
+            data.tag_ids.forEach(tagId => {
+                const tag = allTags.find(t => t && t.id === tagId);
+                if (tag) uniqueTags.add(tag.name);
+            });
+        }
+
+        return Array.from(uniqueTags);
+    };
+
     useEffect(() => {
-        setCourse({ ...course, ...initialData });
-    }, [initialData]);
+        if (initialData && Object.keys(initialData).length > 0) {
+            setCourse(prevCourse => ({
+                ...prevCourse,
+                ...initialData,
+                tag_names: getUniqueTags(initialData, tags),
+                major_ids: initialData.major_ids || [],
+            }));
+        }
+    }, [initialData, tags]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setCourse({ ...course, [name]: value });
+        setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData();
-        Object.keys(course).forEach(key => {
-            if (Array.isArray(course[key])) {
-                formData.append(key, JSON.stringify(course[key]));
-            } else {
-                formData.append(key, course[key]);
+        Object.entries(course).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                value.forEach((item, index) => {
+                    formData.append(`${key}[${index}]`, item);
+                });
+            } else if (value !== null && value !== undefined) {
+                formData.append(key, value);
             }
         });
         if (courseVideo) formData.append('video', courseVideo);
@@ -45,7 +70,7 @@ const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initia
                 <Form.Control
                     type="text"
                     name="title"
-                    value={course.title}
+                    value={course.title || ''}
                     onChange={handleInputChange}
                     required
                 />
@@ -55,7 +80,7 @@ const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initia
                 <Form.Control
                     as="textarea"
                     name="description"
-                    value={course.description}
+                    value={course.description || ''}
                     onChange={handleInputChange}
                     required
                 />
@@ -64,12 +89,12 @@ const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initia
                 <Form.Label>Instructor</Form.Label>
                 <Form.Select
                     name="instructor_id"
-                    value={course.instructor_id}
+                    value={course.instructor_id || ''}
                     onChange={handleInputChange}
                     required
                 >
                     <option value="">Select Instructor</option>
-                    {users.filter(user => user.role === 'instructor').map(instructor => (
+                    {users.filter(user => user && user.role === 'instructor').map(instructor => (
                         <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
                     ))}
                 </Form.Select>
@@ -78,8 +103,8 @@ const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initia
                 <Form.Label>Tags</Form.Label>
                 <MultiSelectWithSearchAndCreate
                     initialOptions={tags}
-                    currentSelections={course.tag_names}
-                    onChange={(selected) => setCourse({ ...course, tag_names: selected })}
+                    currentSelections={course.tag_names || []}
+                    onChange={(selected) => setCourse(prevCourse => ({ ...prevCourse, tag_names: selected }))}
                     allowAdd={true}
                 />
             </Form.Group>
@@ -87,9 +112,12 @@ const CourseForm = ({ onSubmit, users, tags, majors, loading, buttonText, initia
                 <Form.Label>Majors</Form.Label>
                 <Select
                     isMulti
-                    options={majors.map(major => ({ value: major.id, label: major.name }))}
-                    value={course.major_ids.map(id => ({ value: id, label: majors.find(major => major.id === id)?.name }))}
-                    onChange={(selected) => setCourse({ ...course, major_ids: selected.map(option => option.value) })}
+                    options={majors.map(major => major ? ({ value: major.id, label: major.name }) : null).filter(Boolean)}
+                    value={(course.major_ids || []).map(id => {
+                        const major = majors.find(m => m && m.id === id);
+                        return major ? { value: id, label: major.name } : null;
+                    }).filter(Boolean)}
+                    onChange={(selected) => setCourse(prevCourse => ({ ...prevCourse, major_ids: selected.map(option => option.value) }))}
                     placeholder="Select Majors"
                 />
             </Form.Group>

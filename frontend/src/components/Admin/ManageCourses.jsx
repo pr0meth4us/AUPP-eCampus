@@ -26,6 +26,15 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         }
     };
 
+    const handleEditSubmit = async (formData) => {
+        const success = await handleUpdateCourse(editCourse.id, formData);
+        if (success) {
+            setShowEditModal(false);
+            setEditCourse(null);
+        }
+    };
+
+
     return (
         <div>
             <Accordion className="mb-4">
@@ -109,7 +118,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                 </Modal.Header>
                 <Modal.Body>
                     <CourseForm
-                        onSubmit={(formData) => handleUpdateCourse(editCourse.id, formData)}
+                        onSubmit={handleEditSubmit}
                         users={users}
                         tags={tags}
                         majors={majors}

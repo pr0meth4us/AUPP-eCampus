@@ -5,8 +5,9 @@ from flask import jsonify, request, g
 import json
 from models.course_model import Course, Major, Tag
 from models.user_model import User
-from services.youtube_service import upload_video_to_youtube, delete_from_youtube
 from services.cloudinary_service import delete_from_cloudinary
+from services.youtube_service import delete_from_youtube
+from utils.upload_video import upload_video
 from bson import ObjectId
 
 logging.basicConfig(level=logging.INFO)
@@ -82,7 +83,7 @@ class CourseController:
         try:
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                 video_file.save(temp_file.name)
-                video_url, thumbnail_url = upload_video_to_youtube(temp_file.name, title, description)
+                video_url, thumbnail_url = upload_video(temp_file.name, title, description)
             return video_url, thumbnail_url
         finally:
             os.remove(temp_file.name)
@@ -93,8 +94,33 @@ class CourseController:
         description = request.form.get('description')
         instructor_id = request.form.get('instructor_id') or g.user_id
         video_file = request.files.get('video')
-        tag_names = json.loads(request.form.get('tag_names', '[]'))
-        major_ids = json.loads(request.form.get('major_ids', '[]'))
+        print(request.form)
+
+        def parse_form_data(form, key):
+            json_data = form.get(key)
+            if json_data:
+                try:
+                    return json.loads(json_data)
+                except json.JSONDecodeError:
+                    pass
+
+            indexed_data = []
+            index = 0
+            while True:
+                indexed_key = f"{key}[{index}]"
+                if indexed_key in form:
+                    indexed_data.append(form[indexed_key])
+                    index += 1
+                else:
+                    break
+
+            if indexed_data:
+                return indexed_data
+
+            return form.getlist(key)
+
+        tag_names = parse_form_data(request.form, 'tag_names')
+        major_ids = parse_form_data(request.form, 'major_ids')
 
         return {
             'title': title,
