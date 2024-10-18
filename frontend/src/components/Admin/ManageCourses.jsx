@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Accordion, Table, Modal } from 'react-bootstrap';
-import {Button} from "@nextui-org/button";
+import {Button} from "react-bootstrap";
 import { createCourse, deleteCourse, updateCourse } from '../../services/api';
 import Notification from "../Notification";
 import MultiSelectWithSearchAndCreate from './MultiSelectWithSearchAndCreate';
