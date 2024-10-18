@@ -8,10 +8,12 @@ export const useCourseActions = (fetchData, setNotification) => {
         setLoading(true);
         try {
             await createCourse(formData);
-            setNotification({ message: 'Course created successfully!', type: 'success' });
             fetchData();
+            setNotification({ message: 'Course created successfully!', type: 'success' });
+            return true;
         } catch (error) {
             setNotification({ message: 'Failed to create course.', type: 'error' });
+            return false;
         } finally {
             setLoading(false);
         }
@@ -21,10 +23,12 @@ export const useCourseActions = (fetchData, setNotification) => {
         setLoading(true);
         try {
             await updateCourse(courseId, formData);
-            setNotification({ message: 'Course updated successfully!', type: 'success' });
             fetchData();
+            setNotification({ message: 'Course updated successfully!', type: 'success' });
+            return true;
         } catch (error) {
             setNotification({ message: 'Failed to update course.', type: 'error' });
+            return false;
         } finally {
             setLoading(false);
         }
