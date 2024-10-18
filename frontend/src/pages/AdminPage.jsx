@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {getAllUsers, getAllCourses, fetchMajors, fetchTags} from '../services/api';
 import ManageCourses from "../components/Admin/ManageCourses";
 import ManageUsers from "../components/Admin/ManageUsers";
+import TextSkeleton from "../components/Skeletons/TextSkeleton";
 
 const AdminPage = () => {
     const [users, setUsers] = useState([]);
@@ -17,33 +18,20 @@ const AdminPage = () => {
 
 
     const fetchData = async () => {
-        try {
-            const userData = await getAllUsers();
-            const majors = await fetchMajors()
-            const tags = await fetchTags()
-            setUsers(userData);
-            setMajors(majors);
-            setTags(tags);
-            const courseData = await getAllCourses();
-            setCourses(courseData);
-            console.log(majors)
-            console.log(courseData)
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-        } finally {
-            setLoading(false);
-        }
+        const userData = await getAllUsers();
+        const majors = await fetchMajors()
+        const tags = await fetchTags()
+        setUsers(userData);
+        setMajors(majors);
+        setTags(tags);
+        const courseData = await getAllCourses();
+        setCourses(courseData);
+        setLoading(false);
     };
 
     if (loading) {
         return (
-            <div className="container mt-5">
-                <div className="d-flex justify-content-center">
-                    <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
+            <TextSkeleton/>
         );
     }
 
