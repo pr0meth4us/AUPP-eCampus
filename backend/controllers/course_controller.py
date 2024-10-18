@@ -21,6 +21,7 @@ class CourseController:
             courses = Course.get_all()
             serialized_courses = [
                 {
+                    'id': str(course['_id']),
                     'title': course.get('title'),
                     'description': course.get('description'),
                     'instructor_id': str(course['instructor_id']),
