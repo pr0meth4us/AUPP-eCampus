@@ -3,7 +3,7 @@ import { getAllCourses } from "../services/api";
 import Header from "../components/Home/Header";
 import Footer from "../components/Footer";
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import CardVideoSkeleton from "../components/Course/CardVideoSkeleton";
+import CardVideoSkeleton from "../components/Skeletons/CardVideoSkeleton";
 
 const CourseCatalog = () => {
     const [courses, setCourses] = useState([]);
