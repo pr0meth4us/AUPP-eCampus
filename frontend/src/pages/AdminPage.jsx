@@ -16,7 +16,6 @@ const AdminPage = () => {
         fetchData();
     }, []);
 
-
     const fetchData = async () => {
         const userData = await getAllUsers();
         const majors = await fetchMajors()
