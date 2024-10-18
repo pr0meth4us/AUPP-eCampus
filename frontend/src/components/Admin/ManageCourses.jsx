@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Accordion, Table, Modal } from 'react-bootstrap';
+import { Accordion, Table, Modal, Button as ReactButton} from 'react-bootstrap';
 import { Button } from "@nextui-org/button";
 import { deleteCourse } from '../../services/api';
 import Notification from "../Notification";
 import CourseForm from './CourseForm';
 import { useCourseActions } from './useCourseActions';
 import ManageVideos from "./ManageVideos";
+import {Link} from "react-router-dom";
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [editCourse, setEditCourse] = useState(null);
@@ -86,17 +87,18 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                         <td>{courseMajors}</td>
                                         <td>
                                             {course.video_url && (
-                                                <Button variant="link" href={course.video_url} target="_blank" rel="noopener noreferrer">
+                                                <Link
+                                                    variant="link" to={course.video_url} target="_blank" rel="noopener noreferrer">
                                                     Watch Video
-                                                </Button>
+                                                </Link>
                                             )}
                                         </td>
                                         <td>
-                                            <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => {
+                                            <ReactButton variant="outline-secondary" size="sm" className="me-1" onClick={() => {
                                                 setEditCourse(course);
                                                 setShowEditModal(true);
-                                            }}>Edit</Button>
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</Button>
+                                            }}>Edit</ReactButton>
+                                            <ReactButton variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</ReactButton>
                                         </td>
                                     </tr>
                                 );
