@@ -1,10 +1,11 @@
 import React, {  useState } from 'react';
-import {  Accordion, Table, Modal } from 'react-bootstrap';
+import {  Button as ReactButton, Accordion, Table, Modal } from 'react-bootstrap';
 import {  deleteCourse } from '../../services/api';
 import Notification from "../Notification";
 import CourseForm from './CourseForm';
 import { useCourseActions } from './useCourseActions';
 import ManageVideos from "./ManageVideos";
+import {Link} from "react-router-dom";
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [editCourse, setEditCourse] = useState(null);
