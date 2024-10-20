@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { Accordion, Table, Modal, Button as ReactButton} from 'react-bootstrap';
-import { Button } from "@nextui-org/button";
-import { deleteCourse } from '../../services/api';
+import React, { useEffect, useState } from 'react';
+import { Form, Accordion, Table, Modal } from 'react-bootstrap';
+import {Button} from "@nextui-org/button";
+import { createCourse, deleteCourse, updateCourse } from '../../services/api';
 import Notification from "../Notification";
 import CourseForm from './CourseForm';
 import { useCourseActions } from './useCourseActions';
 import ManageVideos from "./ManageVideos";
-import {Link} from "react-router-dom";
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [editCourse, setEditCourse] = useState(null);
