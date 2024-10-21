@@ -3,7 +3,6 @@ from services.mongo_service import init_mongo
 from config import Config
 import traceback
 
-
 def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(Config)
@@ -24,13 +23,17 @@ def create_app():
             {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
         ), 500
 
+    @flask_app.route('/health')
+    def health_check():
+        return jsonify(status="healthy"), 200
+
     @flask_app.after_request
     def add_csp_headers(response):
         response.headers['Content-Security-Policy'] = (
-            "default-src 'self'; " 
-            "script-src 'self' https://www.google.com https://www.gstatic.com; "  
-            "frame-src 'self' https://www.google.com; "  
-            "style-src 'self' https://fonts.googleapis.com; "  
+            "default-src 'self'; "
+            "script-src 'self' https://www.google.com https://www.gstatic.com; "
+            "frame-src 'self' https://www.google.com; "
+            "style-src 'self' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com;"
         )
         return response
@@ -38,6 +41,7 @@ def create_app():
     return flask_app
 
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True, host='0.0.0.0', port=5001)
