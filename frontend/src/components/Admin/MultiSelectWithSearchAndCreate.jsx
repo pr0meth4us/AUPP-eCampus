@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import CreatableSelect from 'react-select/creatable';  // Use CreatableSelect for creating new options
+import CreatableSelect from 'react-select/creatable';
 
-const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, allowAdd }) => {
-    const [customOptions, setCustomOptions] = useState(options);
+const MultiSelectWithSearchAndCreate = ({ initialOptions, currentSelections, onChange, allowAdd }) => {
+    const [availableOptions, setAvailableOptions] = useState(initialOptions);
 
     const handleChange = (selected) => {
         onChange(selected ? selected.map(option => option.value) : []);
@@ -10,11 +10,11 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
 
     const handleCreateOption = (inputValue) => {
         const newOption = { value: inputValue, label: inputValue };
-        setCustomOptions(prev => [...prev, newOption]);
-        handleChange([...formattedOptions.filter(option => selectedOptions.includes(option.value)), newOption]); // Auto-select new option
+        setAvailableOptions(prev => [...prev, newOption]);
+        handleChange([...selectOptions.filter(option => currentSelections.includes(option.value)), newOption]); // Auto-select new option
     };
 
-    const formattedOptions = customOptions.map(option => ({
+    const selectOptions = availableOptions.map(option => ({
         value: option.value || option.name,
         label: option.label || option.name,
     }));
@@ -23,14 +23,14 @@ const MultiSelectWithSearchAndCreate = ({ options, selectedOptions, onChange, al
         <div className="mb-3">
             <CreatableSelect
                 isMulti
-                options={formattedOptions}
-                value={formattedOptions.filter(option => selectedOptions.includes(option.value))}
+                options={selectOptions}
+                value={selectOptions.filter(option => currentSelections.includes(option.value))}
                 onChange={handleChange}
                 placeholder="Select or add tags..."
                 isClearable
                 onCreateOption={allowAdd ? handleCreateOption : undefined}
                 isValidNewOption={(inputValue) =>
-                    inputValue && !customOptions.some(option => option.value === inputValue)
+                    inputValue && !availableOptions.some(option => option.value === inputValue)
                 }
             />
         </div>

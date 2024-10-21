@@ -1,141 +1,98 @@
 import random
 import time
-import httplib2
-import logging
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.discovery import build
 from google.oauth2 import service_account
+from googleapiclient.http import MediaFileUpload
 from config import Config
-from .cloudinary_service import upload_to_cloudinary
+from utils.logger import logger
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+SERVICE_ACCOUNT_INFO = {
+    "type": Config.GOOGLE_SERVICE_ACCOUNT_TYPE,
+    "project_id": Config.GOOGLE_PROJECT_ID,
+    "private_key_id": Config.GOOGLE_PRIVATE_KEY_ID,
+    "private_key": Config.GOOGLE_PRIVATE_KEY,
+    "client_email": Config.GOOGLE_CLIENT_EMAIL,
+    "client_id": Config.GOOGLE_CLIENT_ID,
+    "auth_uri": Config.GOOGLE_AUTH_URI,
+    "token_uri": Config.GOOGLE_TOKEN_URI,
+    "auth_provider_x509_cert_url": Config.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": Config.GOOGLE_CLIENT_X509_CERT_URL,
+    "universe_domain": Config.GOOGLE_UNIVERSE_DOMAIN
+}
 
-SERVICE_ACCOUNT_FILE = Config.GOOGLE_SERVICE_ACCOUNT_FILE
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 MAX_RETRIES = 10
-RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError)
 RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
-
-VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
 def get_authenticated_service():
-    logger.info("Authenticating with YouTube API.")
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
+    credentials = service_account.Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=SCOPES)
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, credentials=credentials)
-
-
-def initialize_upload(youtube, options):
-    logger.info(f"Preparing to upload video: {options.title}")
-    tags = options.keywords.split(",") if options.keywords else None
-
-    body = dict(
-        snippet=dict(
-            title=options.title,
-            description=options.description,
-            tags=tags,
-            categoryId=options.category
-        ),
-        status=dict(
-            privacyStatus=options.privacyStatus
-        )
-    )
-
-    insert_request = youtube.videos().insert(
-        part=",".join(body.keys()),
-        body=body,
-        media_body=MediaFileUpload(options.file, chunksize=-1, resumable=True)
-    )
-
-    logger.info("Starting resumable upload.")
-    return resumable_upload(insert_request)
 
 
 def resumable_upload(insert_request):
     response = None
-    error = None
     retry = 0
     while response is None:
         try:
-            logger.info("Uploading file...")
             status, response = insert_request.next_chunk()
-            if response is not None:
-                if 'id' in response:
-                    logger.info(f"Video id '{response['id']}' was successfully uploaded.")
-                    return f"https://www.youtube.com/watch?v={response['id']}"
-                else:
-                    logger.error(f"The upload failed with an unexpected response: {response}")
-                    exit(f"The upload failed with an unexpected response: {response}")
+            if response and 'id' in response:
+                logger.info(f"Video id '{response['id']}' successfully uploaded.")
+                return f"https://www.youtube.com/watch?v={response['id']}"
         except HttpError as e:
             if e.resp.status in RETRIABLE_STATUS_CODES:
-                error = f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}"
-                logger.warning(error)
+                logger.warning(f"Retriable HTTP error {e.resp.status} occurred. Retrying...")
             else:
-                logger.error(f"Non-retriable HTTP error occurred: {e.resp.status}\n{e.content}")
-                raise
-        except RETRIABLE_EXCEPTIONS as e:
-            error = f"A retriable error occurred: {e}"
-            logger.warning(error)
-
-        if error is not None:
-            retry += 1
-            if retry > MAX_RETRIES:
-                logger.error("No longer attempting to retry.")
-                exit("No longer attempting to retry.")
-
-            max_sleep = 2 ** retry
-            sleep_seconds = random.random() * max_sleep
-            logger.info(f"Sleeping {sleep_seconds} seconds and then retrying...")
-            time.sleep(sleep_seconds)
+                raise e
+        retry += 1
+        if retry > MAX_RETRIES:
+            logger.error("Max retries reached. Upload failed.")
+            raise Exception("Max retries reached.")
+        sleep_seconds = random.random() * (2 ** retry)
+        logger.info(f"Sleeping {sleep_seconds} seconds before retrying...")
+        time.sleep(sleep_seconds)
 
 
-def upload_video_to_youtube(video_file, title, description, category_id='27', privacy_status='unlisted', tags=None):
-    logger.info("Starting video upload process.")
-    youtube = get_authenticated_service()
-
-    class Options:
-        def __init__(self, file, title, description, category, privacy_status, keywords):
-            self.file = file
-            self.title = title
-            self.description = description
-            self.category = category
-            self.privacyStatus = privacy_status
-            self.keywords = keywords
-
-    options = Options(video_file, title, description, category_id, privacy_status, tags)
-
+def upload_to_youtube(video_file, title, description, category_id='27', privacy_status='unlisted', tags=None):
     try:
-        video_url = initialize_upload(youtube, options)
+        youtube = get_authenticated_service()
 
+        body = {
+            "snippet": {
+                "title": title,
+                "description": description,
+                "tags": tags.split(",") if tags else None,
+                "categoryId": category_id
+            },
+            "status": {
+                "privacyStatus": privacy_status
+            }
+        }
+
+        insert_request = youtube.videos().insert(
+            part=",".join(body.keys()),
+            body=body,
+            media_body=MediaFileUpload(video_file, chunksize=-1, resumable=True)
+        )
+        video_url = resumable_upload(insert_request)
         video_id = video_url.split("=")[-1]
-
-        video_details = youtube.videos().list(
-            part='snippet',
-            id=video_id
-        ).execute()
-
+        video_details = youtube.videos().list(part='snippet', id=video_id).execute()
         thumbnail_url = video_details['items'][0]['snippet']['thumbnails']['high']['url']
 
         return video_url, thumbnail_url
 
     except HttpError as e:
-        logger.error(f"An HTTP error {e.resp.status} occurred:\n{e.content}")
-        logger.info("Attempting fallback upload to Cloudinary.")
-
-        video_url, thumbnail_url = upload_to_cloudinary(video_file, title)
-        return video_url, thumbnail_url
+        logger.error(f"HTTP error {e.resp.status} occurred during YouTube upload. Error details:\n{e.content}")
+        raise e
 
 
 def delete_from_youtube(video_id):
     try:
         youtube = get_authenticated_service()
         youtube.videos().delete(id=video_id).execute()
-        logging.info(f"Video with ID {video_id} deleted from YouTube.")
+        logger.info(f"Video with ID {video_id} deleted from YouTube.")
     except Exception as e:
-        logging.error(f"Failed to delete video from YouTube: {str(e)}")
+        logger.error(f"Failed to delete video from YouTube: {str(e)}")

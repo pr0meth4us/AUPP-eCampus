@@ -10,6 +10,7 @@ const CourseCatalog = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
     const fetchData = async () => {
         try {
             const courseData = await getAllCourses();
