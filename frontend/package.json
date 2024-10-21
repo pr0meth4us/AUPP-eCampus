@@ -24,10 +24,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start-prod": "react-scripts start -prod",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start:prod": "REACT_APP_ENV=production react-scripts start",
+    "start:dev": "REACT_APP_ENV=development react-scripts start"
   },
   "eslintConfig": {
     "extends": [
