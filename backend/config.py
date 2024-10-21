@@ -17,7 +17,7 @@ class Config:
     GOOGLE_SERVICE_ACCOUNT_TYPE = os.getenv('TYPE')
     GOOGLE_PROJECT_ID = os.getenv('PROJECT_ID')
     GOOGLE_PRIVATE_KEY_ID = os.getenv('PRIVATE_KEY_ID')
-    GOOGLE_PRIVATE_KEY = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+    GOOGLE_PRIVATE_KEY = os.getenv('PRIVATE_KEY')
     GOOGLE_CLIENT_EMAIL = os.getenv('CLIENT_EMAIL')
     GOOGLE_CLIENT_ID = os.getenv('CLIENT_ID')
     GOOGLE_AUTH_URI = os.getenv('AUTH_URI')
