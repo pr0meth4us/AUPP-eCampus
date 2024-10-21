@@ -7,7 +7,20 @@ from googleapiclient.http import MediaFileUpload
 from config import Config
 from utils.logger import logger
 
-SERVICE_ACCOUNT_FILE = Config.GOOGLE_SERVICE_ACCOUNT_FILE
+SERVICE_ACCOUNT_INFO = {
+    "type": Config.GOOGLE_SERVICE_ACCOUNT_TYPE,
+    "project_id": Config.GOOGLE_PROJECT_ID,
+    "private_key_id": Config.GOOGLE_PRIVATE_KEY_ID,
+    "private_key": Config.GOOGLE_PRIVATE_KEY,
+    "client_email": Config.GOOGLE_CLIENT_EMAIL,
+    "client_id": Config.GOOGLE_CLIENT_ID,
+    "auth_uri": Config.GOOGLE_AUTH_URI,
+    "token_uri": Config.GOOGLE_TOKEN_URI,
+    "auth_provider_x509_cert_url": Config.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": Config.GOOGLE_CLIENT_X509_CERT_URL,
+    "universe_domain": Config.GOOGLE_UNIVERSE_DOMAIN
+}
+
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -16,9 +29,7 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 
 
 def get_authenticated_service():
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
+    credentials = service_account.Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=SCOPES)
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, credentials=credentials)
 
 
@@ -49,17 +60,17 @@ def upload_to_youtube(video_file, title, description, category_id='27', privacy_
     try:
         youtube = get_authenticated_service()
 
-        body = dict(
-            snippet=dict(
-                title=title,
-                description=description,
-                tags=tags.split(",") if tags else None,
-                categoryId=category_id
-            ),
-            status=dict(
-                privacyStatus=privacy_status
-            )
-        )
+        body = {
+            "snippet": {
+                "title": title,
+                "description": description,
+                "tags": tags.split(",") if tags else None,
+                "categoryId": category_id
+            },
+            "status": {
+                "privacyStatus": privacy_status
+            }
+        }
 
         insert_request = youtube.videos().insert(
             part=",".join(body.keys()),
