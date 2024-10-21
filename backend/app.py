@@ -23,6 +23,10 @@ def create_app():
             {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
         ), 500
 
+    @flask_app.route('/health')
+    def health_check():
+        return jsonify(status="healthy"), 200
+
     @flask_app.after_request
     def add_csp_headers(response):
         response.headers['Content-Security-Policy'] = (
