@@ -17,7 +17,8 @@ SERVICE_ACCOUNT_INFO = {
     "auth_uri": Config.GOOGLE_AUTH_URI,
     "token_uri": Config.GOOGLE_TOKEN_URI,
     "auth_provider_x509_cert_url": Config.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
-    "client_x509_cert_url": Config.GOOGLE_CLIENT_X509_CERT_URL
+    "client_x509_cert_url": Config.GOOGLE_CLIENT_X509_CERT_URL,
+    "universe_domain": Config.GOOGLE_UNIVERSE_DOMAIN
 }
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]

@@ -1,11 +1,5 @@
 import os
-import random
-import time
-from googleapiclient.errors import HttpError
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-from googleapiclient.http import MediaFileUpload
-from utils.logger import logger
+
 
 class Config:
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb')
@@ -20,13 +14,14 @@ class Config:
     JWT_TOKEN_LOCATION = ['headers']
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'
-    GOOGLE_SERVICE_ACCOUNT_TYPE = os.getenv('GOOGLE_SERVICE_ACCOUNT_TYPE')
-    GOOGLE_PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID')
-    GOOGLE_PRIVATE_KEY_ID = os.getenv('GOOGLE_PRIVATE_KEY_ID')
-    GOOGLE_PRIVATE_KEY = os.getenv('GOOGLE_PRIVATE_KEY').replace('\\n', '\n') 
-    GOOGLE_CLIENT_EMAIL = os.getenv('GOOGLE_CLIENT_EMAIL')
-    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-    GOOGLE_AUTH_URI = os.getenv('GOOGLE_AUTH_URI')
-    GOOGLE_TOKEN_URI = os.getenv('GOOGLE_TOKEN_URI')
-    GOOGLE_AUTH_PROVIDER_X509_CERT_URL = os.getenv('GOOGLE_AUTH_PROVIDER_X509_CERT_URL')
-    GOOGLE_CLIENT_X509_CERT_URL = os.getenv('GOOGLE_CLIENT_X509_CERT_URL')
+    GOOGLE_SERVICE_ACCOUNT_TYPE = os.getenv('TYPE')
+    GOOGLE_PROJECT_ID = os.getenv('PROJECT_ID')
+    GOOGLE_PRIVATE_KEY_ID = os.getenv('PRIVATE_KEY_ID')
+    GOOGLE_PRIVATE_KEY = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+    GOOGLE_CLIENT_EMAIL = os.getenv('CLIENT_EMAIL')
+    GOOGLE_CLIENT_ID = os.getenv('CLIENT_ID')
+    GOOGLE_AUTH_URI = os.getenv('AUTH_URI')
+    GOOGLE_TOKEN_URI = os.getenv('TOKEN_URI')
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL = os.getenv('AUTH_PROVIDER_X509_CERT_URL')
+    GOOGLE_CLIENT_X509_CERT_URL = os.getenv('CLIENT_X509_CERT_URL')
+    GOOGLE_UNIVERSE_DOMAIN = os.getenv('UNIVERSE_DOMAIN')
