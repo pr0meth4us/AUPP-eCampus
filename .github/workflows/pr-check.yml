@@ -66,8 +66,10 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
           sudo mv /home/runner/.koyeb/bin/koyeb /usr/local/bin/
 
-      - name: Login to Koyeb
-        run: koyeb login --token ${{ secrets.KOYEB_API_TOKEN }}
+      - name: Create Koyeb Config File
+        run: |
+          mkdir -p ~/.koyeb
+          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > ~/.koyeb/koyeb.yaml
 
       - name: Deploy and Wait for Status
         run: |
@@ -115,8 +117,10 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
           sudo mv /home/runner/.koyeb/bin/koyeb /usr/local/bin/
 
-      - name: Login to Koyeb
-        run: koyeb login --token ${{ secrets.KOYEB_API_TOKEN }}
+      - name: Create Koyeb Config File
+        run: |
+          mkdir -p ~/.koyeb
+          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > ~/.koyeb/koyeb.yaml
 
       - name: Verify Deployment Status
         run: |
@@ -126,6 +130,6 @@ jobs:
           if [ "$STATUS" == "READY" ]; then
             echo "Deployment verified successfully!"
             exit 0
-          else:
+          else
             echo "Deployment verification failed! Status: $STATUS"
             exit 1
