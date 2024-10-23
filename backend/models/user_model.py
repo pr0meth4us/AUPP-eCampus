@@ -114,7 +114,8 @@ class Instructor(User):
 
 class Admin(User):
     def __init__(self, name, email, password):
-        super().__init__(name, email, password, role='admin')
+        super().__init__(name, email, password)
+        self.role = 'admin'
         self.token = Config.ADMIN_TOKEN
 
     def save_to_db(self):
@@ -125,7 +126,7 @@ class Admin(User):
             'name': self.name,
             'email': self.email,
             'password_hash': self.password_hash,
-            'role': self.role
+            'role': self.role,
         }
         db.users.insert_one(admin_data)
 
@@ -147,3 +148,19 @@ class Admin(User):
             }
             for user in users
         ]
+
+    @staticmethod
+    def update_user(user_id, new_name=None, new_email=None, new_password=None):
+        update_data = {}
+        if new_name:
+            update_data['name'] = new_name
+        if new_email:
+            if User.is_email_taken(new_email):
+                raise ValueError(f"Email '{new_email}' is already in use.")
+            update_data['email'] = new_email
+        if new_password:
+            update_data['password_hash'] = generate_password_hash(new_password)
+
+        result = db.users.update_one({'_id': ObjectId(user_id)}, {'$set': update_data})
+        if result.modified_count == 0:
+            raise ValueError("User not found or no changes made.")
