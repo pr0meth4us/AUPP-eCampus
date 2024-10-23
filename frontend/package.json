@@ -5,14 +5,15 @@
   "dependencies": {
     "@dgtdept/rachana": "^1.0.3",
     "@nextui-org/button": "^2.0.38",
-    "@nextui-org/react": "^2.4.8",
     "@nextui-org/card": "^2.0.34",
     "@nextui-org/input": "^2.2.5",
+    "@nextui-org/react": "^2.4.8",
     "@nextui-org/spacer": "^2.0.33",
     "@nextui-org/system": "^2.2.6",
     "@nextui-org/theme": "^2.2.11",
     "axios": "^1.7.7",
     "bootstrap-icons": "^1.11.3",
+    "cross-env": "^7.0.3",
     "framer-motion": "^11.11.9",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.5",
@@ -27,8 +28,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "start:prod": "REACT_APP_ENV=production react-scripts start",
-    "start:dev": "REACT_APP_ENV=development react-scripts start"
+    "start:prod": "cross-env REACT_APP_ENV=production react-scripts start",
+    "start:dev": "cross-env REACT_APP_ENV=development react-scripts start"
   },
   "eslintConfig": {
     "extends": [
