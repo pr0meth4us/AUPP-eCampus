@@ -18,7 +18,7 @@ def create_app():
     from routes.course_routes import course_bp
     flask_app.register_blueprint(auth_bp, url_prefix='/auth')
     flask_app.register_blueprint(admin_bp, url_prefix='/admin')
-    flask_app.register_blueprint(student_bp, url_prefix='/')
+    flask_app.register_blueprint(student_bp, url_prefix='/students')
     flask_app.register_blueprint(course_bp, url_prefix='/courses')
 
     @flask_app.errorhandler(500)
