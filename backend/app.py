@@ -28,6 +28,10 @@ def create_app():
     def health_check():
         return jsonify(status="healthy"), 200
 
+    @flask_app.route('/')
+    def home():
+        return jsonify(message="AUPP eCampus Backend up and running"), 200
+
     @flask_app.after_request
     def add_csp_headers(response):
         response.headers['Content-Security-Policy'] = (
