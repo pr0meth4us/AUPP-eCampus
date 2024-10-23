@@ -67,7 +67,7 @@ jobs:
           sudo mv /home/runner/.koyeb/bin/koyeb /usr/local/bin/
 
       - name: Login to Koyeb
-        run: koyeb auth login --token ${{ secrets.KOYEB_API_TOKEN }}
+        run: koyeb login --token ${{ secrets.KOYEB_API_TOKEN }}
 
       - name: Deploy and Wait for Status
         run: |
@@ -116,7 +116,7 @@ jobs:
           sudo mv /home/runner/.koyeb/bin/koyeb /usr/local/bin/
 
       - name: Login to Koyeb
-        run: koyeb login -t ${{ secrets.KOYEB_API_TOKEN }}
+        run: koyeb login --token ${{ secrets.KOYEB_API_TOKEN }}
 
       - name: Verify Deployment Status
         run: |
