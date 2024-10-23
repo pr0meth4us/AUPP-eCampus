@@ -23,7 +23,7 @@ jobs:
 
       - name: Deploy to Koyeb
         run: |
-          APP_NAME="bf364295-c7fb-47cf-ad00-224df2656571"
+          APP_NAME=9d14690f
           
           # Deploy to Koyeb using git repository
           koyeb service update $APP_NAME \
