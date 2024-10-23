@@ -68,8 +68,7 @@ jobs:
 
       - name: Create Koyeb Config File
         run: |
-          mkdir -p ~/.koyeb
-          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > ~/.koyeb/koyeb.yaml
+          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > $HOME/.koyeb.yaml
 
       - name: Deploy and Wait for Status
         run: |
@@ -119,8 +118,7 @@ jobs:
 
       - name: Create Koyeb Config File
         run: |
-          mkdir -p ~/.koyeb
-          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > ~/.koyeb/koyeb.yaml
+          echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > $HOME/.koyeb.yaml
 
       - name: Verify Deployment Status
         run: |
