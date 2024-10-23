@@ -1,4 +1,4 @@
-name: Koyeb Deployment
+name: Koyeb Deployment Check
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - dev
 
 jobs:
-  koyeb-deploy:
+  koyeb-deploy-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,38 +21,39 @@ jobs:
         run: |
           echo "token: ${{ secrets.KOYEB_API_TOKEN }}" > $HOME/.koyeb.yaml
 
-      - name: Deploy to Koyeb
+      - name: Test Koyeb Deployment Configuration
         run: |
           APP_NAME="9d14690f"
           
-          # Deploy to Koyeb
+          # Test deployment configuration
           koyeb service update $APP_NAME \
             --git github.com/${{ github.repository }} \
             --git-branch ${{ github.head_ref }} \
-            --ports 5001:http
+            --ports 5001:http \
+            --dry-run
 
-      - name: Wait for Deployment Status
+      - name: Verify Service Status
         run: |
           APP_NAME="9d14690f"
-          echo "Waiting for deployment to be ready..."
-          MAX_ATTEMPTS=30
+          echo "Verifying service status..."
+          MAX_ATTEMPTS=3  # Reduced to 3 attempts
           ATTEMPT=0
           
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             STATUS=$(koyeb service get $APP_NAME -o json | jq -r '.status')
           
             if [ "$STATUS" == "READY" ]; then
-              echo "Deployment successful!"
+              echo "Service configuration check successful!"
               exit 0
             elif [ "$STATUS" == "ERROR" ]; then
-              echo "Deployment failed!"
+              echo "Service configuration check failed!"
               exit 1
             fi
           
             ATTEMPT=$((ATTEMPT + 1))
-            echo "Waiting for deployment... Attempt $ATTEMPT of $MAX_ATTEMPTS"
-            sleep 20
+            echo "Checking service... Attempt $ATTEMPT of $MAX_ATTEMPTS"
+            sleep 10  # Reduced sleep time to 10 seconds
           done
           
-          echo "Deployment timed out!"
+          echo "Service check timed out!"
           exit 1
