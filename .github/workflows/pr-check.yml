@@ -54,7 +54,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  koyeb-preview:
+  koyeb-deploy:
     needs: docker-build
     runs-on: ubuntu-latest
 
@@ -69,13 +69,64 @@ jobs:
       - name: Login to Koyeb
         run: koyeb login -t ${{ secrets.KOYEB_API_TOKEN }}
 
-      - name: Deploy Preview
+      - name: Deploy and Wait for Status
         run: |
-          BRANCH_NAME=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
-          koyeb service create $BRANCH_NAME-preview \
+          APP_NAME="production-thundering-sharai/aupp-ecampus"
+          
+          # Deploy to Koyeb
+          koyeb service update $APP_NAME \
             --docker ${{ github.repository }}:${{ github.sha }} \
             --ports 5001:http \
-            --routes /$BRANCH_NAME-preview:5001 \
             --env FLASK_APP=app.py \
             --env FLASK_RUN_HOST=0.0.0.0 \
             --env FLASK_RUN_PORT=5001
+          
+          # Wait for deployment to be ready
+          echo "Waiting for deployment to be ready..."
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATUS=$(koyeb service get $APP_NAME -o json | jq -r '.status')
+          
+            if [ "$STATUS" == "READY" ]; then
+              echo "Deployment successful!"
+              exit 0
+            elif [ "$STATUS" == "ERROR" ]; then
+              echo "Deployment failed!"
+              exit 1
+            fi
+          
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Waiting for deployment... Attempt $ATTEMPT of $MAX_ATTEMPTS"
+            sleep 20
+          done
+          
+          echo "Deployment timed out!"
+          exit 1
+
+  verify-deployment:
+    needs: koyeb-deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Koyeb CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
+          sudo mv ./koyeb /usr/local/bin/
+
+      - name: Login to Koyeb
+        run: koyeb login -t ${{ secrets.KOYEB_API_TOKEN }}
+
+      - name: Verify Deployment Status
+        run: |
+          APP_NAME="production-thundering-sharai/aupp-ecampus"
+          STATUS=$(koyeb service get $APP_NAME -o json | jq -r '.status')
+          
+          if [ "$STATUS" == "READY" ]; then
+            echo "Deployment verified successfully!"
+            exit 0
+          else
+            echo "Deployment verification failed! Status: $STATUS"
+            exit 1
+          fi
