@@ -23,14 +23,13 @@ jobs:
 
       - name: Test Koyeb Deployment Configuration
         run: |
-          APP_NAME="9d14690f"
+          APP_NAME=9d14690f
           
           # Test deployment configuration
           koyeb service update $APP_NAME \
             --git github.com/${{ github.repository }} \
             --git-branch ${{ github.head_ref }} \
             --ports 5001:http \
-            --dry-run
 
       - name: Verify Service Status
         run: |
