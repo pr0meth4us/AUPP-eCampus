@@ -23,7 +23,8 @@ class StudentController:
 
     @staticmethod
     def get_student_profile(student_id):
-        student = db.users.find_one({"student_id": student_id})
+        print("dsfafsa",student_id)
+        student = db.users.find_one({"_id": ObjectId(student_id)})
         if student:
             student['_id'] = str(student['_id'])
             return jsonify(student)
@@ -41,7 +42,7 @@ class StudentController:
             "updated_at": datetime.now(timezone.utc)
         }
         try:
-            Student.update_user(student_id,
+            Student.update_user(ObjectId(student_id),
                                 new_name=updated_data.get("name"),
                                 new_email=updated_data.get("email"),
                                 new_password=data.get("password"))
