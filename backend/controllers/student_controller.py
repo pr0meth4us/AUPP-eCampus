@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from services.mongo_service import db
-from datetime import datetime, timezone  # Import timezone
+from datetime import datetime, timezone
 from models.user_model import Student
 import os
 
@@ -12,12 +12,11 @@ class StudentController:
         student = Student(
             name=data.get("name"),
             email=data.get("email"),
-            password=data.get("password"),  # Password will be hashed in the Student class
+            password=data.get("password"),
             bio=data.get("bio"),
             courses_enrolled=data.get("courses_enrolled", []),
             profile_image=data.get("profile_image", "")
         )
-        # Save student to the database
         student.save_to_db()
         return jsonify({"message": "Student profile created successfully"}), 201
 
@@ -44,9 +43,9 @@ class StudentController:
         # Use the User model's update_user method to update the student's info
         try:
             Student.update_user(student_id,
-                                 new_name=updated_data.get("name"),
-                                 new_email=updated_data.get("email"),
-                                 new_password=data.get("password"))  # Pass password if updating
+                                new_name=updated_data.get("name"),
+                                new_email=updated_data.get("email"),
+                                new_password=data.get("password"))  # Pass password if updating
             return jsonify({"message": "Student profile updated successfully"}), 200
         except ValueError:
             return jsonify({"message": "Student not found or no changes made."}), 404
@@ -68,7 +67,6 @@ class StudentController:
         image_path = os.path.join(upload_folder, image.filename)
         image.save(image_path)
 
-        # Update the student's profile with the new image path
         updated_data = {
             "profile_image": image_path,
             "updated_at": datetime.now(timezone.utc)  # Ensure you're using timezone-aware datetime
@@ -79,8 +77,6 @@ class StudentController:
             return jsonify({"message": "Profile image uploaded successfully", "image_path": image_path}), 200
         else:
             return jsonify({"message": "Student not found"}), 404
-
-
 
     @staticmethod
     def delete_student_profile(student_id):

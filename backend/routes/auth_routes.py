@@ -30,6 +30,6 @@ def verify_otp_and_register():
     return register(data)
 
 
-@auth_bp.route('/sign out', methods=['POST'])
+@auth_bp.route('/signout', methods=['POST'])
 def sign_out():
     return logout()

@@ -10,8 +10,6 @@ from utils.token_utils import create_token
 from models.otp_model import OTP
 
 
-
-
 def check_email(data):
     email = data.get('email')
     if User.find_by_email(email):
@@ -30,41 +28,35 @@ def register(data):
         user_classes = {'student': User, 'instructor': Instructor, 'admin': Admin}
         user_class = user_classes.get(role)
 
-        # Verify admin token for admin role
         if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
             return jsonify({'message': 'Invalid admin token.'}), 403
 
-        # General user creation
         user_data = {
             "name": data['name'],
             "email": email,
-            "password": data['password'],  # Assuming password hashing elsewhere
+            "password": data['password'],
             "role": role,
-            "profile_image": data.get("profile_image", ""),  # Optional
+            "profile_image": data.get("profile_image", ""),
             "created_at": datetime.now(),
         }
 
-        # Role-specific data
         if role == 'student':
             user_data['student_profile'] = {
-                "student_id": data.get("student_id"),
                 "bio": data.get("bio", ""),
-                "courses_enrolled": [],  # Initialize as empty
+                "courses_enrolled": [],
             }
         elif role == 'instructor':
             user_data['instructor_profile'] = {
                 "expertise": data.get("expertise", ""),
-                "courses_taught": []  # Initialize as empty
+                "courses_taught": []
             }
 
-        # Save user to the database
         user = user_class(**user_data)
-        user.save_to_db() # Resolved!
+        user.save_to_db()
 
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
-
 
 
 def login_user(data):
