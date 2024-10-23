@@ -3,6 +3,7 @@ from services.mongo_service import init_mongo
 from config import Config
 import traceback
 
+
 def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(Config)
