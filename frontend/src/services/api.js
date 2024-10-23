@@ -20,11 +20,10 @@ export const register = async (name, email, password, role, otp, token = null, c
     return response.data;
 };
 
-export const registerInstructor = async (name, email, password) => {
-    const response = await api.post(`/admin/instructor-register`, { name, email, password });
+export const registerUser = async (name, email, password, role) => {
+    const response = await api.post(`/admin/register`, { name, email, password, role });
     return response.data;
 };
-
 export const logout = async () => {
     const response = await api.post('/auth/logout');
     return response.data;
@@ -41,7 +40,6 @@ export const getAllUsers = async () => {
 };
 
 
-
 export const deleteUser = async (userId) => {
     const response = await api.delete(`/admin/delete-user/${userId}`);
     return response.data;
@@ -51,3 +49,53 @@ export const updateUser = async (userId, userData) => {
     const response = await api.put(`/admin/update-user/${userId}`, userData)
     return response.data;
 };
+
+export const createCourse = async (formData) => {
+    const response = await api.post('/courses/', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+
+
+export const getAllCourses = async () => {
+    const response = await api.get('/courses/');
+    return response.data;
+};
+
+export const updateCourse = async (courseId, courseData) => {
+    const response = await api.put(`/courses/${courseId}`, courseData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+export const deleteCourse = async (courseId) => {
+    const response = await api.delete(`/courses/${courseId}`);
+    return response.data;
+};
+
+
+export const fetchTags = async () =>{
+    const response = await api.get(`/courses/tags`)
+    return response.data;
+}
+
+
+export const fetchMajors = async () =>{
+    const response = await api.get('/courses/majors')
+    return response.data;
+}
+
+export const fetchAllVideos = async () =>{
+    const response = await api.get('/admin/get-video')
+    return response.data
+}
+
+export const deleteVideo = async (video_id) =>{
+    const response = await api.delete(`/admin/delete-video/${video_id}`)
+    return response.data
+}
