@@ -3,8 +3,7 @@ from datetime import datetime
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
-from models.authentication_model import Authentication
-from models.user_model import User, Admin, Instructor
+from models.user_model import User, Student, Admin, Instructor
 from services.mail_service import send_mail
 from utils.token_utils import create_token
 from models.otp_model import OTP
@@ -12,8 +11,10 @@ from models.otp_model import OTP
 
 def check_email(data):
     email = data.get('email')
-    if User.find_by_email(email):
-        return jsonify({'message': 'Email already exists.'}), 409
+    try:
+        User.is_email_taken(email)
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
 
     otp = OTP.create_otp(email)
     send_mail(email, otp)
@@ -24,13 +25,21 @@ def register(data):
     email = data.get('email')
     received_otp = data.get('otp')
     role = data.get('role')
+    if User.find_by_email(email):
+        return jsonify({'message': 'Email already exists.'}), 409
     if OTP.verify_otp(email, int(received_otp)):
-        user_classes = {'student': User, 'instructor': Instructor, 'admin': Admin}
+        user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
         user_class = user_classes.get(role)
 
         if role == 'admin' and data.get('token') != Config.ADMIN_TOKEN:
             return jsonify({'message': 'Invalid admin token.'}), 403
 
+        user = user_class(name=data['name'], email=email, password=data['password'])
+        try:
+            user.save_to_db()
+            return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+        except ValueError as e:
+            return jsonify({'message': str(e)}), 400
         user_data = {
             "name": data['name'],
             "email": email,
@@ -69,8 +78,6 @@ def login_user(data):
     if user and User.verify_password(user['password_hash'], data['password']):
         user_id_str = str(user['_id'])
         token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
-        auth = Authentication(user_id=user['_id'], token=token)
-        auth.save_to_db()
 
         response = make_response(jsonify({
             'message': 'Login successful',

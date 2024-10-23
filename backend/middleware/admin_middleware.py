@@ -1,7 +1,5 @@
 from functools import wraps
-
 from flask import request, jsonify
-
 from utils.token_utils import extract_role_from_token
 
 
@@ -13,7 +11,7 @@ def require_admin(f):
         if not token:
             return jsonify({'message': 'Authentication token is missing.'}), 401
 
-        role = extract_role_from_token(token)
+        role, _id = extract_role_from_token(token)
         if not role or role != 'admin':
             return jsonify({'message': 'Unauthorized. Admins only.'}), 403
 
