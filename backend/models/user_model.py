@@ -65,10 +65,10 @@ class User:
 
 
 class Student(User):
-    def __init__(self, name, email, password, bio=None):
+    def __init__(self, name, email, password, bio=None, courses_enrolled=None, profile_image=None):
         super().__init__(name, email, password, bio, role='student')
-        self.courses_enrolled = []
-        self.profile_image = None
+        self.courses_enrolled = courses_enrolled if courses_enrolled is not None else []
+        self.profile_image = profile_image  # Initialize with None or a default value
 
     def save_to_db(self):
         student_data = {
