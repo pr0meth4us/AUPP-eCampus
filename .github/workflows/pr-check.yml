@@ -12,20 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          python-version: '3.13'
 
       - name: Install dependencies
-        run: npm ci
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run tests
-        run: npm test
+        working-directory: ./backend
+        run: |
+          python -m pytest
 
-      - name: Build check
-        run: npm run build
+      - name: Build and test Docker image
+        run: |
+          docker build -t myapp-backend:test -f backend/Dockerfile .
+          docker run --rm myapp-backend:test python -c "import flask; print('Flask installation OK')"
 
   koyeb-preview:
     needs: test
@@ -43,6 +49,9 @@ jobs:
           KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
         run: |
           koyeb app init preview-${{ github.head_ref }} \
-            --git ${{ github.repository }} \
+            --docker ${{ github.repository }} \
             --branch ${{ github.head_ref }} \
-            --type web
+            --ports 5001:http \
+            --env FLASK_APP=app.py \
+            --env FLASK_RUN_HOST=0.0.0.0 \
+            --env FLASK_RUN_PORT=5001
