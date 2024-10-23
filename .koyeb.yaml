@@ -1,0 +1,15 @@
+app: aupp-ecampus
+service:
+  name: ecampus
+  instance:
+    type: nano
+    ports:
+      - port: 5001
+        protocol: http
+    env:
+      - name: FLASK_APP
+        value: app.py
+      - name: FLASK_RUN_HOST
+        value: 0.0.0.0
+      - name: FLASK_RUN_PORT
+        value: "5001"

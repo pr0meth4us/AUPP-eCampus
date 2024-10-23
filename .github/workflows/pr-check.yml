@@ -25,17 +25,15 @@ jobs:
         run: |
           APP_NAME="bf364295-c7fb-47cf-ad00-224df2656571"
           
-          # Deploy to Koyeb
+          # Deploy to Koyeb using git repository
           koyeb service update $APP_NAME \
-            --docker ${{ github.repository }}:${{ github.sha }} \
-            --ports 5001:http \
-            --env FLASK_APP=app.py \
-            --env FLASK_RUN_HOST=0.0.0.0 \
-            --env FLASK_RUN_PORT=5001
+            --git ${{ github.repository }} \
+            --git-branch ${{ github.head_ref }} \
+            --ports 5001:http
 
       - name: Wait for Deployment Status
         run: |
-          APP_NAME="production-thundering-sharai/aupp-ecampus"
+          APP_NAME="bf364295-c7fb-47cf-ad00-224df2656571"  # Using same APP_NAME as above
           echo "Waiting for deployment to be ready..."
           MAX_ATTEMPTS=30
           ATTEMPT=0
