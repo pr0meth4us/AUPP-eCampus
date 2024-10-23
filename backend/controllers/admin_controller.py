@@ -48,4 +48,3 @@ def admin_register(data):
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
     except ValueError as e:
         return jsonify({'message': str(e)}), 400
-

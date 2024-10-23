@@ -26,7 +26,9 @@ class CourseController:
                     'title': course.get('title'),
                     'description': course.get('description'),
                     'instructor_id': str(course['instructor_id']),
-                    'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',                    'uploader_id': str(course['uploader_id']),
+                    'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown'))
+                    if User.find_by_id(course['instructor_id']) else 'Unknown',
+                    'uploader_id': str(course['uploader_id']),
                     'video_url': course.get('video_url'),
                     'thumbnail_url': course.get('thumbnail_url'),
                     'major_ids': [str(mid) for mid in course.get('major_ids', [])],
@@ -139,7 +141,8 @@ class CourseController:
 
         created_tags = CourseController.create_tags(data['tag_names'])
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
-        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                        data['description'])
         course = Course(
             title=data['title'],
             description=data['description'],
@@ -174,7 +177,8 @@ class CourseController:
         )
 
         if data['video_file']:
-            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                                data['description'])
 
             current_video_url = current_course.get('video_url')
             if 'youtube.com' in current_video_url:

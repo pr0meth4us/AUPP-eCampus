@@ -1,5 +1,3 @@
-import uuid
-
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
