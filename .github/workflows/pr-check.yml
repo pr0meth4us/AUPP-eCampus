@@ -10,48 +10,72 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          cache: 'pip'
 
       - name: Install dependencies
         working-directory: ./backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest flake8
+
+      - name: Run linting
+        working-directory: ./backend
+        run: flake8 . --max-line-length=120
 
       - name: Run tests
         working-directory: ./backend
-        run: |
-          python -m pytest
+        run: pytest
 
-      - name: Build and test Docker image
-        run: |
-          docker build -t myapp-backend:test -f backend/Dockerfile .
-          docker run --rm myapp-backend:test python -c "import flask; print('Flask installation OK')"
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          load: true
+          tags: app:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   koyeb-preview:
-    needs: test
+    needs: docker-build
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Koyeb CLI
         run: |
-          curl -fsSL https://cli.koyeb.com/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
+          sudo mv ./koyeb /usr/local/bin/
 
-      - name: Deploy Preview to Koyeb
-        env:
-          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
+      - name: Login to Koyeb
+        run: koyeb login -t ${{ secrets.KOYEB_API_TOKEN }}
+
+      - name: Deploy Preview
         run: |
-          koyeb app init preview-${{ github.head_ref }} \
-            --docker ${{ github.repository }} \
-            --branch ${{ github.head_ref }} \
+          BRANCH_NAME=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          koyeb service create $BRANCH_NAME-preview \
+            --docker ${{ github.repository }}:${{ github.sha }} \
             --ports 5001:http \
+            --routes /$BRANCH_NAME-preview:5001 \
             --env FLASK_APP=app.py \
             --env FLASK_RUN_HOST=0.0.0.0 \
             --env FLASK_RUN_PORT=5001
