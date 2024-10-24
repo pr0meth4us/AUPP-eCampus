@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Accordion, Table, Modal } from 'react-bootstrap';
-import { deleteUser, updateUser, registerUser } from '../../services/api';
+import {admin} from '../../services';
 
 const ManageUsers = ({ users, fetchData }) => {
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: '' });
@@ -16,7 +16,7 @@ const ManageUsers = ({ users, fetchData }) => {
     const handleUserRegister = async (e) => {
         e.preventDefault();
         try {
-            await registerUser(newUser.name, newUser.email, newUser.password, newUser.role);
+            await admin.registerUser(newUser.name, newUser.email, newUser.password, newUser.role);
 
             fetchData();
             setNewUser({ name: '', email: '', password: '', role: '' });
@@ -32,7 +32,7 @@ const ManageUsers = ({ users, fetchData }) => {
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                await deleteUser(userId);
+                await admin.deleteUser(userId);
                 fetchData();
                 setNotification({ message: 'User deleted successfully.', type: 'success' });
             } catch (error) {
@@ -44,7 +44,7 @@ const ManageUsers = ({ users, fetchData }) => {
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         try {
-            await updateUser(editUser.id, editUser);
+            await admin.updateUser(editUser.id, editUser);
             fetchData();
             setEditUser(null);
             setShowEditModal(false);

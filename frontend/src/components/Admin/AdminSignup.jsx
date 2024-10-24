@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { register } from "../../services/api";
+import {useAuth} from "../../context/authContext";
 
 const Signup = () => {
+    const { signup } = useAuth();
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
@@ -13,7 +14,7 @@ const Signup = () => {
 
     const handleSignup = async () => {
         try {
-            await register(name, email, password, "admin", token);
+            await signup(name, email, password, "admin", token);
             navigate('/admin/dashboard');
 
         } catch (err) {

@@ -1,13 +1,13 @@
 import { Accordion, Button, Table } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import { fetchAllVideos, deleteVideo as apiDeleteVideo } from "../../services/api"; // Rename to avoid shadowing
+import { admin } from "../../services"; // Rename to avoid shadowing
 
 const ManageVideos = () => {
     const [videos, setVideos] = useState([]);
 
     useEffect(() => {
         const fetchVideosContent = async () => {
-            const videoData = await fetchAllVideos(); // Call the fetch function
+            const videoData = await admin.fetchAllVideos(); // Call the fetch function
             setVideos(videoData); // Update state with the fetched video data
         };
 
@@ -16,7 +16,7 @@ const ManageVideos = () => {
 
     const handleDeleteVideo = async (public_id) => {
         try {
-            await apiDeleteVideo(public_id); // Use the renamed deleteVideo function
+            await admin.deleteVideo(public_id); // Use the renamed deleteVideo function
             setVideos((prevVideos) => prevVideos.filter(video => video.public_id !== public_id)); // Remove deleted video from state
             console.log(`Video with ID ${public_id} deleted successfully.`);
         } catch (error) {

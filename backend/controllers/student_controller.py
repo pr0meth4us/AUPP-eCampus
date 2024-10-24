@@ -23,7 +23,6 @@ class StudentController:
 
     @staticmethod
     def get_student_profile(student_id):
-        print("dsfafsa",student_id)
         student = db.users.find_one({"_id": ObjectId(student_id)})
         if student:
             student['_id'] = str(student['_id'])
