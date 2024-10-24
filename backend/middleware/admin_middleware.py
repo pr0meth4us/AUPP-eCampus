@@ -1,20 +1,14 @@
 from functools import wraps
-from flask import request, jsonify
-from utils.token_utils import extract_role_from_token
+from flask import g, jsonify
+from .auth_middleware import token_required
 
 
 def require_admin(f):
+    """Middleware to ensure user is an admin."""
     @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get('auth_token')
-
-        if not token:
-            return jsonify({'message': 'Authentication token is missing.'}), 401
-
-        role, _id = extract_role_from_token(token)
-        if not role or role != 'admin':
+    @token_required
+    def decorated(*args, **kwargs):
+        if g.current_user['role'] != 'admin':
             return jsonify({'message': 'Unauthorized. Admins only.'}), 403
-
         return f(*args, **kwargs)
-
-    return decorated_function
+    return decorated

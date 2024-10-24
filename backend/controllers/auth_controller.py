@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
@@ -38,6 +40,30 @@ def register(data):
             return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
         except ValueError as e:
             return jsonify({'message': str(e)}), 400
+        user_data = {
+            "name": data['name'],
+            "email": email,
+            "password": data['password'],
+            "role": role,
+            "profile_image": data.get("profile_image", ""),
+            "created_at": datetime.now(),
+        }
+
+        if role == 'student':
+            user_data['student_profile'] = {
+                "bio": data.get("bio", ""),
+                "courses_enrolled": [],
+            }
+        elif role == 'instructor':
+            user_data['instructor_profile'] = {
+                "expertise": data.get("expertise", ""),
+                "courses_taught": []
+            }
+
+        user = user_class(**user_data)
+        user.save_to_db()
+
+        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
     else:
         return jsonify({'message': 'Invalid or expired OTP.'}), 401
 
