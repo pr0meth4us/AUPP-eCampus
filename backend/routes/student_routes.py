@@ -18,8 +18,8 @@ def get_student(student_id):
 
 @student_bp.route('/<student_id>', methods=['PUT'])
 @own_profile_required
-def update_student(student_id):
-    return StudentController.update_student_profile(student_id)
+def update_student():
+    return StudentController.update_student_profile()
 
 
 @student_bp.route('/<student_id>', methods=['DELETE'])
