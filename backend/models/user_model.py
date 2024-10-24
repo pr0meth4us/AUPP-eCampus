@@ -72,6 +72,36 @@ class User:
             {'$set': {'courses': self.courses}}
         )
 
+    def update_self(self, new_name: Optional[str] = None,
+                    new_email: Optional[str] = None,
+                    new_password: Optional[str] = None,
+                    new_bio: Optional[str] = None,
+                    new_profile_image: Optional[str] = None) -> None:
+        """Allow the user to update their own information."""
+        update_data = {}
+        if new_name:
+            update_data['name'] = new_name
+        if new_email:
+            if self.is_email_taken(new_email):
+                raise ValueError(f"Email '{new_email}' is already in use.")
+            update_data['email'] = new_email
+        if new_password:
+            update_data['password_hash'] = generate_password_hash(new_password)
+        if new_bio is not None:
+            update_data['bio'] = new_bio
+        if new_profile_image is not None:
+            update_data['profile_image'] = new_profile_image
+
+        if not update_data:
+            raise ValueError("No fields to update.")
+
+        result = db.users.update_one(
+            {'email': self.email},
+            {'$set': update_data}
+        )
+        if result.modified_count == 0:
+            raise ValueError("User not found or no changes made.")
+
 
 class Student(User):
     """Student user model."""

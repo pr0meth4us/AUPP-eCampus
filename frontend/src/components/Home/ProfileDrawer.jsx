@@ -41,40 +41,8 @@ export default function DrawerButton({ id }) {
                     id={`${id}-label`}
                     className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400"
                 >
-                    <svg
-                        className="w-4 h-4 mr-2.5"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                    >
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-                    </svg>
                     Profile
                 </h5>
-
-                <button
-                    type="button"
-                    onClick={toggleDrawer}
-                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 right-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                    <svg
-                        className="w-3 h-3"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 14 14"
-                    >
-                        <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                        />
-                    </svg>
-                    <span className="sr-only">Close menu</span>
-                </button>
 
                 {/* Profile Section */}
                 <div className="flex items-center mb-4">
@@ -85,7 +53,7 @@ export default function DrawerButton({ id }) {
                     />
                     <div>
                         <a
-                            href={`/profile/${user.email}`}
+                            href={`/profile/${user._id}`} // Use the hashed user ID
                             className="text-lg font-semibold text-gray-800 dark:text-gray-200 hover:underline"
                         >
                             {user.name || 'No Name Provided'}
@@ -96,24 +64,7 @@ export default function DrawerButton({ id }) {
                     </div>
                 </div>
 
-                <h6 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Courses:
-                </h6>
-                <a
-                    href="/courses"
-                    className="text-blue-600 hover:underline mb-4"
-                >
-                    View all courses
-                </a>
-
-                {user.role === 'instructor' && (
-                    <div>
-                        <h6 className="font-semibold text-gray-700 dark:text-gray-300">Expertise:</h6>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            {user.expertise || 'No expertise provided'}
-                        </p>
-                    </div>
-                )}
+                {/* Other drawer content */}
             </div>
         </>
     );

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import bcrypt from 'bcryptjs';
 
 const ProfilePage = () => {
-    const { email } = useParams();
+    const { id } = useParams();
     const { user } = useAuth();
 
-    const isOwnProfile = user.email === email;
+    const isOwnProfile = user._id === id;
 
     return (
         <div className="container mx-auto p-4">
@@ -20,7 +21,7 @@ const ProfilePage = () => {
                 <div>
                     <h2 className="text-xl font-semibold">{user.name || 'No Name Provided'}</h2>
                     <p className="text-gray-600">{user.role || 'Not specified'}</p>
-                    <p className="text-gray-500">{email}</p>
+                    <p className="text-gray-500">{user.email}</p>
                 </div>
             </div>
 
