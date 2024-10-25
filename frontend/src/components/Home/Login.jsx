@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useNavigate } from 'react-router-dom';
 import Recaptcha from '../Recaptcha';
+import '../../assets/css/elements/login.css';
+
 
 const LoginPage = () => {
     const { login } = useAuth();
