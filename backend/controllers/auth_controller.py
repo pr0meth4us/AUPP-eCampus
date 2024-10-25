@@ -74,7 +74,7 @@ def login_user(data):
         return jsonify(
             {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
-    user = User.find_by_email_and_role(data['email'], role)
+    user = User.find_by_email(data['email'])
     if user and User.verify_password(user['password_hash'], data['password']):
         user_id_str = str(user['_id'])
         token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
@@ -107,8 +107,21 @@ def check_auth():
     if not user:
         return jsonify({"authenticated": False, "message": "User not found"}), 401
 
-    return jsonify({"authenticated": True, "user": {"role": user['role']}}), 200
+    # Create a copy of the user dict and remove sensitive information
+    user_data = user.copy()
+    user_data.pop('password_hash', None)  # Remove password hash if present
 
+    # Convert ObjectId to string for JSON serialization
+    user_data['_id'] = str(user_data['_id'])
+
+    # Handle courses for admin (ensure it's not included)
+    if user_data.get('role') == 'admin':
+        user_data.pop('courses', None)
+
+    return jsonify({
+        "authenticated": True,
+        "user": user_data
+    }), 200
 
 def logout():
     response = make_response(jsonify({"message": "Successfully logged out"}), 200)
