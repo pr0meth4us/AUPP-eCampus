@@ -1,0 +1,13 @@
+/* login.css */
+.modal {
+    z-index: 1500 !important; /* Ensure it is above any other content */
+}
+
+.modal-backdrop {
+    z-index: 1100 !important; /* Make sure backdrop is just below the modal */
+}
+
+/* Lower the z-index of fixed elements like the header or banner */
+.fixed-top {
+    z-index: 2000!important;
+}
