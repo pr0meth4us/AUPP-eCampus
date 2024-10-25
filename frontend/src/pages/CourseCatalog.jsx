@@ -22,35 +22,34 @@ const CourseCatalog = () => {
         }
     };
     return (
-        <>
-            <Header />
-            <div style={{ minHeight: '100vh' }}>
-                {loading ? (
-                    <CardVideoSkeleton />
-                ) : (
-                    <Container>
-                        <Row className="g-4">
-                            {courses.map(course => (
-                                <Col key={course.id} xs={12} md={6} lg={4}>
-                                    <Card>
-                                        <Card.Img variant="top" src={course.thumbnail_url}
-                                                  alt={`Thumbnail for ${course.title}`} />
-                                        <Card.Body>
-                                            <i className="bi bi-person-workspace text-muted"></i><small
-                                            className="p-2 text-muted">{course.instructor_name}</small>
-                                            <Card.Title>{course.title}</Card.Title>
-                                            <Card.Text>{course.description}</Card.Text>
-                                            <Button variant="primary" href={course.video_url} target="_blank">Watch</Button>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Container>
-                )}
-            </div>
-            <Footer />
-        </>
+    <>
+        <Header />
+        <div style={{ minHeight: '100vh', paddingTop: '180px' }}> {/* Adjust the padding value as needed */}
+            {loading ? (
+                <CardVideoSkeleton />
+            ) : (
+                <Container>
+                    <Row className="g-4">
+                        {courses.map(course => (
+                            <Col key={course.id} xs={12} md={6} lg={4}>
+                                <Card style={{ width: '90%', margin: '0 auto' }}>
+                                    <Card.Img variant="top" src={course.thumbnail_url} alt={`Thumbnail for ${course.title}`} />
+                                    <Card.Body>
+                                        <i className="bi bi-person-workspace text-muted"></i>
+                                        <small className="p-2 text-muted">{course.instructor_name}</small>
+                                        <Card.Title>{course.title}</Card.Title>
+                                        <Card.Text>{course.description}</Card.Text>
+                                        <Button variant="primary" href={course.video_url} target="_blank">Watch</Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                </Container>
+            )}
+        </div>
+        <Footer />
+    </>
     );
 }
 export default CourseCatalog;

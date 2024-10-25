@@ -1,3 +1,4 @@
+/* header.css */
 .signup{
     background-color: #AD0000;
     border-radius: 0 !important;
@@ -5,4 +6,6 @@
 
 header {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    margin-top: 40px; /* Same as the banner's height */
+    z-index: 1020; /* Make sure it's below the banner */
 }
