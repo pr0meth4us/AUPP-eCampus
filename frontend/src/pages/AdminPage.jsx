@@ -17,9 +17,9 @@ const AdminPage = () => {
     }, []);
 
     const fetchData = async () => {
-        const userData = await course.getAllUsers();
-        const majors = await admin.fetchMajors()
-        const tags = await admin.fetchTags()
+        const userData = await admin.getAllUsers();
+        const majors = await course.fetchMajors()
+        const tags = await course.fetchTags()
         setUsers(userData);
         setMajors(majors);
         setTags(tags);
