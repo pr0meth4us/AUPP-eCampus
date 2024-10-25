@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { getAllCourses } from "../services/api";
+import { course } from "../services";
 import Header from "../components/Home/Header";
 import Footer from "../components/Footer";
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import CardVideoSkeleton from "../components/Skeletons/CardVideoSkeleton";
-
+import CardVideoSkeleton from "../components/Course/CardVideoSkeleton";
 const CourseCatalog = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
         try {
-            const courseData = await getAllCourses();
+            const courseData = await course.getAllCourses();
             setCourses(courseData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
@@ -23,7 +21,6 @@ const CourseCatalog = () => {
             setLoading(false);
         }
     };
-
     return (
         <>
             <Header />
@@ -56,5 +53,4 @@ const CourseCatalog = () => {
         </>
     );
 }
-
 export default CourseCatalog;

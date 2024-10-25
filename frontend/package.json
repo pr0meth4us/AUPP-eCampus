@@ -12,7 +12,10 @@
     "@nextui-org/system": "^2.2.6",
     "@nextui-org/theme": "^2.2.11",
     "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
     "bootstrap-icons": "^1.11.3",
+    "cross-env": "^7.0.3",
+    "crypto-js": "^4.2.0",
     "framer-motion": "^11.11.9",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.5",
@@ -27,8 +30,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "start:prod": "REACT_APP_ENV=production react-scripts start",
-    "start:dev": "REACT_APP_ENV=development react-scripts start"
+    "start:prod": "cross-env REACT_APP_ENV=production react-scripts start",
+    "start:dev": "cross-env REACT_APP_ENV=development react-scripts start"
   },
   "eslintConfig": {
     "extends": [
