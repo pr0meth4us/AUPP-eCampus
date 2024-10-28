@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { checkAuth, login as apiLogin, logout as apiLogout, register as apiRegister, send_otp as apiSendOtp } from "../services/api";
+import { auth } from "../services";
 
 const AuthContext = createContext();
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const data = await checkAuth();
+                const data = await auth.checkAuth();
                 if (data.authenticated && data.user) {
                     setUser(data.user);
                     localStorage.setItem('user', JSON.stringify(data.user));
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
     const sendOtp = async (email) => {
         try {
-            await apiSendOtp(email);
+            await auth.sendOtp(email);
         } catch (error) {
             throw error;
         }
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (name, email, password, role, verificationCode) => {
         try {
-            await apiRegister(name, email, password, role, verificationCode);
+            await auth.register(name, email, password, role, verificationCode);
             await login(email, password, role); // Auto-login the user after successful registration
         } catch (error) {
             throw error;
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, role) => {
         try {
-            const data = await apiLogin(email, password, role);
+            const data = await auth.login(email, password, role);
             if (data.user) {
                 setUser(data.user);
                 localStorage.setItem('user', JSON.stringify(data.user));
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await apiLogout();
+        await auth.logout();
         setUser(null);
         localStorage.removeItem('user');
     };

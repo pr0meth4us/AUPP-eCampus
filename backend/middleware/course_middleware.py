@@ -1,51 +1,42 @@
-from flask import g, request, jsonify
+from flask import g, jsonify
 from functools import wraps
 from models.course_model import Course
-from utils.token_utils import extract_role_from_token
+from .auth_middleware import token_required
 
 
 def require_admin_or_instructor(f):
+    """Middleware to ensure user is an admin or instructor."""
+
     @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get('auth_token')
-
-        if not token:
-            return jsonify({'message': 'Authentication token is missing.'}), 401
-
-        role, user_id = extract_role_from_token(token)
-        if not role or role not in ['admin', 'instructor']:
+    @token_required
+    def decorated(*args, **kwargs):
+        if g.current_user['role'] not in ['admin', 'instructor']:
             return jsonify({'message': 'Unauthorized. Admins or Instructors only.'}), 403
-
-        g.role = role
-        g.user_id = user_id
-
         return f(*args, **kwargs)
 
-    return decorated_function
+    return decorated
 
 
 def require_admin_or_instructor_or_uploader(f):
+    """Middleware to ensure user is an admin, instructor, or course uploader."""
+
     @wraps(f)
-    def decorated_function(course_id, *args, **kwargs):
-        token = request.cookies.get('auth_token')
-
-        if not token:
-            return jsonify({'message': 'Authentication token is missing.'}), 401
-
-        role, user_id = extract_role_from_token(token)
-
+    @token_required
+    def decorated(course_id, *args, **kwargs):
         course = Course.find_by_id(course_id)
         if not course:
             return jsonify({'message': 'Course not found'}), 404
 
-        if role != 'admin' and user_id != str(course['instructor_id']) and user_id != str(course['uploader_id']):
-            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this '
-                                       'action.'}), 403
+        user_id = g.current_user['_id']
+        user_role = g.current_user['role']
 
-        g.role = role
-        g.user_id = user_id
+        if (user_role != 'admin' and
+                user_id != str(course['instructor_id']) and
+                user_id != str(course['uploader_id'])):
+            return jsonify(
+                {'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this action.'}), 403
+
         g.course = course
-
         return f(course_id, *args, **kwargs)
 
-    return decorated_function
+    return decorated

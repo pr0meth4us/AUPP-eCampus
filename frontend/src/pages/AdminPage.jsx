@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {getAllUsers, getAllCourses, fetchMajors, fetchTags} from '../services/api';
+import {admin, course} from '../services';
 import ManageCourses from "../components/Admin/ManageCourses";
 import ManageUsers from "../components/Admin/ManageUsers";
 import TextSkeleton from "../components/Skeletons/TextSkeleton";
@@ -17,13 +17,13 @@ const AdminPage = () => {
     }, []);
 
     const fetchData = async () => {
-        const userData = await getAllUsers();
-        const majors = await fetchMajors()
-        const tags = await fetchTags()
+        const userData = await admin.getAllUsers();
+        const majors = await course.fetchMajors()
+        const tags = await course.fetchTags()
         setUsers(userData);
         setMajors(majors);
         setTags(tags);
-        const courseData = await getAllCourses();
+        const courseData = await course.getAllCourses();
         setCourses(courseData);
         setLoading(false);
     };

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import LoginPage from "./Login";
 import Signup from "./Signup";
 import { useAuth } from "../../context/authContext";
+import DrawerButton from "./ProfileDrawer";
 
 const Header = () => {
     const { user } = useAuth();
@@ -43,7 +44,7 @@ const Header = () => {
                     </div>
 
                     {user ? (
-                        <i className="bi bi-person-circle" style={{fontSize: "2em"}}></i>
+                        <DrawerButton id='yessir'/>
                     ) : (
                         <>
                             <button type="button" className="btn color-primary" data-bs-toggle="modal"
