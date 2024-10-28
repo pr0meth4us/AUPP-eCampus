@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCourse, updateCourse } from '../../services/api';
+import { course } from '../../services';
 
 export const useCourseActions = (fetchData, setNotification) => {
     const [loading, setLoading] = useState(false);
@@ -7,7 +7,7 @@ export const useCourseActions = (fetchData, setNotification) => {
     const handleCreateCourse = async (formData) => {
         setLoading(true);
         try {
-            await createCourse(formData);
+            await course.createCourse(formData);
             fetchData();
             setNotification({ message: 'Course created successfully!', type: 'success' });
             return true;
@@ -22,7 +22,7 @@ export const useCourseActions = (fetchData, setNotification) => {
     const handleUpdateCourse = async (courseId, formData) => {
         setLoading(true);
         try {
-            await updateCourse(courseId, formData);
+            await course.updateCourse(courseId, formData);
             fetchData();
             setNotification({ message: 'Course updated successfully!', type: 'success' });
             return true;

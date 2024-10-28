@@ -1,6 +1,6 @@
 import React, {  useState } from 'react';
 import {  Button as ReactButton, Accordion, Table, Modal } from 'react-bootstrap';
-import {  deleteCourse } from '../../services/api';
+import {  course } from '../../services';
 import Notification from "../Notification";
 import CourseForm from './CourseForm';
 import { useCourseActions } from './useCourseActions';
@@ -17,7 +17,7 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const handleDeleteCourse = async (courseId) => {
         if (window.confirm('Are you sure you want to delete this course?')) {
             try {
-                await deleteCourse(courseId);
+                await course.deleteCourse(courseId);
                 fetchData();
                 setNotification({ message: 'Course deleted successfully!', type: 'success' });
             } catch (error) {
