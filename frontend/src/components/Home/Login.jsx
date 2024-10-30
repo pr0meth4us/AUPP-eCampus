@@ -39,7 +39,7 @@ const LoginPage = () => {
                     <div
                         className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
                         <div className="text-center flex-grow-1">
-                            <h2 className="modal-title" id="login">Welcome Back!</h2>
+                            <h2 className="modal-title fw-bold" id="login" style={{fontSize: '2rem'}}>Welcome Back!</h2
                         </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -60,10 +60,10 @@ const LoginPage = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn ${role === 'professor' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
-                                        onClick={() => setRole('professor')}
+                                        className={`btn ${role === 'instructor' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
+                                        onClick={() => setRole('instructor')}
                                     >
-                                        Professor
+                                        Instructor
                                     </button>
                                 </div>
                             </div>
@@ -102,15 +102,26 @@ const LoginPage = () => {
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
-                    <div className="modal-footer flex-column">
-                        <button type="button" className="btn btn-primary w-100" onClick={handleLogin}>Login</button>
-                        <button type="button" className="btn btn-outline-primary w-100 my-3">
-                            Log in with Google
+                    <div className="modal-footer d-flex justify-content-between align-items-center">
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary flex-grow-1 me-2"
+                            ref={closeButtonRef}
+                            data-bs-dismiss="modal"
+                        >
+                            Close
                         </button>
-                        <p className="text-center mt-3">
-                            New to AUPP eCampus? <a href="#">Click Here Register Now</a>
-                        </p>
+                        <button
+                            type="button"
+                            className="btn btn-primary flex-grow-1"
+                            onClick={handleLogin}
+                        >
+                            Login
+                        </button>
                     </div>
+                    <p className="text-center mt-3 mb-3">
+                        New to AUPP eCampus? <a href="#">Click Here Register Now</a>
+                    </p>
                 </div>
             </div>
         </div>
