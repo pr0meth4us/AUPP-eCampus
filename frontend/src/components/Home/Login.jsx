@@ -39,7 +39,7 @@ const LoginPage = () => {
                     <div
                         className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
                         <div className="text-center flex-grow-1">
-                            <h2 className="modal-title fw-bold" id="login" style={{fontSize: '2rem'}}>Welcome Back!</h2
+                            <h2 className="modal-title fw-bold" id="login" style={{fontSize: '2rem'}}>Welcome Back!</h2>
                         </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
