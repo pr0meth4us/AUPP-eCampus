@@ -21,6 +21,10 @@ class Payment:
     @staticmethod
     def create_payment_record(user_id, course_id, amount, currency,
                               status = 'pending'):
+        already_paid = Payment.get_user_course_payment(user_id, course_id)
+        if already_paid:
+            raise PaymentException("Payment already paid")
+
         if not amount:
             return None
 
@@ -140,6 +144,8 @@ class Payment:
         if not payment_result:
             raise PaymentException("Failed to execute PayPal payment")
         payment_data.update({
+            'user_id': ObjectId(payment_data['user_id']),
+            'course_id': ObjectId(payment_data['course_id']),
             'status': 'completed',
             'payer_id': payer_id,
             'payment_state': payment_result.state,
@@ -155,13 +161,8 @@ class Payment:
 
     @staticmethod
     def get_user_course_payment(user_id, course_id):
-        """Get completed payment record for user and course"""
-        try:
-            return db.payments.find_one({
-                'user_id': ObjectId(user_id) if isinstance(user_id, str) else user_id,
-                'course_id': ObjectId(course_id),
-                'status': 'completed'
-            })
-        except Exception as e:
-            logger.error(f"Error finding user course payment: {str(e)}")
-            return None
+        return db.payments.find_one({
+            'user_id': ObjectId(user_id) if isinstance(user_id, str) else user_id,
+            'course_id': ObjectId(course_id),
+            'status': 'completed'
+        })
