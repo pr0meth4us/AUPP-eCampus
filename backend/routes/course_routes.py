@@ -3,6 +3,7 @@ from controllers.course_controller import CourseController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 from middleware.admin_middleware import require_admin
 from models.course_model import Major, Tag
+from middleware.payment_middleware import payment_required
 
 course_bp = Blueprint('course', __name__)
 
@@ -56,3 +57,10 @@ def get_all_tags():
             'name': tag.name
         } for tag in tags
     ]), 200
+
+
+@course_bp.route('/<course_id>/material', methods=['GET'])
+@payment_required
+def get_course_material(course_id):
+    # Logic to retrieve course material
+    return jsonify({"material": "This is the paid course material."})

@@ -15,7 +15,7 @@ class StudentController:
             email=data.get("email"),
             password=data.get("password"),
             bio=data.get("bio"),
-            courses_enrolled=data.get("courses_enrolled", []),
+            courses=data.get("courses", []),
             profile_image=""
         )
         student.save_to_db()

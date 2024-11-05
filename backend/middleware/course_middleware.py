@@ -10,9 +10,14 @@ def require_admin_or_instructor(f):
     @wraps(f)
     @token_required
     def decorated(*args, **kwargs):
+        print(g.current_user['role'])
+        print(g)
+        print(g.current_user)
         if g.current_user['role'] not in ['admin', 'instructor']:
+            print('true')
             return jsonify({'message': 'Unauthorized. Admins or Instructors only.'}), 403
         return f(*args, **kwargs)
+    print(decorated)
 
     return decorated
 
