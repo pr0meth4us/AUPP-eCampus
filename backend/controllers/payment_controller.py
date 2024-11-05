@@ -1,28 +1,34 @@
 from bson import ObjectId
 from flask import jsonify, g
 from models.course_model import Course
-from models.payment_model import Payment
+from models.payment_model import Payment, PaymentException
 
 
 class PaymentController:
 
     @staticmethod
     def create_payment(data):
-        course_to_pay = Course.find_by_id(data['course_id'])
-        amount = course_to_pay.get('amount')
-        payment_id = Payment.create_payment_record(
-            user_id=ObjectId(g.current_user['_id']),
-            course_id=data['course_id'],
-            amount=amount,
-            currency='USD'
-        )
+        try:
 
-        payment = Payment.find_payment_by_id(payment_id)
-        return jsonify({
-            'payment_id': str(payment_id),
-            'approval_url': payment['approval_url'],
-            'amount': amount,
-        }), 201
+            course_to_pay = Course.find_by_id(data['course_id'])
+            amount = course_to_pay.get('amount')
+            payment_id = Payment.create_payment_record(
+                user_id=ObjectId(g.current_user['_id']),
+                course_id=data['course_id'],
+                amount=amount,
+                currency='USD'
+            )
+
+
+            payment = Payment.find_payment_by_id(payment_id)
+            return jsonify({
+                'payment_id': str(payment_id),
+                'approval_url': payment['approval_url'],
+                'amount': amount,
+            }), 201
+        except PaymentException as e:
+            return jsonify({"error": str(e)}), 409  # Return JSON response with 409 Conflict
+
 
     @staticmethod
     def payment_success(token, paypal_payment_id, payer_id):
