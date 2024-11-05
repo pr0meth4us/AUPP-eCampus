@@ -6,7 +6,7 @@ from services.mongo_service import db
 
 
 class Course:
-    def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids):
+    def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids, amount):
         self.title = title
         self.description = description
         self.instructor_id = ObjectId(instructor_id)
@@ -17,6 +17,7 @@ class Course:
         self.tag_ids = [ObjectId(tid) for tid in tag_ids]
         self.created_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
+        self.amount = amount
 
     @staticmethod
     def get_all():
@@ -33,7 +34,8 @@ class Course:
             'major_ids': self.major_ids,
             'tag_ids': self.tag_ids,
             'created_at': self.created_at,
-            'updated_at': self.updated_at
+            'updated_at': self.updated_at,
+            'amount': self.amount
         }
         result = db.courses.insert_one(course_data)
         return str(result.inserted_id)
