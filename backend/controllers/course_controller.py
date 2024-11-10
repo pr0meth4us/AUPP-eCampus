@@ -13,7 +13,6 @@ from bson import ObjectId
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class CourseController:
 
     @staticmethod
@@ -25,18 +24,19 @@ class CourseController:
                 'title': course.get('title'),
                 'description': course.get('description'),
                 'instructor_id': str(course['instructor_id']),
-                'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',                    'uploader_id': str(course['uploader_id']),
+                'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',
+                'uploader_id': str(course['uploader_id']),
                 'video_url': course.get('video_url'),
                 'thumbnail_url': course.get('thumbnail_url'),
                 'major_ids': [str(mid) for mid in course.get('major_ids', [])],
                 'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
                 'created_at': course.get('created_at'),
-                'updated_at': course.get('updated_at')
+                'updated_at': course.get('updated_at'),
+                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]  # Include enrolled_students in the response
             }
             for course in courses
         ]
         return jsonify(serialized_courses), 200
-
 
     @staticmethod
     def validate_majors(major_ids):
@@ -205,6 +205,44 @@ class CourseController:
             return jsonify({'message': 'Course deleted successfully'}), 200
         except Exception as e:
             return jsonify({'message': str(e)}), 500
+
+    @staticmethod
+    def enroll_student(course_id, student_id):
+        """Enroll a student in a course."""
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        student = User.find_by_id(student_id)
+        if not student:
+            return jsonify({'message': 'Student not found.'}), 404
+
+        if student_id not in course['enrolled_students']:
+            course['enrolled_students'].append(student_id)
+            Course.update_course(course_id, enrolled_students=course['enrolled_students'])
+            student.update_courses(course_id, add=True)
+            return jsonify({'message': 'Student enrolled successfully.'}), 200
+        else:
+            return jsonify({'message': 'Student already enrolled.'}), 400
+
+    @staticmethod
+    def unenroll_student(course_id, student_id):
+        """Unenroll a student from a course."""
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        student = User.find_by_id(student_id)
+        if not student:
+            return jsonify({'message': 'Student not found.'}), 404
+
+        if student_id in course['enrolled_students']:
+            course['enrolled_students'].remove(student_id)
+            Course.update_course(course_id, enrolled_students=course['enrolled_students'])
+            student.update_courses(course_id, add=False)
+            return jsonify({'message': 'Student unenrolled successfully.'}), 200
+        else:
+            return jsonify({'message': 'Student not enrolled in this course.'}), 400
 
     from middleware.payment_middleware import payment_required
 
