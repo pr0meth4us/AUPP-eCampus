@@ -4,7 +4,6 @@ from services.mongo_service import db
 from config import Config
 from typing import List, Optional, Dict, Any
 
-
 class User:
     """Base class containing common user attributes and methods."""
 
@@ -20,7 +19,7 @@ class User:
         self.role = role
         self.bio = bio
         self.profile_image = profile_image
-        self.courses = courses or []
+        self.courses = courses or []  # Initialize courses as an empty list if not provided
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert user object to dictionary for database storage."""
@@ -31,7 +30,7 @@ class User:
             'role': self.role,
             'bio': self.bio,
             'profile_image': self.profile_image,
-            'courses': self.courses
+            'courses': self.courses  # Include courses in the dictionary representation
         }
 
     @staticmethod
@@ -102,7 +101,6 @@ class User:
         if result.modified_count == 0:
             raise ValueError("User not found or no changes made.")
 
-
 class Student(User):
     """Student user model."""
 
@@ -113,7 +111,6 @@ class Student(User):
         super().__init__(name, email, password, role='student',
                          bio=bio, profile_image=profile_image,
                          courses=courses)
-
 
 class Instructor(User):
     """Instructor user model with expertise."""
@@ -142,7 +139,6 @@ class Instructor(User):
                 {'email': self.email},
                 {'$set': {'expertise': self.expertise}}
             )
-
 
 class Admin(User):
     """Admin user model with administrative capabilities."""
