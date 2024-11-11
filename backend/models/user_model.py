@@ -197,3 +197,30 @@ class Admin(User):
         )
         if result.modified_count == 0:
             raise ValueError("User not found or no changes made.")
+
+    @staticmethod
+    def update_courses(user_id, course_id, add=True):
+        """
+        Adds or removes a course from the user's enrolled courses list.
+
+        :param user_id: The ID of the user.
+        :param course_id: The ID of the course.
+        :param add: Boolean flag to indicate whether to add or remove the course.
+        """
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+
+        if not user:
+            raise ValueError("User not found.")
+
+        if add:
+            # Add the course to the user's enrolled courses
+            if course_id not in user['enrolled_courses']:
+                user['enrolled_courses'].append(ObjectId(course_id))
+                db.users.update_one({'_id': ObjectId(user_id)},
+                                    {'$set': {'enrolled_courses': user['enrolled_courses']}})
+        else:
+            # Remove the course from the user's enrolled courses
+            if ObjectId(course_id) in user['enrolled_courses']:
+                user['enrolled_courses'].remove(ObjectId(course_id))
+                db.users.update_one({'_id': ObjectId(user_id)},
+                                    {'$set': {'enrolled_courses': user['enrolled_courses']}})
