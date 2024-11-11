@@ -1,6 +1,5 @@
-import os
-import boto3
 import logging
+import boto3
 from config import Config
 
 logging.basicConfig(level=logging.INFO)
