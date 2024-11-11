@@ -1,12 +1,11 @@
-import uuid
-
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-from config import Config
 import logging
+import cloudinary
+import cloudinary.api
+import cloudinary.uploader
 import requests
 from requests.adapters import HTTPAdapter
+
+from config import Config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ cloudinary.config(
     cloud_name=Config.CLOUDINARY_CLOUD_NAME,
     api_key=Config.CLOUDINARY_API_KEY,
     api_secret=Config.CLOUDINARY_API_SECRET,
-    session=session  # If cloudinary accepts a session parameter
+    session=session
 )
 
 

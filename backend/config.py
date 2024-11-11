@@ -32,3 +32,4 @@ class Config:
     AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
     PAYPAL_CLIENT_ID = os.getenv('PAYPAY_CLIENT_ID')
     PAYPAL_CLIENT_SECRET = os.getenv('PAYPA_CLIENT_SECRET')
+    CLIENT_URL = 'http://localhost:3000'
