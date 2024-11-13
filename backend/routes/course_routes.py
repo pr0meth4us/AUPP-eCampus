@@ -67,11 +67,10 @@ def get_course_material(course_id):
 
 
 @course_bp.route('/<course_id>/enroll', methods=['POST'])
+@payment_required
 def enroll_student(course_id):
-    student_id = request.json.get('student_id')
-    if not student_id:
-        return jsonify({'message': 'Student ID is required.'}), 400
-    return CourseController.enroll_student(course_id, student_id)
+    return CourseController.enroll_student(course_id)
+
 
 @course_bp.route('/<course_id>/unroll', methods=['POST'])
 def unenroll_student(course_id):

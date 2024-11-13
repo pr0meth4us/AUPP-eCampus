@@ -1,18 +1,19 @@
 import paypalrestsdk
 import logging
+import os
 from config import Config
 
 paypalrestsdk.configure({
     "mode": "sandbox",
-    "client_id": Config.PAYPAL_CLIENT_ID,
-    "client_secret": Config.PAYPAL_CLIENT_SECRET
+    "client_id": os.getenv("PAYPAL_CLIENT_ID"),
+    "client_secret": os.getenv("PAYPAL_CLIENT_SECRET")
 })
 
 logger = logging.getLogger(__name__)
 
 
 def create_payment(amount, currency="USD"):
-    paypalrestsdk.Payment({
+    payment = paypalrestsdk.Payment({
         "intent": "sale",
         "payer": {"payment_method": "paypal"},
         "transactions": [{"amount": {"total": amount, "currency": currency}}],
@@ -22,6 +23,13 @@ def create_payment(amount, currency="USD"):
         }
     })
 
+    if payment.create():
+        logger.info("Payment created successfully")
+        return payment
 
-def execute_payment(payment_id):
-    paypalrestsdk.Payment.find(payment_id)
+
+def execute_payment(payment_id, payer_id):
+    payment = paypalrestsdk.Payment.find(payment_id)
+    if payment.execute({"payer_id": payer_id}):
+        logger.info("Payment executed successfully")
+        return payment

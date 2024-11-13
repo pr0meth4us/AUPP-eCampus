@@ -4,8 +4,10 @@ from services.mongo_service import db
 
 UTC = timezone.utc
 
+
 class Course:
-    def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids, amount, enrolled_students=None):
+    def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids,
+                 amount, enrolled_students):
         self.title = title
         self.description = description
         self.instructor_id = ObjectId(instructor_id)
@@ -17,7 +19,7 @@ class Course:
         self.created_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
         self.amount = amount
-        self.enrolled_students = enrolled_students if enrolled_students is not None else []  # Ensure enrolled_students is initialized
+        self.enrolled_students = enrolled_students if isinstance(enrolled_students, list) else []
 
     @staticmethod
     def get_all():
@@ -36,6 +38,7 @@ class Course:
             'created_at': self.created_at,
             'updated_at': self.updated_at,
             'amount': self.amount,
+            'enrolled_students': self.enrolled_students
         }
         result = db.courses.insert_one(course_data)
         return str(result.inserted_id)
@@ -58,7 +61,6 @@ class Course:
             raise ValueError("Course not found.")
 
     def add_student(self, student_id):
-        # Add student to the enrolled_students list
         if student_id not in self.enrolled_students:
             self.enrolled_students.append(ObjectId(student_id))
             self.save_to_db()
@@ -70,16 +72,14 @@ class Course:
             self.save_to_db()
 
     def get_major_names(self):
-        # Get the names of all the majors associated with this course
         majors = [db.majors.find_one({'_id': mid}) for mid in self.major_ids]
         return [major['name'] if major else 'Unknown' for major in majors]
 
     def get_tag_names(self):
-        # Get the names of all the tags associated with this course
         tags = [db.tags.find_one({'_id': tid}) for tid in self.tag_ids]
         return [tag['name'] if tag else 'Unknown' for tag in tags]
 
-# Define a simple Major class for handling major operations (same file)
+
 class Major:
     def __init__(self, name):
         self.name = name
@@ -101,7 +101,7 @@ class Major:
     def find_by_id(major_id):
         return db.majors.find_one({'_id': ObjectId(major_id)})
 
-# Define a simple Tag class for handling tag operations (same file)
+
 class Tag:
     def __init__(self, name):
         self.name = name
@@ -123,7 +123,6 @@ class Tag:
     def find_by_id(tag_id):
         return db.tags.find_one({'_id': ObjectId(tag_id)})
 
-    # New method to find by name
     @staticmethod
     def find_by_name(name):
         return db.tags.find_one({'name': name})

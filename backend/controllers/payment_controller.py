@@ -27,7 +27,7 @@ class PaymentController:
                 'amount': amount,
             }), 201
         except PaymentException as e:
-            return jsonify({"error": str(e)}), 409  # Return JSON response with 409 Conflict
+            return jsonify({"error": str(e)}), 409
 
 
     @staticmethod
