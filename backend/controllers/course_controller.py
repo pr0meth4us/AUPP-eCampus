@@ -229,7 +229,7 @@ class CourseController:
 
         if user_id not in enrolled_students:
             enrolled_students.append(user_id)
-            enrolled_students = [ObjectId(sid) for sid in enrolled_students]
+            enrolled_students = list(set(ObjectId(sid) for sid in enrolled_students))
 
             Course.update_course(course_id, enrolled_students=enrolled_students)
             User.update_courses(user_id, course_id, add=True)
