@@ -20,7 +20,7 @@ class Payment:
 
     @staticmethod
     def create_payment_record(user_id, course_id, amount, currency,
-                              status = 'pending'):
+                              status='pending'):
         already_paid = Payment.get_user_course_payment(user_id, course_id)
         if already_paid:
             raise PaymentException("Payment already paid")
@@ -29,8 +29,6 @@ class Payment:
             return None
 
         paypal_payment = create_payment(amount, currency)
-        if not paypal_payment:
-            raise PaymentException("Failed to create PayPal payment")
 
         payment_id = str(ObjectId())
 
@@ -60,8 +58,6 @@ class Payment:
 
         logger.info(f"Payment record created: {payment_id}")
         return payment_id
-
-
 
     @staticmethod
     def update_payment_status(payment_id, status, payment_details):
@@ -158,11 +154,21 @@ class Payment:
 
         return result
 
-
     @staticmethod
     def get_user_course_payment(user_id, course_id):
-        return db.payments.find_one({
-            'user_id': ObjectId(user_id) if isinstance(user_id, str) else user_id,
-            'course_id': ObjectId(course_id),
-            'status': 'completed'
-        })
+        """Find payment by user_id and course_id."""
+        try:
+            query = {
+                'user_id': ObjectId(user_id),  # Convert string to ObjectId
+                'course_id': ObjectId(course_id),
+                'status': 'completed'
+            }
+            print("Querying with:", query)
+
+            payment = db.payments.find_one(query)
+            print("Query Result:", payment)
+
+            return payment
+        except Exception as e:
+            print("Error querying payment:", str(e))
+            return None

@@ -13,6 +13,7 @@ from bson import ObjectId
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class CourseController:
 
     @staticmethod
@@ -24,7 +25,9 @@ class CourseController:
                 'title': course.get('title'),
                 'description': course.get('description'),
                 'instructor_id': str(course['instructor_id']),
-                'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',
+                'instructor_name': str(
+                    User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(
+                    course['instructor_id']) else 'Unknown',
                 'uploader_id': str(course['uploader_id']),
                 'video_url': course.get('video_url'),
                 'thumbnail_url': course.get('thumbnail_url'),
@@ -32,7 +35,7 @@ class CourseController:
                 'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
                 'created_at': course.get('created_at'),
                 'updated_at': course.get('updated_at'),
-                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]  # Include enrolled_students in the response
+                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]
             }
             for course in courses
         ]
@@ -135,11 +138,12 @@ class CourseController:
         data = CourseController.extract_request_data()
         if not data['title'] or not data['description'] or not data['instructor_id']:
             return jsonify({'message': 'Title, description, and instructor are required.'}), 400
-        print('controller', g.current_user)
 
         created_tags = CourseController.create_tags(data['tag_names'])
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
-        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                        data['description'])
+
         course = Course(
             title=data['title'],
             description=data['description'],
@@ -149,7 +153,8 @@ class CourseController:
             thumbnail_url=thumbnail_url,
             major_ids=data['major_ids'],
             tag_ids=tag_ids,
-            amount=data['amount']
+            amount=data['amount'],
+            enrolled_students=[]
         )
         course_id = course.save_to_db()
         return jsonify({'message': 'Course created successfully', 'course_id': course_id}), 201
@@ -175,7 +180,8 @@ class CourseController:
         )
 
         if data['video_file']:
-            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                                data['description'])
 
             current_video_url = current_course.get('video_url')
             if 'youtube.com' in current_video_url:
@@ -207,27 +213,32 @@ class CourseController:
             return jsonify({'message': str(e)}), 500
 
     @staticmethod
-    def enroll_student(course_id, student_id):
-        """Enroll a student in a course."""
+    def enroll_student(course_id):
         course = Course.find_by_id(course_id)
         if not course:
             return jsonify({'message': 'Course not found.'}), 404
 
-        student = User.find_by_id(student_id)
-        if not student:
-            return jsonify({'message': 'Student not found.'}), 404
+        user_id = g.current_user.get('_id')
 
-        if student_id not in course['enrolled_students']:
-            course['enrolled_students'].append(student_id)
-            Course.update_course(course_id, enrolled_students=course['enrolled_students'])
-            student.update_courses(course_id, add=True)
+        enrolled_students = course.get('enrolled_students', [])
+        if not isinstance(enrolled_students, list):
+            enrolled_students = []
+
+        enrolled_students = [str(student_id) for student_id in enrolled_students]
+
+
+        if user_id not in enrolled_students:
+            enrolled_students.append(user_id)
+            enrolled_students = [ObjectId(sid) for sid in enrolled_students]
+
+            Course.update_course(course_id, enrolled_students=enrolled_students)
+            User.update_courses(user_id, course_id, add=True)
             return jsonify({'message': 'Student enrolled successfully.'}), 200
         else:
             return jsonify({'message': 'Student already enrolled.'}), 400
 
     @staticmethod
     def unenroll_student(course_id, student_id):
-        """Unenroll a student from a course."""
         course = Course.find_by_id(course_id)
         if not course:
             return jsonify({'message': 'Course not found.'}), 404
@@ -239,7 +250,7 @@ class CourseController:
         if student_id in course['enrolled_students']:
             course['enrolled_students'].remove(student_id)
             Course.update_course(course_id, enrolled_students=course['enrolled_students'])
-            student.update_courses(course_id, add=False)
+            User.update_courses(student, course_id, add=False)
             return jsonify({'message': 'Student unenrolled successfully.'}), 200
         else:
             return jsonify({'message': 'Student not enrolled in this course.'}), 400

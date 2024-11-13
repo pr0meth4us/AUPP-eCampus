@@ -4,25 +4,24 @@ from services.mongo_service import db
 from config import Config
 from typing import List, Optional, Dict, Any
 
+
 class User:
-    """Base class containing common user attributes and methods."""
 
     required_fields = {'name', 'email', 'password', 'role'}
     optional_fields = {'bio', 'profile_image', 'courses'}
 
-    def __init__(self, name: str, email: str, password: str, role: str,
-                 bio: Optional[str] = None, profile_image: Optional[str] = None,
-                 courses: Optional[List[str]] = None):
+    def __init__(self, name, email, password, role,
+                 bio, profile_image,
+                 courses):
         self.name = name
         self.email = email
         self.password_hash = generate_password_hash(password)
         self.role = role
         self.bio = bio
         self.profile_image = profile_image
-        self.courses = courses or []  # Initialize courses as an empty list if not provided
+        self.courses = courses
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert user object to dictionary for database storage."""
+    def to_dict(self):
         return {
             'name': self.name,
             'email': self.email,
@@ -30,12 +29,11 @@ class User:
             'role': self.role,
             'bio': self.bio,
             'profile_image': self.profile_image,
-            'courses': self.courses  # Include courses in the dictionary representation
+            'courses': self.courses
         }
 
     @staticmethod
     def is_email_taken(email: str) -> bool:
-        """Check if email is already registered."""
         return db.users.find_one({'email': email}) is not None
 
     @staticmethod
@@ -59,24 +57,11 @@ class User:
             raise ValueError(f"Email '{self.email}' is already in use.")
         db.users.insert_one(self.to_dict())
 
-    def update_courses(self, course_id: str, add: bool = True) -> None:
-        """Add or remove a course."""
-        if add and course_id not in self.courses:
-            self.courses.append(course_id)
-        elif not add and course_id in self.courses:
-            self.courses.remove(course_id)
-
-        db.users.update_one(
-            {'email': self.email},
-            {'$set': {'courses': self.courses}}
-        )
-
     def update_self(self, new_name: Optional[str] = None,
                     new_email: Optional[str] = None,
                     new_password: Optional[str] = None,
                     new_bio: Optional[str] = None,
                     new_profile_image: Optional[str] = None) -> None:
-        """Allow the user to update their own information."""
         update_data = {}
         if new_name:
             update_data['name'] = new_name
@@ -101,6 +86,25 @@ class User:
         if result.modified_count == 0:
             raise ValueError("User not found or no changes made.")
 
+    @staticmethod
+    def update_courses(user_id, course_id, add=True):
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+
+        if not user:
+            raise ValueError("User not found.")
+
+        if add:
+            if course_id not in user['courses']:
+                user['courses'].append(ObjectId(course_id))
+                db.users.update_one({'_id': ObjectId(user_id)},
+                                    {'$set': {'courses': user['courses']}})
+        else:
+            if ObjectId(course_id) in user['courses']:
+                user['courses'].remove(ObjectId(course_id))
+                db.users.update_one({'_id': ObjectId(user_id)},
+                                    {'$set': {'courses': user['courses']}})
+
+
 class Student(User):
     """Student user model."""
 
@@ -111,6 +115,7 @@ class Student(User):
         super().__init__(name, email, password, role='student',
                          bio=bio, profile_image=profile_image,
                          courses=courses)
+
 
 class Instructor(User):
     """Instructor user model with expertise."""
@@ -126,7 +131,6 @@ class Instructor(User):
         self.expertise = expertise or []
 
     def to_dict(self) -> Dict[str, Any]:
-        """Override to_dict to include instructor-specific fields."""
         data = super().to_dict()
         data['expertise'] = self.expertise
         return data
@@ -140,8 +144,8 @@ class Instructor(User):
                 {'$set': {'expertise': self.expertise}}
             )
 
+
 class Admin(User):
-    """Admin user model with administrative capabilities."""
 
     def __init__(self, name: str, email: str, password: str,
                  bio: Optional[str] = None,
@@ -153,7 +157,7 @@ class Admin(User):
     def to_dict(self) -> Dict[str, Any]:
         """Override to_dict to exclude courses for admin."""
         data = super().to_dict()
-        data.pop('courses', None)  # Remove courses field for admin
+        data.pop('courses', None)
         return data
 
     @staticmethod
@@ -165,7 +169,6 @@ class Admin(User):
 
     @staticmethod
     def get_all_users() -> List[Dict[str, Any]]:
-        """Get all users from the database."""
         return [{
             'id': str(user['_id']),
             'name': user['name'],
@@ -177,7 +180,6 @@ class Admin(User):
     def update_user(user_id: str, new_name: Optional[str] = None,
                     new_email: Optional[str] = None,
                     new_password: Optional[str] = None) -> None:
-        """Update user information."""
         update_data = {}
         if new_name:
             update_data['name'] = new_name
@@ -197,30 +199,3 @@ class Admin(User):
         )
         if result.modified_count == 0:
             raise ValueError("User not found or no changes made.")
-
-    @staticmethod
-    def update_courses(user_id, course_id, add=True):
-        """
-        Adds or removes a course from the user's enrolled courses list.
-
-        :param user_id: The ID of the user.
-        :param course_id: The ID of the course.
-        :param add: Boolean flag to indicate whether to add or remove the course.
-        """
-        user = db.users.find_one({'_id': ObjectId(user_id)})
-
-        if not user:
-            raise ValueError("User not found.")
-
-        if add:
-            # Add the course to the user's enrolled courses
-            if course_id not in user['enrolled_courses']:
-                user['enrolled_courses'].append(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'enrolled_courses': user['enrolled_courses']}})
-        else:
-            # Remove the course from the user's enrolled courses
-            if ObjectId(course_id) in user['enrolled_courses']:
-                user['enrolled_courses'].remove(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'enrolled_courses': user['enrolled_courses']}})
