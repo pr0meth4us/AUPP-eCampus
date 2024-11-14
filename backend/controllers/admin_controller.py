@@ -21,7 +21,6 @@ def update_user(user_id):
     return jsonify({"message": "User updated successfully."}), 200
 
 
-
 def admin_register(data):
     email = data.get('email')
     if User.find_by_email(email):
