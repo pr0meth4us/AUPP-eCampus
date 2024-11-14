@@ -15,7 +15,6 @@ def get_all_users():
 @admin_bp.route('/register', methods=['POST'])
 def register_route():
     data = request.get_json()
-    print(data)
     return admin_register(data)
 
 

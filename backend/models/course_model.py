@@ -95,7 +95,7 @@ class Major:
 
     @staticmethod
     def get_all():
-        return db.majors.find()
+        return list(db.majors.find())
 
     @staticmethod
     def find_by_id(major_id):
@@ -117,7 +117,7 @@ class Tag:
 
     @staticmethod
     def get_all():
-        return db.tags.find()
+        return list(db.tags.find())
 
     @staticmethod
     def find_by_id(tag_id):

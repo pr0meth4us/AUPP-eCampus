@@ -42,8 +42,8 @@ def get_all_majors():
     majors = Major.get_all()
     return jsonify([
         {
-            'id': str(major._id),
-            'name': major.name
+            'id': str(major['_id']),
+            'name': major['name']
         } for major in majors
     ]), 200
 
@@ -53,8 +53,8 @@ def get_all_tags():
     tags = Tag.get_all()
     return jsonify([
         {
-            'id': str(tag._id),
-            'name': tag.name
+            'id': str(tag['_id']),
+            'name': tag['name']
         } for tag in tags
     ]), 200
 
