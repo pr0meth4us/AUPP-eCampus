@@ -6,20 +6,19 @@ from typing import List, Optional, Dict, Any
 
 
 class User:
-
     required_fields = {'name', 'email', 'password', 'role'}
     optional_fields = {'bio', 'profile_image', 'courses'}
 
     def __init__(self, name, email, password, role,
-                 bio, profile_image,
-                 courses):
+                 bio=None, profile_image=None,
+                 courses=None):
         self.name = name
         self.email = email
         self.password_hash = generate_password_hash(password)
         self.role = role
-        self.bio = bio
-        self.profile_image = profile_image
-        self.courses = courses
+        self.bio = bio if bio is not None else ""
+        self.profile_image = profile_image if profile_image is not None else ""
+        self.courses = courses if courses is not None else []
 
     def to_dict(self):
         return {

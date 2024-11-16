@@ -18,8 +18,8 @@ def create_payment(amount, currency="USD"):
         "payer": {"payment_method": "paypal"},
         "transactions": [{"amount": {"total": amount, "currency": currency}}],
         "redirect_urls": {
-            "return_url": f"{Config.CLIENT_URL}/api/payments/success",
-            "cancel_url": f"{Config.CLIENT_URL}/api/payments/cancel"
+            "return_url": f"{Config.CLIENT_URL}/payment/success",
+            "cancel_url": f"{Config.CLIENT_URL}/payment/cancel"
         }
     })
 
