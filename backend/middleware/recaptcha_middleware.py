@@ -5,7 +5,6 @@ from config import Config
 
 
 def verify_recaptcha(recaptcha_response):
-    """Verify reCAPTCHA response with Google API."""
     try:
         payload = {
             'secret': Config.RECAPTCHA_SECRET_KEY,
@@ -22,7 +21,6 @@ def verify_recaptcha(recaptcha_response):
 
 
 def require_recaptcha(f):
-    """Middleware to enforce reCAPTCHA verification on certain routes."""
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
