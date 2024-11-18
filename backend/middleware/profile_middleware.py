@@ -4,7 +4,6 @@ from flask import jsonify, g
 
 
 def own_profile_required(f):
-    """Middleware to ensure users can only access their own profile."""
     @wraps(f)
     @token_required
     def decorated_function(*args, **kwargs):

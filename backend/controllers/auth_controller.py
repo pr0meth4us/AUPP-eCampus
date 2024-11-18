@@ -35,37 +35,9 @@ def register(data):
             return jsonify({'message': 'Invalid admin token.'}), 403
 
         user = user_class(name=data['name'], email=email, password=data['password'])
-        try:
-            user.save_to_db()
-            return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
-        except ValueError as e:
-            return jsonify({'message': str(e)}), 400
-        user_data = {
-            "name": data['name'],
-            "email": email,
-            "password": data['password'],
-            "role": role,
-            "profile_image": data.get("profile_image", ""),
-            "created_at": datetime.now(),
-        }
-
-        if role == 'student':
-            user_data['student_profile'] = {
-                "bio": data.get("bio", ""),
-                "courses_enrolled": [],
-            }
-        elif role == 'instructor':
-            user_data['instructor_profile'] = {
-                "expertise": data.get("expertise", ""),
-                "courses_taught": []
-            }
-
-        user = user_class(**user_data)
         user.save_to_db()
-
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
-    else:
-        return jsonify({'message': 'Invalid or expired OTP.'}), 401
+
 
 
 def login_user(data):
@@ -107,14 +79,9 @@ def check_auth():
     if not user:
         return jsonify({"authenticated": False, "message": "User not found"}), 401
 
-    # Create a copy of the user dict and remove sensitive information
     user_data = user.copy()
-    user_data.pop('password_hash', None)  # Remove password hash if present
-
-    # Convert ObjectId to string for JSON serialization
+    user_data.pop('password_hash', None)
     user_data['_id'] = str(user_data['_id'])
-
-    # Handle courses for admin (ensure it's not included)
     if user_data.get('role') == 'admin':
         user_data.pop('courses', None)
 
@@ -122,6 +89,7 @@ def check_auth():
         "authenticated": True,
         "user": user_data
     }), 200
+
 
 def logout():
     response = make_response(jsonify({"message": "Successfully logged out"}), 200)

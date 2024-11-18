@@ -5,20 +5,20 @@ from .auth_middleware import token_required
 
 
 def require_admin_or_instructor(f):
-    """Middleware to ensure user is an admin or instructor."""
 
     @wraps(f)
     @token_required
     def decorated(*args, **kwargs):
         if g.current_user['role'] not in ['admin', 'instructor']:
+            print('true')
             return jsonify({'message': 'Unauthorized. Admins or Instructors only.'}), 403
         return f(*args, **kwargs)
+    print(decorated)
 
     return decorated
 
 
 def require_admin_or_instructor_or_uploader(f):
-    """Middleware to ensure user is an admin, instructor, or course uploader."""
 
     @wraps(f)
     @token_required
