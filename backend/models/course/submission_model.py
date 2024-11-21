@@ -13,7 +13,6 @@ class Submission:
         self.feedback = feedback
         self.is_late = False
 
-
     def save_to_db(self):
         assignment = db.assignments.find_one({'_id': self.assignment_id})
 
@@ -24,8 +23,8 @@ class Submission:
             raise ValueError("Submissions are locked for this assignment.")
 
         due_date = assignment['due_date']
-        if due_date.tzinfo is None:  # Check if it's offset-naive
-            due_date = due_date.replace(tzinfo=timezone.utc)  # Convert to offset-aware
+        if due_date.tzinfo is None:
+            due_date = due_date.replace(tzinfo=timezone.utc)
 
         if self.submitted_at > due_date:
             if not assignment.get('allow_late_submissions', False):
@@ -43,7 +42,6 @@ class Submission:
         }
         result = db.submissions.insert_one(submission_data)
 
-        # Update assignment with the new submission
         db.assignments.update_one(
             {'_id': self.assignment_id},
             {'$addToSet': {'submissions': result.inserted_id}}
