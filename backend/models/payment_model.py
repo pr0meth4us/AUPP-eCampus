@@ -19,23 +19,23 @@ class Payment:
     PAYMENT_EXPIRY = 3600
 
     @staticmethod
-    def create_payment_record(user_id, course_id, amount, currency,
+    def create_payment_record(user_id, course_id, price, currency,
                               status='pending'):
         already_paid = Payment.get_user_course_payment(user_id, course_id)
         if already_paid:
             raise PaymentException("Payment already paid")
 
-        if not amount:
+        if not price:
             return None
 
-        paypal_payment = create_payment(amount, currency)
+        paypal_payment = create_payment(price, currency)
 
         payment_id = str(ObjectId())
 
         payment_data = {
             'user_id': str(ObjectId(user_id)) if isinstance(user_id, str) else str(user_id),
             'course_id': str(ObjectId(course_id)),
-            'amount': amount,
+            'price': price,
             'currency': currency,
             'status': status,
             'created_at': datetime.now(timezone.utc).isoformat(),

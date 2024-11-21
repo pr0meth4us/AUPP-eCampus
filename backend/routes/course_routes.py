@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from controllers.course_controller import CourseController
+from controllers.course.course_controller import CourseController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 from middleware.admin_middleware import require_admin
-from models.course_model import Major, Tag
+from models.course import Major, Tag
 from middleware.payment_middleware import payment_required
 
 course_bp = Blueprint('course', __name__)

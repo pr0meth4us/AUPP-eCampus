@@ -12,16 +12,8 @@ def create_app():
     from services.cors_service import init_cors
     init_cors(flask_app)
 
-    from routes.auth_routes import auth_bp
-    from routes.admin_routes import admin_bp
-    from routes.student_routes import student_bp
-    from routes.course_routes import course_bp
-    from routes.payment_routes import payment_bp
-    flask_app.register_blueprint(payment_bp, url_prefix='/payment')
-    flask_app.register_blueprint(auth_bp, url_prefix='/auth')
-    flask_app.register_blueprint(admin_bp, url_prefix='/admin')
-    flask_app.register_blueprint(student_bp, url_prefix='/students')
-    flask_app.register_blueprint(course_bp, url_prefix='/courses')
+    from routes import register_routes
+    register_routes(flask_app)
 
     @flask_app.errorhandler(500)
     def internal_error(error):
