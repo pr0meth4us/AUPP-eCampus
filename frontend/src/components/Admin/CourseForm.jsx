@@ -11,7 +11,9 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
         instructor_id: '',
         tag_names: [],
         major_ids: [],
+        amount: '0' // Keep this as a string initially to avoid confusion
     });
+    const [selectedPrice, setSelectedPrice] = useState('');
     const [courseVideo, setCourseVideo] = useState(null);
 
     const getUniqueTags = (data, allTags) => {
@@ -44,7 +46,21 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
+        // If the field is the amount, set it as a number
+        if (name === 'amount') {
+            setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
+        } else {
+            setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
+        }
+    };
+
+    const handlePriceChange = (event) => {
+        const value = event.target.value;
+        setSelectedPrice(value);
+        // If price is charged, clear amount
+        if (value !== "charge") {
+            setCourse(prevCourse => ({ ...prevCourse, amount: '0' }));
+        }
     };
 
     const handleSubmit = (e) => {
@@ -99,6 +115,33 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
                     ))}
                 </Form.Select>
             </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Select Pricing Model</Form.Label>
+                <Form.Select
+                    name="price"
+                    value={selectedPrice}
+                    onChange={handlePriceChange}
+                    required
+                >
+                    <option value="">Choose a Pricing Model</option>
+                    <option value="free">Free Access</option>
+                    <option value="charge">Paid Access</option>
+                </Form.Select>
+            </Form.Group>
+            {selectedPrice === "charge" && (
+                <Form.Group className="mb-3">
+                    <Form.Label>Enter Price (USD)</Form.Label>
+                    <Form.Control
+                        type="number"
+                        name="amount"
+                        value={course.amount}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="Enter amount"
+                    />
+                </Form.Group>
+            )}
+
             <Form.Group className="mb-3">
                 <Form.Label>Tags</Form.Label>
                 <MultiSelectWithSearchAndCreate
