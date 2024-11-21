@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import jsonify, g
 from models.payment_model import Payment
-from models.course_model import Course
+from models.course.course_model import Course
 from .auth_middleware import token_required
 
 
@@ -14,7 +14,7 @@ def payment_required(f):
         course = Course.find_by_id(course_id)
         print(course_id, user_id)
 
-        if course["amount"] == "0" or course["amount"] is None:
+        if course["price"] == "0" or course["price"] is None:
             return f(*args, **kwargs)
 
         payment = Payment.get_user_course_payment( user_id, course_id)
