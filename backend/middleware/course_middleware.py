@@ -1,6 +1,6 @@
 from flask import g, jsonify
 from functools import wraps
-from models.course_model import Course
+from models.course.course_model import Course
 from .auth_middleware import token_required
 
 

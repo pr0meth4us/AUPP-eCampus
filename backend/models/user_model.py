@@ -35,6 +35,9 @@ class User:
     def is_email_taken(email: str) -> bool:
         return db.users.find_one({'email': email}) is not None
 
+    def get_user_email(self):
+        return self.email
+
     @staticmethod
     def find_by_email(email: str) -> Optional[Dict]:
         """Find user by email."""
@@ -42,7 +45,6 @@ class User:
 
     @staticmethod
     def find_by_id(user_id: str) -> Optional[Dict]:
-        """Find user by ID."""
         return db.users.find_one({'_id': ObjectId(user_id)})
 
     @staticmethod
@@ -154,7 +156,6 @@ class Admin(User):
         self.token = Config.ADMIN_TOKEN
 
     def to_dict(self) -> Dict[str, Any]:
-        """Override to_dict to exclude courses for admin."""
         data = super().to_dict()
         data.pop('courses', None)
         return data
@@ -180,12 +181,19 @@ class Admin(User):
                     new_email: Optional[str] = None,
                     new_password: Optional[str] = None) -> None:
         update_data = {}
+
         if new_name:
             update_data['name'] = new_name
+
         if new_email:
-            if User.is_email_taken(new_email):
+            current_user = User.find_by_id(user_id)
+            if current_user['email'] == new_email:
+                pass
+            elif User.is_email_taken(new_email):
                 raise ValueError(f"Email '{new_email}' is already in use.")
-            update_data['email'] = new_email
+            else:
+                update_data['email'] = new_email
+
         if new_password:
             update_data['password_hash'] = generate_password_hash(new_password)
 
@@ -196,5 +204,6 @@ class Admin(User):
             {'_id': ObjectId(user_id)},
             {'$set': update_data}
         )
+
         if result.modified_count == 0:
             raise ValueError("User not found or no changes made.")

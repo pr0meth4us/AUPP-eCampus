@@ -1,7 +1,7 @@
-import requests
-from flask import request, jsonify, current_app, g
 from functools import wraps
+from flask import request, jsonify, g
 from utils.token_utils import decode_token, get_token_from_request
+
 
 def token_required(f):
     @wraps(f)
@@ -19,4 +19,5 @@ def token_required(f):
         request.user = payload
 
         return f(*args, **kwargs)
+
     return decorated

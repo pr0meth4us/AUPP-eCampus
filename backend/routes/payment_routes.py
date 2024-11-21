@@ -19,7 +19,7 @@ def payment_success():
     token = request.args.get('token')
     payment_id = request.args.get('paymentId')
     payer_id = request.args.get('PayerID')
-    return PaymentController.payment_success(token, payment_id, payer_id)
+    return PaymentController.payment_success(payment_id, payer_id)
 
 
 @payment_bp.route('/<payment_id>', methods=['GET'])

@@ -11,7 +11,7 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
         instructor_id: '',
         tag_names: [],
         major_ids: [],
-        amount: '0' // Keep this as a string initially to avoid confusion
+        price: '0' // Keep this as a string initially to avoid confusion
     });
     const [selectedPrice, setSelectedPrice] = useState('');
     const [courseVideo, setCourseVideo] = useState(null);
@@ -46,8 +46,8 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // If the field is the amount, set it as a number
-        if (name === 'amount') {
+        // If the field is the price, set it as a number
+        if (name === 'price') {
             setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
         } else {
             setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
@@ -57,9 +57,9 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
     const handlePriceChange = (event) => {
         const value = event.target.value;
         setSelectedPrice(value);
-        // If price is charged, clear amount
+        // If price is charged, clear price
         if (value !== "charge") {
-            setCourse(prevCourse => ({ ...prevCourse, amount: '0' }));
+            setCourse(prevCourse => ({ ...prevCourse, price: '0' }));
         }
     };
 
@@ -133,11 +133,11 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
                     <Form.Label>Enter Price (USD)</Form.Label>
                     <Form.Control
                         type="number"
-                        name="amount"
-                        value={course.amount}
+                        name="price"
+                        value={course.price}
                         onChange={handleInputChange}
                         required
-                        placeholder="Enter amount"
+                        placeholder="Enter price"
                     />
                 </Form.Group>
             )}
