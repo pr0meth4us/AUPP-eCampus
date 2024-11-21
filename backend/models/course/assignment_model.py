@@ -51,6 +51,11 @@ class Assignment:
         db.assignments.update_one({'_id': self._id}, {'$set': {'is_locked': False}})
 
     @staticmethod
+    def get_course_id(assignment_id):
+
+        return db.assignments.find_one({"_id": ObjectId(assignment_id)})['course_id']
+
+    @staticmethod
     def get_by_course(course_id):
         return list(db.assignments.find({'course_id': ObjectId(course_id)}))
 

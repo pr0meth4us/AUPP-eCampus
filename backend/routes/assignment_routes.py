@@ -1,12 +1,12 @@
 from flask import Blueprint, request
 from controllers.course.assignment_controller import AssignmentController
-from middleware.course_middleware import require_admin_or_instructor
+from middleware.course_middleware import require_admin_or_instructor_or_uploader
 
 assignment_bp = Blueprint('assignments', __name__)
 
 
 @assignment_bp.route('', methods=['POST'])
-@require_admin_or_instructor
+@require_admin_or_instructor_or_uploader
 def add_assignment(course_id):
     data = request.form.to_dict()
     file = request.files.get('file')
