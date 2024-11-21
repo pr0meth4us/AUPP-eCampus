@@ -9,10 +9,6 @@ export default function DrawerButton({ id }) {
         setIsOpen(!isOpen);
     };
 
-    const closeDrawer = () => {
-        setIsOpen(false);
-    };
-
     return (
         <>
             <div className="text-center">
@@ -25,7 +21,7 @@ export default function DrawerButton({ id }) {
                         <img
                             src={user.profile_image}
                             alt="Profile"
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full" // Adjust size for the button
                         />
                     ) : (
                         <i className="bi bi-person-circle" style={{ fontSize: "2em" }}></i>
@@ -41,31 +37,23 @@ export default function DrawerButton({ id }) {
                 tabIndex="-1"
                 aria-labelledby={`${id}-label`}
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h5
-                        id={`${id}-label`}
-                        className="inline-flex items-center text-base font-semibold text-gray-500 dark:text-gray-400"
-                    >
-                        Profile
-                    </h5>
-                    <button
-                        className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                        onClick={closeDrawer}
-                    >
-                        X
-                    </button>
-                </div>
+                <h5
+                    id={`${id}-label`}
+                    className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400"
+                >
+                    Profile
+                </h5>
 
                 {/* Profile Section */}
                 <div className="flex items-center mb-4">
                     <img
-                        src={user.profile_image || 'default-profile.png'}
+                        src={user.profile_image || 'default-profile.png'} // Fallback image
                         alt="Profile"
                         className="w-16 h-16 rounded-full mr-3"
                     />
                     <div>
                         <a
-                            href={`/profile/${user._id}`}
+                            href={`/profile/${user._id}`} // Use the hashed user ID
                             className="text-lg font-semibold text-gray-800 dark:text-gray-200 hover:underline"
                         >
                             {user.name || 'No Name Provided'}
@@ -76,7 +64,35 @@ export default function DrawerButton({ id }) {
                     </div>
                 </div>
 
-                {/* Other drawer content */}
+                {/* Drawer Menu */}
+                <div className="space-y-4">
+                    <a href="/my-courses" className="block text-gray-100 hover:underline">
+                        My Courses
+                    </a>
+                    <a href={`/profile/${user._id}`} className="block text-gray-100 hover:underline">
+                        Profile
+                    </a>
+                    <a href="/subscription" className="block text-gray-100 hover:underline">
+                        Subscription
+                    </a>
+                    <a href="/badges" className="block text-gray-100 hover:underline">
+                        My Badges
+                    </a>
+
+                    <hr className="border-gray-600 my-4" />
+                    <a href="/settings" className="block text-gray-100 hover:underline">
+                        Settings
+                    </a>
+                    <a href="/help" className="block text-gray-100 hover:underline">
+                        Help center
+                    </a>
+                    <button
+                        onClick={() => /* logOutFunction */ {}}
+                        className="w-full text-left text-gray-100 hover:underline"
+                    >
+                        Log out
+                    </button>
+                </div>
             </div>
         </>
     );
