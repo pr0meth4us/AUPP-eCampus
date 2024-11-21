@@ -4,7 +4,6 @@ from .auth_middleware import token_required
 
 
 def require_admin(f):
-    """Middleware to ensure user is an admin."""
     @wraps(f)
     @token_required
     def decorated(*args, **kwargs):
