@@ -4,6 +4,11 @@
   "private": true,
   "dependencies": {
     "@dgtdept/rachana": "^1.0.3",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.6",
+    "@mui/material": "^6.1.6",
+    "@mui/styles": "^6.1.6",
     "@nextui-org/button": "^2.0.38",
     "@nextui-org/card": "^2.0.34",
     "@nextui-org/input": "^2.2.5",

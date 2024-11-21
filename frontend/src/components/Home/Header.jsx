@@ -14,7 +14,7 @@ const Header = () => {
     return (
         <>
             <Banner />
-            <header className="bg-light py-3">
+            <header className="bg-light py-3 fixed-top">
                 <div className="container d-flex justify-content-between align-items-center">
                     <div className="logo">
                         <a href="/">
@@ -30,7 +30,7 @@ const Header = () => {
                                 placeholder="Search info..."
                                 className="form-control"
                                 required
-                                style={{width: "300px"}}  // Adjust the width as needed
+                                style={{width: "300px"}}
                             />
                             <span className="input-group-text bg-white search-icon">
                                 <i className="bi bi-search"></i>
