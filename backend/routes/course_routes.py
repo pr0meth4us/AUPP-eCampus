@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from controllers.course_controller import CourseController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 from middleware.admin_middleware import require_admin
 from models.course_model import Major, Tag
+from middleware.payment_middleware import payment_required
 
 course_bp = Blueprint('course', __name__)
 
@@ -41,8 +42,8 @@ def get_all_majors():
     majors = Major.get_all()
     return jsonify([
         {
-            'id': str(major._id),
-            'name': major.name
+            'id': str(major['_id']),
+            'name': major['name']
         } for major in majors
     ]), 200
 
@@ -52,7 +53,29 @@ def get_all_tags():
     tags = Tag.get_all()
     return jsonify([
         {
-            'id': str(tag._id),
-            'name': tag.name
+            'id': str(tag['_id']),
+            'name': tag['name']
         } for tag in tags
     ]), 200
+
+
+@course_bp.route('/<course_id>/material', methods=['GET'])
+@payment_required
+def get_course_material(course_id):
+    # Logic to retrieve course material
+    return jsonify({"material": "This is the paid course material."})
+
+
+@course_bp.route('/<course_id>/enroll', methods=['POST'])
+@payment_required
+def enroll_student(course_id):
+    return CourseController.enroll_student(course_id)
+
+
+@course_bp.route('/<course_id>/unroll', methods=['POST'])
+def unenroll_student(course_id):
+    student_id = request.json.get('student_id')
+    if not student_id:
+        return jsonify({'message': 'Student ID is required.'}), 400
+    return CourseController.unenroll_student(course_id, student_id)
+

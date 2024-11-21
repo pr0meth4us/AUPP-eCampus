@@ -1,6 +1,5 @@
-import os
-import boto3
 import logging
+import boto3
 from config import Config
 
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +16,6 @@ BUCKET_NAME = 'auppecampus'
 
 
 def upload_to_s3(image_file, title):
-    """Uploads an image file to S3 and returns the image URL."""
     public_id = title.strip()
 
     s3.upload_fileobj(
@@ -36,13 +34,11 @@ def upload_to_s3(image_file, title):
 
 
 def delete_from_s3(public_id):
-    """Deletes an image from S3 based on its public ID."""
     s3.delete_object(Bucket=BUCKET_NAME, Key=public_id)
     logger.info(f"Image with public ID {public_id} deleted from S3.")
 
 
 def retrieve_all_images_from_s3():
-    """Retrieves all images from the specified S3 bucket."""
     response = s3.list_objects_v2(Bucket=BUCKET_NAME)
     image_urls = []
 

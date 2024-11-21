@@ -18,28 +18,28 @@ class CourseController:
 
     @staticmethod
     def get_all_courses():
-        try:
-            courses = Course.get_all()
-            serialized_courses = [
-                {
-                    'id': str(course['_id']),
-                    'title': course.get('title'),
-                    'description': course.get('description'),
-                    'instructor_id': str(course['instructor_id']),
-                    'instructor_name': str(User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(course['instructor_id']) else 'Unknown',                    'uploader_id': str(course['uploader_id']),
-                    'video_url': course.get('video_url'),
-                    'thumbnail_url': course.get('thumbnail_url'),
-                    'major_ids': [str(mid) for mid in course.get('major_ids', [])],
-                    'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
-                    'created_at': course.get('created_at'),
-                    'updated_at': course.get('updated_at')
-                }
-                for course in courses
-            ]
-            return jsonify(serialized_courses), 200
-        except Exception as e:
-            logger.error(f"Error fetching courses: {e}")
-            return jsonify({"error": "Failed to fetch courses"}), 500
+        courses = Course.get_all()
+        serialized_courses = [
+            {
+                'id': str(course['_id']),
+                'title': course.get('title'),
+                'description': course.get('description'),
+                'instructor_id': str(course['instructor_id']),
+                'instructor_name': str(
+                    User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(
+                    course['instructor_id']) else 'Unknown',
+                'uploader_id': str(course['uploader_id']),
+                'video_url': course.get('video_url'),
+                'thumbnail_url': course.get('thumbnail_url'),
+                'major_ids': [str(mid) for mid in course.get('major_ids', [])],
+                'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
+                'created_at': course.get('created_at'),
+                'updated_at': course.get('updated_at'),
+                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]
+            }
+            for course in courses
+        ]
+        return jsonify(serialized_courses), 200
 
     @staticmethod
     def validate_majors(major_ids):
@@ -93,6 +93,7 @@ class CourseController:
         title = request.form.get('title')
         description = request.form.get('description')
         instructor_id = request.form.get('instructor_id') or g.user_id
+        amount = request.form.get('amount')
         video_file = request.files.get('video')
         print(request.form)
 
@@ -129,6 +130,7 @@ class CourseController:
             'video_file': video_file,
             'major_ids': [ObjectId(mid) for mid in major_ids],
             'tag_names': tag_names,
+            'amount': amount
         }
 
     @staticmethod
@@ -139,16 +141,20 @@ class CourseController:
 
         created_tags = CourseController.create_tags(data['tag_names'])
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
-        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                        data['description'])
+
         course = Course(
             title=data['title'],
             description=data['description'],
             instructor_id=ObjectId(data['instructor_id']),
             video_url=video_url,
-            uploader_id=ObjectId(g.user_id),
+            uploader_id=ObjectId(g.current_user['_id']),
             thumbnail_url=thumbnail_url,
             major_ids=data['major_ids'],
             tag_ids=tag_ids,
+            amount=data['amount'],
+            enrolled_students=[]
         )
         course_id = course.save_to_db()
         return jsonify({'message': 'Course created successfully', 'course_id': course_id}), 201
@@ -174,7 +180,8 @@ class CourseController:
         )
 
         if data['video_file']:
-            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'], data['description'])
+            new_video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
+                                                                                data['description'])
 
             current_video_url = current_course.get('video_url')
             if 'youtube.com' in current_video_url:
@@ -204,3 +211,53 @@ class CourseController:
             return jsonify({'message': 'Course deleted successfully'}), 200
         except Exception as e:
             return jsonify({'message': str(e)}), 500
+
+    @staticmethod
+    def enroll_student(course_id):
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        user_id = g.current_user.get('_id')
+
+        enrolled_students = course.get('enrolled_students', [])
+        if not isinstance(enrolled_students, list):
+            enrolled_students = []
+
+        enrolled_students = [str(student_id) for student_id in enrolled_students]
+
+
+        if user_id not in enrolled_students:
+            enrolled_students.append(user_id)
+            enrolled_students = list(set(ObjectId(sid) for sid in enrolled_students))
+
+            Course.update_course(course_id, enrolled_students=enrolled_students)
+            User.update_courses(user_id, course_id, add=True)
+            return jsonify({'message': 'Student enrolled successfully.'}), 200
+        else:
+            return jsonify({'message': 'Student already enrolled.'}), 400
+
+    @staticmethod
+    def unenroll_student(course_id, student_id):
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        student = User.find_by_id(student_id)
+        if not student:
+            return jsonify({'message': 'Student not found.'}), 404
+
+        if student_id in course['enrolled_students']:
+            course['enrolled_students'].remove(student_id)
+            Course.update_course(course_id, enrolled_students=course['enrolled_students'])
+            User.update_courses(student, course_id, add=False)
+            return jsonify({'message': 'Student unenrolled successfully.'}), 200
+        else:
+            return jsonify({'message': 'Student not enrolled in this course.'}), 400
+
+    from middleware.payment_middleware import payment_required
+
+    @payment_required
+    def get_course_material(course_id):
+        # Logic to retrieve course material
+        return jsonify({"material": "This is the paid course material."})
