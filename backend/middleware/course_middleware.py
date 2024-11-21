@@ -1,5 +1,4 @@
 from functools import wraps
-from bson.errors import InvalidId
 from flask import g, jsonify
 from models.course import Assignment, Course
 from .auth_middleware import token_required
@@ -42,7 +41,8 @@ def require_admin_or_instructor_or_uploader(f):
                 user_id != str(course['instructor_id']) and
                 user_id != str(course['uploader_id'])
         ):
-            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this action.'}), 403
+            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this '
+                                       'action.'}), 403
 
         g.course = course
         return f(*args, **kwargs)
