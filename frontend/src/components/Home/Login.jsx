@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useNavigate } from 'react-router-dom';
 import Recaptcha from '../Recaptcha';
+import '../../assets/css/elements/login.css';
 
 const LoginPage = () => {
     const { login } = useAuth();
@@ -35,9 +36,10 @@ const LoginPage = () => {
         <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                    <div
+                        className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
                         <div className="text-center flex-grow-1">
-                            <h2 className="modal-title" id="login">Welcome Back!</h2>
+                            <h2 className="modal-title fw-bold" id="login" style={{fontSize: '2rem'}}>Welcome Back!</h2>
                         </div>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -51,7 +53,7 @@ const LoginPage = () => {
                                 <div className="d-flex gap-4">
                                     <button
                                         type="button"
-                                        className={`btn ${role === 'student' ? 'btn-primary' : 'btn-outline-primary'} w-50 `}
+                                        className={`btn ${role === 'student' ? 'btn-primary' : 'btn-outline-primary'} w-50`}
                                         onClick={() => setRole('student')}
                                     >
                                         Student
@@ -63,7 +65,6 @@ const LoginPage = () => {
                                     >
                                         Instructor
                                     </button>
-
                                 </div>
                             </div>
                             <div className="mb-3">
@@ -89,17 +90,38 @@ const LoginPage = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
+                                <a href="#" className="d-block mt-2">Forgot password?</a>
                             </div>
-                            <Recaptcha onVerify={setCaptchaValue} />
+                            <div className="mb-3 d-flex justify-content-between align-items-center">
+                                <div className="form-check">
+                                    <input type="checkbox" className="form-check-input" id="rememberMe"/>
+                                    <label className="form-check-label" htmlFor="rememberMe">Remember me</label>
+                                </div>
+                            </div>
+                            <Recaptcha onVerify={setCaptchaValue}/>
                             {error && <p className="text-danger">{error}</p>}
                         </form>
                     </div>
-                    <div className="modal-footer">
-                        <button type="button" className="btn btn-outline-secondary" ref={closeButtonRef} data-bs-dismiss="modal">Close</button>
-                        <button type="button" className="btn btn-primary" onClick={handleLogin}>
+                    <div className="modal-footer d-flex justify-content-between align-items-center">
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary flex-grow-1 me-2"
+                            ref={closeButtonRef}
+                            data-bs-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-primary flex-grow-1"
+                            onClick={handleLogin}
+                        >
                             Login
                         </button>
                     </div>
+                    <p className="text-center mt-3 mb-3">
+                        New to AUPP eCampus? <a href="#">Click Here Register Now</a>
+                    </p>
                 </div>
             </div>
         </div>

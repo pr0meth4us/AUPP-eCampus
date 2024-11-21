@@ -3,7 +3,7 @@ import os
 import tempfile
 from flask import jsonify, request, g
 import json
-from models.course_model import Course, Major, Tag
+from models.course import Course, Major, Tag
 from models.user_model import User
 from services.cloudinary_service import delete_from_cloudinary
 from services.youtube_service import delete_from_youtube
@@ -93,7 +93,7 @@ class CourseController:
         title = request.form.get('title')
         description = request.form.get('description')
         instructor_id = request.form.get('instructor_id') or g.user_id
-        amount = request.form.get('amount')
+        price = request.form.get('price')
         video_file = request.files.get('video')
         print(request.form)
 
@@ -130,7 +130,7 @@ class CourseController:
             'video_file': video_file,
             'major_ids': [ObjectId(mid) for mid in major_ids],
             'tag_names': tag_names,
-            'amount': amount
+            'price': price
         }
 
     @staticmethod
@@ -153,7 +153,7 @@ class CourseController:
             thumbnail_url=thumbnail_url,
             major_ids=data['major_ids'],
             tag_ids=tag_ids,
-            amount=data['amount'],
+            price=data['price'],
             enrolled_students=[]
         )
         course_id = course.save_to_db()

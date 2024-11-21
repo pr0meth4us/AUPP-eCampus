@@ -1,6 +1,6 @@
 from bson import ObjectId
 from flask import jsonify, g
-from models.course_model import Course
+from models.course.course_model import Course
 from models.payment_model import Payment, PaymentException
 
 
@@ -11,27 +11,25 @@ class PaymentController:
         try:
 
             course_to_pay = Course.find_by_id(data['course_id'])
-            amount = course_to_pay.get('amount')
+            price = course_to_pay.get('price')
             payment_id = Payment.create_payment_record(
                 user_id=ObjectId(g.current_user['_id']),
                 course_id=data['course_id'],
-                amount=amount,
+                price=price,
                 currency='USD'
             )
-
 
             payment = Payment.find_payment_by_id(payment_id)
             return jsonify({
                 'payment_id': str(payment_id),
                 'approval_url': payment['approval_url'],
-                'amount': amount,
+                'price': price,
             }), 201
         except PaymentException as e:
             return jsonify({"error": str(e)}), 409
 
-
     @staticmethod
-    def payment_success(token, paypal_payment_id, payer_id):
+    def payment_success(paypal_payment_id, payer_id):
         if not paypal_payment_id or not payer_id:
             return jsonify({'error': 'Missing required parameters'}), 400
 
@@ -53,7 +51,6 @@ class PaymentController:
             }), 200
         return jsonify({'error': 'Payment execution failed'}), 400
 
-
     @staticmethod
     def get_payment(payment_id):
         payment = Payment.find_payment_by_id(payment_id)
@@ -65,7 +62,7 @@ class PaymentController:
 
         return jsonify({
             'payment_id': str(payment['_id']),
-            'amount': payment['amount'],
+            'price': payment['price'],
             'currency': payment['currency'],
             'status': payment['status'],
             'created_at': payment['created_at'].isoformat(),
@@ -81,7 +78,7 @@ class PaymentController:
 
         return jsonify({
             'payment_id': str(payment['_id']),
-            'amount': payment['amount'],
+            'price': payment['price'],
             'currency': payment['currency'],
             'status': payment['status'],
             'created_at': payment['created_at'].isoformat()
