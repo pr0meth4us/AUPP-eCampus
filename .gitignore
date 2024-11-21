@@ -93,4 +93,4 @@ backend/build/
 /backend/*.pem
 /backend/*.key
 /backend/*.crt
-/backend/youtube-credentials.json
+/backend/youtube-credentials.json.DS_Store
