@@ -16,6 +16,8 @@ def create_app():
     from routes.admin_routes import admin_bp
     from routes.student_routes import student_bp
     from routes.course_routes import course_bp
+    from routes.payment_routes import payment_bp
+    flask_app.register_blueprint(payment_bp, url_prefix='/payment')
     flask_app.register_blueprint(auth_bp, url_prefix='/auth')
     flask_app.register_blueprint(admin_bp, url_prefix='/admin')
     flask_app.register_blueprint(student_bp, url_prefix='/students')
