@@ -12,11 +12,11 @@ paypalrestsdk.configure({
 logger = logging.getLogger(__name__)
 
 
-def create_payment(amount, currency="USD"):
+def create_payment(price, currency="USD"):
     payment = paypalrestsdk.Payment({
         "intent": "sale",
         "payer": {"payment_method": "paypal"},
-        "transactions": [{"amount": {"total": amount, "currency": currency}}],
+        "transactions": [{"price": {"total": price, "currency": currency}}],
         "redirect_urls": {
             "return_url": f"{Config.CLIENT_URL}/payment/success",
             "cancel_url": f"{Config.CLIENT_URL}/payment/cancel"

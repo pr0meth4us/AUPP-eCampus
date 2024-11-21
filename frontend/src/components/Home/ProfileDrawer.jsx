@@ -64,7 +64,35 @@ export default function DrawerButton({ id }) {
                     </div>
                 </div>
 
-                {/* Other drawer content */}
+                {/* Drawer Menu */}
+                <div className="space-y-4">
+                    <a href="/my-courses" className="block text-gray-100 hover:underline">
+                        My Courses
+                    </a>
+                    <a href={`/profile/${user._id}`} className="block text-gray-100 hover:underline">
+                        Profile
+                    </a>
+                    <a href="/subscription" className="block text-gray-100 hover:underline">
+                        Subscription
+                    </a>
+                    <a href="/badges" className="block text-gray-100 hover:underline">
+                        My Badges
+                    </a>
+
+                    <hr className="border-gray-600 my-4" />
+                    <a href="/settings" className="block text-gray-100 hover:underline">
+                        Settings
+                    </a>
+                    <a href="/help" className="block text-gray-100 hover:underline">
+                        Help center
+                    </a>
+                    <button
+                        onClick={() => /* logOutFunction */ {}}
+                        className="w-full text-left text-gray-100 hover:underline"
+                    >
+                        Log out
+                    </button>
+                </div>
             </div>
         </>
     );

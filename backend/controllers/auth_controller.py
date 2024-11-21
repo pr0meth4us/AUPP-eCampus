@@ -39,7 +39,6 @@ def register(data):
         return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
 
 
-
 def login_user(data):
     role = data.get('role')
     if not role or role not in ['student', 'instructor', 'admin']:
