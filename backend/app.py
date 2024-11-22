@@ -8,7 +8,7 @@ def create_app():
     flask_app = Flask(__name__)
 
     flask_app.config.from_object(Config)
-    init_mongo(flask_app)
+    init_mongo()
     from services.cors_service import init_cors
     init_cors(flask_app)
 
