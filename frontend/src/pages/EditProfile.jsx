@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import {useAuth} from "../context/authContext";
-import {student} from "../services"
+import { Input, Button, Avatar } from "@nextui-org/react";
+import { useAuth } from "../context/authContext";
+import { student } from "../services";
+import {Textarea} from "@nextui-org/input";
 
 const EditProfile = () => {
     const { user } = useAuth();
@@ -11,11 +13,28 @@ const EditProfile = () => {
     const [profileImage, setProfileImage] = useState(user.profile_image || '');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('profileImage', file);
+
+            try {
+                const response = await student.uploadProfileImage(formData);
+                setProfileImage(response.imageUrl);
+            } catch (err) {
+                setError('Failed to upload image');
+            }
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setIsLoading(true);
 
         try {
             const response = await student.updateProfile(user._id, {
@@ -31,73 +50,81 @@ const EditProfile = () => {
             }
         } catch (err) {
             setError(err.response?.data?.message || 'An error occurred while updating the profile.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-md mx-auto my-8">
-            <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
-            {error && <div className="mb-4 text-red-500">{error}</div>}
-            {success && <div className="mb-4 text-green-500">{success}</div>}
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="name" className="block mb-1">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full border rounded p-2"
-                        required
+        <div className="max-w-md mx-auto my-8 p-6 bg-white rounded-xl shadow-lg">
+            <div className="flex flex-col items-center mb-6">
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="profileImageUpload"
+                />
+                <label htmlFor="profileImageUpload" className="cursor-pointer">
+                    <Avatar
+                        src={profileImage || '/default-avatar.png'}
+                        className="w-24 h-24 mb-4 hover:opacity-75 transition-opacity"
                     />
+                </label>
+                <p className="text-sm text-gray-500">Click avatar to upload new picture</p>
+                <h2 className="text-2xl font-bold text-gray-800">Edit Profile</h2>
+            </div>
+
+            {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600">
+                    {error}
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="email" className="block mb-1">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border rounded p-2"
-                        required
-                    />
+            )}
+            {success && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-green-600">
+                    {success}
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="password" className="block mb-1">New Password (leave blank to keep current)</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border rounded p-2"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="bio" className="block mb-1">Bio</label>
-                    <textarea
-                        id="bio"
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        className="w-full border rounded p-2"
-                        rows="4"
-                    ></textarea>
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="profileImage" className="block mb-1">Profile Image URL</label>
-                    <input
-                        type="text"
-                        id="profileImage"
-                        value={profileImage}
-                        onChange={(e) => setProfileImage(e.target.value)}
-                        className="w-full border rounded p-2"
-                    />
-                </div>
-                <button
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                    label="Name"
+                    value={name}
+                    onValueChange={setName}
+                    variant="bordered"
+                    required
+                />
+                <Input
+                    type="email"
+                    label="Email"
+                    value={email}
+                    onValueChange={setEmail}
+                    variant="bordered"
+                    required
+                />
+                <Input
+                    type="password"
+                    label="New Password"
+                    value={password}
+                    onValueChange={setPassword}
+                    description="Leave blank to keep current password"
+                    variant="bordered"
+                />
+                <Textarea
+                    label="Bio"
+                    value={bio}
+                    onValueChange={setBio}
+                    variant="bordered"
+                    minRows={3}
+                />
+                <Button
+                    color="primary"
                     type="submit"
-                    className="w-full bg-blue-700 text-white font-medium rounded-lg p-2 hover:bg-blue-800 focus:outline-none"
+                    fullWidth
+                    isLoading={isLoading}
                 >
                     Update Profile
-                </button>
+                </Button>
             </form>
         </div>
     );
