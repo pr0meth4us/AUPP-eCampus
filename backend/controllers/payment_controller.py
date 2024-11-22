@@ -9,7 +9,6 @@ class PaymentController:
     @staticmethod
     def create_payment(data):
         try:
-
             course_to_pay = Course.find_by_id(data['course_id'])
             price = course_to_pay.get('price')
             payment_id = Payment.create_payment_record(
@@ -36,7 +35,6 @@ class PaymentController:
         payment = Payment.find_payment_by_paypal_id(paypal_payment_id)
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
-        print(payment, "paypal id find")
 
         success = Payment.execute_payment_completion(
             payment_data=payment,
@@ -45,10 +43,16 @@ class PaymentController:
         )
 
         if success:
+            receipt = Payment.generate_receipt(
+                payment_data=payment
+            )
+
             return jsonify({
                 'message': 'Payment completed successfully',
-                'payment_id': str(payment['_id'])
+                'payment_id': str(payment['_id']),
+                'receipt': receipt
             }), 200
+
         return jsonify({'error': 'Payment execution failed'}), 400
 
     @staticmethod
