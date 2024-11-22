@@ -1,13 +1,10 @@
-import Header from "../components/Home/Header";
 import Instructors from "../components/Home/Instructors";
-import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import "../assets/css/home.css"; // Import the CSS file
 
 const Home = () => {
     return (
         <>
-            <Header />
             <div className="main-content"> {/* Apply the main-content class here */}
                 <div className="row">
                     <div className="d-flex mt-7" style={{ marginLeft: "200px" }}>
@@ -78,7 +75,6 @@ const Home = () => {
                     <img src="/partners.png" alt="" />
                 </div>
             </div>
-            <Footer />
         </>
     );
 };

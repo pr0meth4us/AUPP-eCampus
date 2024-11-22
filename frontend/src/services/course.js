@@ -33,5 +33,30 @@ export const course = {
     fetchMajors: async () => {
         const response = await api.get('/courses/majors');
         return response.data;
+    },
+
+    enrollStudent: async (courseId) => {
+        const response = await api.post(`/courses/${courseId}/enroll`);
+        return response.data;
+    },
+
+    unenrollStudent: async (courseId, studentId) => {
+        const response = await api.post(`/courses/${courseId}/unroll`, { student_id: studentId });
+        return response.data;
+    },
+
+    getAssignments: async (courseId) => {
+        const response = await api.get(`/courses/${courseId}/assignments`);
+        return response.data;
+    },
+
+    addAssignment: async (courseId, title, description) => {
+        const response = await api.post(`/courses/${courseId}/assignments`, { title, description });
+        return response.data;
+    },
+
+    deleteAssignment: async (courseId, assignmentId) => {
+        const response = await api.delete(`/courses/${courseId}/assignments/${assignmentId}`);
+        return response.data;
     }
 };
