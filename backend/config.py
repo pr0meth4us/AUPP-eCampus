@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 import os
+
+load_dotenv(dotenv_path='.env')
 
 
 class Config:
-    MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb')
+    MONGO_URI = os.getenv('MONGO_URI')
     SECRET_KEY = os.getenv('SECRET_KEY')
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,*').split(',')
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
