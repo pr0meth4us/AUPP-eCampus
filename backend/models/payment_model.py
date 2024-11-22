@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from bson import ObjectId
-from services.paypal_service import create_payment, execute_payment
+from services.paypal_service import PaymentService
 import json
 import logging
 from services.redis_service import redis_client
@@ -28,7 +28,7 @@ class Payment:
         if not price:
             return None
 
-        paypal_payment = create_payment(price, currency)
+        paypal_payment = PaymentService.create_payment(price, currency)
 
         payment_id = str(ObjectId())
 
@@ -61,7 +61,6 @@ class Payment:
 
     @staticmethod
     def update_payment_status(payment_id, status, payment_details):
-        """Update payment status and details"""
         try:
             payment_key = f"{Payment.PAYMENT_KEY_PREFIX}{payment_id}"
 
@@ -126,17 +125,12 @@ class Payment:
 
     @staticmethod
     def clear_expired_payment(payment_id):
-        """Clear an expired payment record"""
-        try:
-            payment_key = f"{Payment.PAYMENT_KEY_PREFIX}{payment_id}"
-            return redis_client.delete(payment_key) > 0
-        except Exception as e:
-            logger.error(f"Error clearing expired payment: {str(e)}")
-            return False
+        payment_key = f"{Payment.PAYMENT_KEY_PREFIX}{payment_id}"
+        return redis_client.delete(payment_key) > 0
 
     @staticmethod
     def execute_payment_completion(payment_data, paypal_payment_id, payer_id):
-        payment_result = execute_payment(paypal_payment_id, payer_id)
+        payment_result = PaymentService.execute_payment(paypal_payment_id, payer_id)
         if not payment_result:
             raise PaymentException("Failed to execute PayPal payment")
         payment_data.update({
@@ -156,10 +150,9 @@ class Payment:
 
     @staticmethod
     def get_user_course_payment(user_id, course_id):
-        """Find payment by user_id and course_id."""
         try:
             query = {
-                'user_id': ObjectId(user_id),  # Convert string to ObjectId
+                'user_id': ObjectId(user_id),
                 'course_id': ObjectId(course_id),
                 'status': 'completed'
             }
@@ -172,3 +165,16 @@ class Payment:
         except Exception as e:
             print("Error querying payment:", str(e))
             return None
+
+    @staticmethod
+    def generate_receipt(payment_data):
+        receipt = {
+            "Receipt ID": payment_data.get("_id", "N/A"),
+            "Date": payment_data.get("updated_at", datetime.now(timezone.utc).isoformat()),
+            "Price": payment_data["price"],
+            "Currency": payment_data["currency"],
+            "Status": payment_data["status"],
+            "Approval URL": payment_data.get("approval_url", "N/A"),
+            "Payer ID": payment_data.get("payer_id", "N/A"),
+        }
+        return receipt
