@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { payment, course } from "../services";
+import { payment, course } from "../../services";
 
 const CourseSuccess = () => {
     const location = useLocation();

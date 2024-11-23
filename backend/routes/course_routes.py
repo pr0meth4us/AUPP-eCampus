@@ -66,6 +66,11 @@ def get_course_material(course_id):
     return jsonify({"material": "This is the paid course material."})
 
 
+@course_bp.route('/<course_id>', methods=['GET'])
+def get_course_by_id(course_id):
+    return CourseController.get_course_by_id(course_id)
+
+
 @course_bp.route('/<course_id>/enroll', methods=['POST'])
 @payment_required
 def enroll_student(course_id):

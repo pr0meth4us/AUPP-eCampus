@@ -40,6 +40,11 @@ export const course = {
         return response.data;
     },
 
+    getCourseById: async (courseId) => {
+        const response = await api.get('/courses/' + courseId);
+        return response.data;
+    },
+
     unenrollStudent: async (courseId, studentId) => {
         const response = await api.post(`/courses/${courseId}/unroll`, { student_id: studentId });
         return response.data;

@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
         <AuthProvider>
             <div className="layout-wrapper">
                 <Header />
-                <main className="content">{children}</main>
+                <main className="content mt-32">{children}</main>
                 <Footer />
             </div>
         </AuthProvider>

@@ -15,13 +15,13 @@ export const AuthProvider = ({ children }) => {
             try {
                 const storedUser = localStorage.getItem('user');
                 if (!storedUser) {
-                    setLoading(false); // No user in storage, no need to check auth
+                    setLoading(false);
                     return;
                 }
 
                 const data = await auth.checkAuth();
                 if (data.authenticated && data.user) {
-                    setUser(data.user); // Keep the user in state
+                    setUser(data.user);
                     localStorage.setItem('user', JSON.stringify(data.user));
                 } else {
                     setUser(null);

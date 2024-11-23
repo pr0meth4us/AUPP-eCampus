@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {course, payment} from "../services";
+import {course, payment} from "../../services";
 import {Button, Card, CardFooter, CardHeader, Pagination} from "@nextui-org/react";
-import CardVideoSkeleton from "../components/Course/CardVideoSkeleton";
+import CardVideoSkeleton from "../../components/Skeletons/CardVideoSkeleton";
 import {Lock, PlayCircle, User} from "lucide-react";
 
 const CourseCatalog = () => {
