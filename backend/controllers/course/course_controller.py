@@ -96,7 +96,6 @@ class CourseController:
         instructor_id = request.form.get('instructor_id') or g.user_id
         price = request.form.get('price')
         video_file = request.files.get('video')
-        print(request.form)
 
         def parse_form_data(form, key):
             json_data = form.get(key)
@@ -260,3 +259,8 @@ class CourseController:
     def get_course_material(course_id):
         # Logic to retrieve course material
         return jsonify({"material": "This is the paid course material."})
+
+    @staticmethod
+    def get_course_by_id(course_id):
+        course = Course.get_course_by_id(course_id)
+        return jsonify(course.to_dict()), 200

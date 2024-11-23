@@ -49,8 +49,7 @@ header {
 
 .content {
     flex: 1;
-    margin-top: 80px; /* Offset equal to header height */
-    background-color: #f8f9fa; /* Optional background color */
+    background-color: #f8f9fa;
 }
 
 .button-no-after::after {
