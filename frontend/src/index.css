@@ -53,3 +53,8 @@ header {
     background-color: #f8f9fa; /* Optional background color */
 }
 
+.button-no-after::after {
+    content: none !important;
+}
+
+

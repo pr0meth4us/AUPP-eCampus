@@ -35,7 +35,8 @@ class CourseController:
                 'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
                 'created_at': course.get('created_at'),
                 'updated_at': course.get('updated_at'),
-                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]
+                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])],
+                'price': course.get('price')
             }
             for course in courses
         ]
@@ -225,8 +226,6 @@ class CourseController:
             enrolled_students = []
 
         enrolled_students = [str(student_id) for student_id in enrolled_students]
-
-
         if user_id not in enrolled_students:
             enrolled_students.append(user_id)
             enrolled_students = list(set(ObjectId(sid) for sid in enrolled_students))

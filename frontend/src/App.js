@@ -9,6 +9,8 @@ import CourseCatalog from './pages/CourseCatalog';
 import ProfilePage from './pages/ProfilePage';
 import EditProfile from './pages/EditProfile';
 import Layout from "./context/Layout";
+import CourseSuccess from "./pages/CourseSuccess"
+import CourseConfirmation from "./pages/CourseConfirmation";
 
 const App = () => {
     return (
@@ -22,6 +24,8 @@ const App = () => {
                     <Route path="/course-catalog" element={<CourseCatalog />} />
                     <Route path="/profile/:id" element={<ProfilePage />} />
                     <Route path="/edit-profile" element={<EditProfile />} />
+                    <Route path="/course/success" element={<CourseSuccess />} />
+                    <Route path="/course/confirmation" element={<CourseConfirmation />} />
                 </Routes>
             </Layout>
         </Router>
