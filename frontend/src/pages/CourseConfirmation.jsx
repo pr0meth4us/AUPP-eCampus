@@ -13,11 +13,10 @@ const CourseConfirmation = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
             <div className="bg-gray-50 p-8 shadow-lg rounded-lg w-full max-w-3xl">
-                {/* Header Section */}
                 <div className="flex justify-between items-center">
                     <div>
                         <img
-                            src="/path/to/logo.png" // Replace with your logo path
+                            src="/path/to/logo.png"
                             alt="Company Logo"
                             className="h-20 mb-4"
                         />

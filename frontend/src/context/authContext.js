@@ -13,15 +13,21 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
+                const storedUser = localStorage.getItem('user');
+                if (!storedUser) {
+                    setLoading(false); // No user in storage, no need to check auth
+                    return;
+                }
+
                 const data = await auth.checkAuth();
                 if (data.authenticated && data.user) {
-                    setUser(data.user);
+                    setUser(data.user); // Keep the user in state
                     localStorage.setItem('user', JSON.stringify(data.user));
                 } else {
                     setUser(null);
                     localStorage.removeItem('user');
                 }
-            } catch {
+            } catch (error) {
                 setUser(null);
                 localStorage.removeItem('user');
             } finally {
@@ -43,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     const signup = async (name, email, password, role, verificationCode) => {
         try {
             await auth.register(name, email, password, role, verificationCode);
-            await login(email, password, role); // Auto-login the user after successful registration
+            await login(email, password, role); // Auto-login after successful registration
         } catch (error) {
             throw error;
         }
@@ -70,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, loading, login, signup, logout, sendOtp }}>
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
