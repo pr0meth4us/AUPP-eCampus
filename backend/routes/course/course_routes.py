@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, request
 from controllers.course import CourseController, TagController, MajorController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
-from middleware.admin_middleware import require_admin
-from models.course import Major, Tag
 from middleware.payment_middleware import payment_required
 
 course_bp = Blueprint('course', __name__)
@@ -17,7 +15,7 @@ def create_course():
 
 @course_bp.route('/', methods=['GET'])
 def get_all_courses():
-    return CourseController.get_all_courses()
+    return CourseController.preview_courses()
 
 
 @course_bp.route('/<course_id>', methods=['PUT'])

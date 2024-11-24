@@ -42,7 +42,7 @@ class CloudflareUploadService:
 
 def handle_temp_file_upload(file, path):
     temp_dir = "/tmp"
-    os.makedirs(temp_dir, exist_ok=True)  #
+    os.makedirs(temp_dir, exist_ok=True)
 
     filename = secure_filename(file.filename)
     temp_file_path = os.path.join(temp_dir, filename)

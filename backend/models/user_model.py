@@ -96,16 +96,20 @@ class User:
         if not user:
             raise ValueError("User not found.")
 
+        if 'courses' not in user or not isinstance(user['courses'], list):
+            user['courses'] = []
+
+        course_id = ObjectId(course_id)
+
         if add:
             if course_id not in user['courses']:
-                user['courses'].append(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'courses': user['courses']}})
+                user['courses'].append(course_id)
         else:
-            if ObjectId(course_id) in user['courses']:
-                user['courses'].remove(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'courses': user['courses']}})
+            if course_id in user['courses']:
+                user['courses'].remove(course_id)
+
+        db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'courses': user['courses']}})
+
 
 
 class Student(User):
