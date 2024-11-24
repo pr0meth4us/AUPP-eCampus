@@ -12,6 +12,9 @@ import CourseCatalog from "./components/Course/CourseCatalog";
 import CourseSuccess from "./components/Course/CourseSuccess";
 import CourseConfirmation from "./components/Course/CourseConfirmation";
 import MyCourse from "./components/Course/MyCourse";
+import CoursePage from "./components/Course/CoursePage";
+import InstructorCoursePage from "./components/Course/InstructorCoursePage";
+import InstructorCourseCreate from "./components/Course/InstructorCourseCreate";
 const App = () => {
     return (
         <Router>
@@ -27,6 +30,9 @@ const App = () => {
                     <Route path="/course/success" element={<CourseSuccess />} />
                     <Route path="/course/confirmation" element={<CourseConfirmation />} />
                     <Route path="/my-courses" element={<MyCourse />}/>
+                    <Route path="/course/:id" element={<CoursePage />} />
+                    <Route path="/instructor/course/:id" element={<InstructorCoursePage/>}/>
+                    <Route path="/instructor/course/create" element={<InstructorCourseCreate />}/>
                 </Routes>
             </Layout>
         </Router>

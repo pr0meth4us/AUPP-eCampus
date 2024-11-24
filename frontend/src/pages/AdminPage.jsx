@@ -23,7 +23,7 @@ const AdminPage = () => {
         setUsers(userData);
         setMajors(majors);
         setTags(tags);
-        const courseData = await course.getAllCourses();
+        const courseData = await admin.getAllCourses();
         setCourses(courseData);
         setLoading(false);
     };

@@ -106,6 +106,14 @@ export default function DrawerButton({ id }) {
                     >
                         My Courses
                     </a>
+                    {user.role === 'instructor' && (
+                        <a
+                            href="/instructor/course/create"
+                            className="block px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+                        >
+                            Create Course
+                        </a>
+                    )}
                     <a
                         href={`/profile/${user._id}`}
                         className="block px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition"

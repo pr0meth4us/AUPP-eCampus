@@ -6,7 +6,7 @@ from .assignment_model import Assignment
 
 class Course:
     def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids,
-                 price, enrolled_students=None, assignments=None, _id=None, created_at=None, updated_at=None):
+                 price, cover_image_url=None, enrolled_students=None, assignments=None, _id=None, created_at=None, updated_at=None):
         self._id = _id
         self.title = title
         self.description = description
@@ -14,6 +14,7 @@ class Course:
         self.uploader_id = ObjectId(uploader_id)
         self.video_url = video_url
         self.thumbnail_url = thumbnail_url
+        self.cover_image_url = cover_image_url
         self.major_ids = [ObjectId(mid) for mid in major_ids]
         self.tag_ids = [ObjectId(tid) for tid in tag_ids]
         self.created_at = created_at or datetime.now(timezone.utc)
@@ -35,6 +36,7 @@ class Course:
             'uploader_id': str(self.uploader_id),
             'video_url': self.video_url,
             'thumbnail_url': self.thumbnail_url,
+            'cover_image_url': self.cover_image_url,  # Include cover image URL
             'major_ids': [str(mid) for mid in self.major_ids],  # Convert ObjectId to string
             'tag_ids': [str(tid) for tid in self.tag_ids],  # Convert ObjectId to string
             'created_at': self.created_at,
@@ -46,7 +48,7 @@ class Course:
 
     def save_to_db(self):
         course_data = self.to_dict()
-        course_data.pop('_id')
+        course_data.pop('_id')  # MongoDB generates _id automatically
         result = db.courses.insert_one(course_data)
         self._id = result.inserted_id
         return str(self._id)
@@ -67,6 +69,7 @@ class Course:
                 video_url=data.get('video_url'),
                 uploader_id=str(data.get('uploader_id')),
                 thumbnail_url=data.get('thumbnail_url'),
+                cover_image_url=data.get('cover_image_url'),  # Retrieve cover image URL
                 major_ids=data.get('major_ids', []),
                 tag_ids=data.get('tag_ids', []),
                 price=data.get('price', 0),

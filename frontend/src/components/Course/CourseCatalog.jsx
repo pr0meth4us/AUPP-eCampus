@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { course, payment } from "../../services";
-import { Button, Card, CardFooter, CardHeader, Pagination } from "@nextui-org/react";
+import {
+    Button,
+    Card,
+    CardFooter,
+    CardHeader,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Pagination,
+    useDisclosure,
+} from "@nextui-org/react";
 import CardVideoSkeleton from "../../components/Skeletons/CardVideoSkeleton";
-import { Lock, PlayCircle, User } from "lucide-react";
+import { Lock, User, BookOpen } from "lucide-react"; // Updated icon
 import { useAuth } from "../../context/authContext";
+import { useNavigate } from "react-router-dom";
 
 const CourseCatalog = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
+    const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+    const [selectedCourse, setSelectedCourse] = useState(null);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const coursesPerPage = 6;
+    const [enrolling, setEnrolling] = useState(false);
     const [loadingPayment, setLoadingPayment] = useState(null);
+    const coursesPerPage = 6;
 
     useEffect(() => {
         fetchData();
@@ -40,6 +57,27 @@ const CourseCatalog = () => {
         }
     };
 
+    const handleEnrollment = async () => {
+        if (!selectedCourse) return;
+
+        setEnrolling(true);
+        try {
+            await course.enrollStudent(selectedCourse.id);
+            onClose();
+            navigate(`/course/${selectedCourse.id}`);
+        } catch (error) {
+            console.error("Enrollment failed:", error);
+        } finally {
+            setEnrolling(false);
+            setSelectedCourse(null);
+        }
+    };
+
+    const handleEnrollClick = (course) => {
+        setSelectedCourse(course);
+        onOpen();
+    };
+
     const indexOfLastCourse = currentPage * coursesPerPage;
     const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
     const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
@@ -57,6 +95,7 @@ const CourseCatalog = () => {
                             <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                 {currentCourses.map((course) => {
                                     const isOwned = user?.courses?.includes(course.id);
+                                    const isFree = !course.price || course.price === "0";
 
                                     return (
                                         <Card
@@ -66,12 +105,12 @@ const CourseCatalog = () => {
                                             <CardHeader className="absolute z-10 top-1 flex-col items-start">
                                                 <div
                                                     className={`px-3 py-1 rounded-full text-sm font-bold ${
-                                                        course.price && course.price !== "0"
+                                                        !isFree
                                                             ? "bg-yellow-500 text-black"
                                                             : "bg-green-500 text-white"
                                                     }`}
                                                 >
-                                                    {course.price && course.price !== "0" ? (
+                                                    {!isFree ? (
                                                         <div className="flex items-center gap-1">
                                                             <Lock size={12} />
                                                             Premium
@@ -85,11 +124,11 @@ const CourseCatalog = () => {
                                                 </h3>
                                             </CardHeader>
                                             <img
-                                                alt={`Thumbnail for ${course.title}`}
+                                                alt={`Cover for ${course.title}`}
                                                 className="z-0 w-full h-full object-cover rounded-t-lg"
-                                                src={course.thumbnail_url}
+                                                src={course.cover_image || "/AUPP-Main-Logo.svg"}
                                                 onError={(e) => {
-                                                    e.target.src = "https://via.placeholder.com/300"; // Fallback image
+                                                    e.target.src = "/AUPP-Main-Logo.svg";
                                                     e.target.classList.add("opacity-50");
                                                 }}
                                             />
@@ -100,15 +139,13 @@ const CourseCatalog = () => {
                                                 </div>
                                                 {isOwned ? (
                                                     <Button
-                                                        as="a"
-                                                        href={course.video_url}
-                                                        target="_blank"
+                                                        onClick={() => navigate(`/course/${course.id}`)}
                                                         size="sm"
                                                         className="button-no-after bg-green-500 text-white hover:bg-green-600 flex items-center gap-2"
                                                     >
-                                                        <PlayCircle size={16} /> Watch Now
+                                                        <BookOpen size={16} /> View Course
                                                     </Button>
-                                                ) : course.price && course.price !== "0" ? (
+                                                ) : !isFree ? (
                                                     <Button
                                                         onClick={() => handleCreatePayment(course.id)}
                                                         isLoading={loadingPayment === course.id}
@@ -119,13 +156,11 @@ const CourseCatalog = () => {
                                                     </Button>
                                                 ) : (
                                                     <Button
-                                                        as="a"
-                                                        href={course.video_url}
-                                                        target="_blank"
+                                                        onClick={() => handleEnrollClick(course)}
                                                         size="sm"
                                                         className="button-no-after bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2"
                                                     >
-                                                        <PlayCircle size={16} /> Enroll
+                                                        <BookOpen size={16} /> Enroll Now
                                                     </Button>
                                                 )}
                                             </CardFooter>
@@ -145,6 +180,31 @@ const CourseCatalog = () => {
                     )}
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Confirm Enrollment</ModalHeader>
+                            <ModalBody>
+                                <p>Are you sure you want to enroll in {selectedCourse?.title}?</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    onPress={handleEnrollment}
+                                    isLoading={enrolling}
+                                >
+                                    {enrolling ? "Enrolling..." : "Enroll"}
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </>
     );
 };
