@@ -15,6 +15,9 @@ import MyCourse from "./components/Course/MyCourse";
 import CoursePage from "./components/Course/CoursePage";
 import InstructorCoursePage from "./components/Course/InstructorCoursePage";
 import InstructorCourseCreate from "./components/Course/InstructorCourseCreate";
+import MyCourseInstructor from "./components/Course/MyCourseInstructor";
+import Unauthorized from "./pages/Unauthorized";
+
 const App = () => {
     return (
         <Router>
@@ -23,16 +26,38 @@ const App = () => {
                     <Route path="/" element={<Home />} />
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-login" element={<AdminLogin />} />
-                    <Route path="/admin/dashboard" element={<PrivateRoute element={<AdminPage />} allowedRoles={['admin']} />} />
+
+                    <Route path="/admin/dashboard"
+                           element={<PrivateRoute element={<AdminPage />} allowedRoles={['admin']} />}
+                    />
+                    <Route path="/profile/:id"
+                           element={<PrivateRoute element={<ProfilePage />} allowedRoles={['student', 'instructor', 'admin']} />}
+                    />
+                    <Route path="/edit-profile"
+                           element={<PrivateRoute element={<EditProfile />} allowedRoles={['student', 'instructor', 'admin']} />}
+                    />
+                    <Route path="/my-courses"
+                           element={<PrivateRoute element={<MyCourse />} allowedRoles={['student', 'instructor', 'admin']} />}
+                    />
+                    <Route path="/course-i-teach"
+                           element={<PrivateRoute element={<MyCourseInstructor />} allowedRoles={['instructor', 'admin']} />}
+                    />
+                    <Route path="/course/:id"
+                           element={<PrivateRoute element={<CoursePage />} allowedRoles={['student', 'instructor', 'admin']} />}
+                    />
+                    <Route path="/instructor/course/:id"
+                           element={<PrivateRoute element={<InstructorCoursePage />} allowedRoles={['instructor', 'admin']} />}
+                    />
+                    <Route path="/instructor/course/create"
+                           element={<PrivateRoute element={<InstructorCourseCreate />} allowedRoles={['instructor', 'admin']} />}
+                    />
+
+                    {/* Public Routes */}
                     <Route path="/course-catalog" element={<CourseCatalog />} />
-                    <Route path="/profile/:id" element={<ProfilePage />} />
-                    <Route path="/edit-profile" element={<EditProfile />} />
                     <Route path="/course/success" element={<CourseSuccess />} />
                     <Route path="/course/confirmation" element={<CourseConfirmation />} />
-                    <Route path="/my-courses" element={<MyCourse />}/>
-                    <Route path="/course/:id" element={<CoursePage />} />
-                    <Route path="/instructor/course/:id" element={<InstructorCoursePage/>}/>
-                    <Route path="/instructor/course/create" element={<InstructorCourseCreate />}/>
+                    <Route path="/unauthorized" element={<Unauthorized />} />
+
                 </Routes>
             </Layout>
         </Router>

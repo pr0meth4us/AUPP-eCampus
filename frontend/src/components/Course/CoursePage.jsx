@@ -53,7 +53,7 @@ const CoursePage = () => {
                     <img
                         alt={`Cover for ${course.title}`}
                         className="w-full h-full object-cover"
-                        src={course.cover_image || "/AUPP-Main-Logo.svg"}
+                        src={course.cover_image_url || "/AUPP-Main-Logo.svg"}
                         onError={(e) => {
                             e.target.src = "/AUPP-Main-Logo.svg";
                             e.target.classList.add("opacity-50");

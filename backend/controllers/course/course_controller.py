@@ -55,7 +55,8 @@ class CourseController:
                     User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(
                     course['instructor_id']) else 'Unknown',
                 'major_ids': [str(mid) for mid in course.get('major_ids', [])],
-                'price': course.get('price')
+                'price': course.get('price'),
+                'cover_image_url': course.get('cover_image_url')
             }
             for course in courses
         ]
