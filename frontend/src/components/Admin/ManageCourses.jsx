@@ -1,11 +1,13 @@
-import React, {  useState } from 'react';
-import {  Button as ReactButton, Accordion, Table, Modal } from 'react-bootstrap';
-import {  course } from '../../services';
-import Notification from "../Notification";
+import React, { useState } from 'react';
+import { Button as ReactButton, Accordion, Table, Modal } from 'react-bootstrap';
+import { course } from '../../services';
+import Notification from '../Notification';
 import CourseForm from './CourseForm';
 import { useCourseActions } from './useCourseActions';
-import ManageVideos from "./ManageVideos";
-import {Link} from "react-router-dom";
+import ManageVideos from './ManageVideos';
+import TagManagement from './TagManagement';
+import MajorManagement from './MajorManagement';
+import { Link } from 'react-router-dom';
 
 const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
     const [editCourse, setEditCourse] = useState(null);
@@ -34,9 +36,9 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
         }
     };
 
-
     return (
         <div>
+            {/* Course Creation */}
             <Accordion className="mb-4">
                 <Accordion.Item eventKey="0">
                     <Accordion.Header>Create New Course</Accordion.Header>
@@ -53,8 +55,9 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                 </Accordion.Item>
             </Accordion>
 
+            {/* Course List */}
             <Accordion className="mb-4">
-                <Accordion.Item eventKey="0">
+                <Accordion.Item eventKey="1">
                     <Accordion.Header>Course List</Accordion.Header>
                     <Accordion.Body>
                         <Table striped bordered hover responsive>
@@ -71,11 +74,18 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                             </tr>
                             </thead>
                             <tbody>
-                            {courses.map(course => {
-                                const courseInstructor = users.find(user => user.id === course.instructor_id)?.name || 'Unknown';
-                                const courseUploader = users.find(user => user.id === course.uploader_id)?.name || 'Unknown';
-                                const courseTags = course.tag_ids.map(tagId => tags.find(tag => tag.id === tagId)?.name || 'Unknown').join(', ');
-                                const courseMajors = course.major_ids.map(majorId => majors.find(major => major.id === majorId)?.name || 'Unknown').join(', ');
+                            {courses.map((course) => {
+                                const courseInstructor =
+                                    users.find((user) => user.id === course.instructor_id)?.name || 'Unknown';
+                                const courseUploader =
+                                    users.find((user) => user.id === course.uploader_id)?.name || 'Unknown';
+                                const courseTags = course.tag_ids
+                                    .map((tagId) => tags.find((tag) => tag.id === tagId)?.name || 'Unknown')
+                                    .join(', ');
+                                const courseMajors = course.major_ids
+                                    .map((majorId) => majors.find((major) => major.id === majorId)?.name || 'Unknown')
+                                    .join(', ');
+
                                 return (
                                     <tr key={course.id}>
                                         <td>{course.title}</td>
@@ -87,17 +97,34 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                                         <td>
                                             {course.video_url && (
                                                 <Link
-                                                    variant="link" to={course.video_url} target="_blank" rel="noopener noreferrer">
+                                                    variant="link"
+                                                    to={course.video_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
                                                     Watch Video
                                                 </Link>
                                             )}
                                         </td>
                                         <td>
-                                            <ReactButton variant="outline-secondary" size="sm" className="me-1" onClick={() => {
-                                                setEditCourse(course);
-                                                setShowEditModal(true);
-                                            }}>Edit</ReactButton>
-                                            <ReactButton variant="outline-danger" size="sm" onClick={() => handleDeleteCourse(course.id)}>Delete</ReactButton>
+                                            <ReactButton
+                                                variant="outline-secondary"
+                                                size="sm"
+                                                className="me-1"
+                                                onClick={() => {
+                                                    setEditCourse(course);
+                                                    setShowEditModal(true);
+                                                }}
+                                            >
+                                                Edit
+                                            </ReactButton>
+                                            <ReactButton
+                                                variant="outline-danger"
+                                                size="sm"
+                                                onClick={() => handleDeleteCourse(course.id)}
+                                            >
+                                                Delete
+                                            </ReactButton>
                                         </td>
                                     </tr>
                                 );
@@ -108,12 +135,37 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                 </Accordion.Item>
             </Accordion>
 
+            {/* Tag Management */}
+            <Accordion className="mb-4">
+                <Accordion.Item eventKey="2">
+                    <Accordion.Header>Manage Tags</Accordion.Header>
+                    <Accordion.Body>
+                        <TagManagement tags={tags} fetchData={fetchData} />
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+
+            {/* Major Management */}
+            <Accordion className="mb-4">
+                <Accordion.Item eventKey="3">
+                    <Accordion.Header>Manage Majors</Accordion.Header>
+                    <Accordion.Body>
+                        <MajorManagement majors={majors} fetchData={fetchData} />
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+
+            {/* Video Management */}
             <ManageVideos />
 
-            <Modal show={showEditModal} onHide={() => {
-                setEditCourse(null);
-                setShowEditModal(false);
-            }}>
+            {/* Edit Course Modal */}
+            <Modal
+                show={showEditModal}
+                onHide={() => {
+                    setEditCourse(null);
+                    setShowEditModal(false);
+                }}
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>Edit {editCourse?.title}</Modal.Title>
                 </Modal.Header>
@@ -129,6 +181,8 @@ const ManageCourses = ({ users, courses, tags, majors, fetchData }) => {
                     />
                 </Modal.Body>
             </Modal>
+
+            {/* Notifications */}
             {notification.message && <Notification message={notification.message} type={notification.type} />}
         </div>
     );

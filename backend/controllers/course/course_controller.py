@@ -67,7 +67,8 @@ class CourseController:
         for tag_name in tag_names:
             existing_tag = Tag.find_by_name(tag_name)
             if existing_tag:
-                created_tags.append({'tag_name': tag_name, 'tag_id': str(existing_tag)})
+                tag_id = str(existing_tag['_id']) if isinstance(existing_tag, dict) else str(existing_tag)
+                created_tags.append({'tag_name': tag_name, 'tag_id': tag_id})
             else:
                 new_tag = Tag(name=tag_name)
                 tag_id = new_tag.save_to_db()
@@ -140,6 +141,7 @@ class CourseController:
             return jsonify({'message': 'Title, description, and instructor are required.'}), 400
 
         created_tags = CourseController.create_tags(data['tag_names'])
+        logger.info(f"Created tags: {created_tags}")
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
         video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
                                                                         data['description'])
@@ -257,7 +259,6 @@ class CourseController:
 
     @payment_required
     def get_course_material(course_id):
-        # Logic to retrieve course material
         return jsonify({"material": "This is the paid course material."})
 
     @staticmethod
