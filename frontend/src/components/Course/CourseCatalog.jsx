@@ -126,7 +126,7 @@ const CourseCatalog = () => {
                                             <img
                                                 alt={`Cover for ${course.title}`}
                                                 className="z-0 w-full h-full object-cover rounded-t-lg"
-                                                src={course.cover_image || "/AUPP-Main-Logo.svg"}
+                                                src={course.cover_image_url || "/AUPP-Main-Logo.svg"}
                                                 onError={(e) => {
                                                     e.target.src = "/AUPP-Main-Logo.svg";
                                                     e.target.classList.add("opacity-50");
