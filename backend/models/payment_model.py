@@ -28,7 +28,7 @@ class Payment:
         if not price:
             return None
 
-        paypal_payment = PaymentService.create_payment(price, currency)
+        paypal_payment = PaymentService.create_payment(course_id, price, currency)
 
         payment_id = str(ObjectId())
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from "../../context/authContext";
+import { Avatar, AvatarIcon } from "@nextui-org/react";
 
 export default function DrawerButton({ id }) {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleDrawer = () => {
@@ -12,7 +13,7 @@ export default function DrawerButton({ id }) {
     return (
         <>
             <button
-                className="flex items-center   text-white rounded-full shadow-md transition-colors"
+                className="flex items-center text-white rounded-full shadow-md transition-colors"
                 type="button"
                 onClick={toggleDrawer}
             >
@@ -23,11 +24,16 @@ export default function DrawerButton({ id }) {
                         className="w-8 h-8 rounded-full object-cover"
                     />
                 ) : (
-                    <i className="bi bi-person-circle text-2xl"></i>
+                    <Avatar
+                        icon={<AvatarIcon />}
+                        classNames={{
+                            base: "w-8 h-8 bg-gradient-to-br from-[#FFB457] to-[#FF705B]",
+                            icon: "text-black/80",
+                        }}
+                    />
                 )}
             </button>
 
-            {/* Drawer */}
             <div
                 id={id}
                 className={`fixed top-0 right-0 z-40 h-full w-80 bg-white shadow-lg transition-transform transform ${
@@ -36,7 +42,6 @@ export default function DrawerButton({ id }) {
                 tabIndex="-1"
                 aria-labelledby={`${id}-label`}
             >
-                {/* Drawer Header */}
                 <div className="flex justify-between items-center p-4 bg-blue-600 text-white">
                     <h5 id={`${id}-label`} className="text-lg font-bold">
                         Profile
@@ -63,14 +68,23 @@ export default function DrawerButton({ id }) {
                     </button>
                 </div>
 
-                {/* Profile Section */}
                 <div className="p-4 border-b">
                     <div className="flex items-center gap-4">
-                        <img
-                            src={user.profile_image || '/default-profile.png'}
-                            alt="Profile"
-                            className="w-16 h-16 rounded-full border border-gray-300 object-cover"
-                        />
+                        {user.profile_image ? (
+                            <img
+                                src={user.profile_image}
+                                alt="Profile"
+                                className="w-16 h-16 rounded-full border border-gray-300 object-cover"
+                            />
+                        ) : (
+                            <Avatar
+                                icon={<AvatarIcon />}
+                                classNames={{
+                                    base: "w-16 h-16 bg-gradient-to-br from-[#FFB457] to-[#FF705B]",
+                                    icon: "text-black/80",
+                                }}
+                            />
+                        )}
                         <div>
                             <a
                                 href={`/profile/${user._id}`}
@@ -85,7 +99,6 @@ export default function DrawerButton({ id }) {
                     </div>
                 </div>
 
-                {/* Menu Items */}
                 <div className="p-4 space-y-2">
                     <a
                         href="/my-courses"
@@ -93,6 +106,14 @@ export default function DrawerButton({ id }) {
                     >
                         My Courses
                     </a>
+                    {user.role === 'instructor' && (
+                        <a
+                            href="/course-i-teach"
+                            className="block px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+                        >
+                            Courses I Teach
+                        </a>
+                    )}
                     <a
                         href={`/profile/${user._id}`}
                         className="block px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
@@ -125,7 +146,7 @@ export default function DrawerButton({ id }) {
                         Help Center
                     </a>
                     <button
-                        onClick={() => /* logOutFunction */ {}}
+                        onClick={logout}
                         className="w-full text-left px-4 py-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition"
                     >
                         Log Out
