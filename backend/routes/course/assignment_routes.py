@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from controllers.course.assignment_controller import AssignmentController
+from controllers.course import AssignmentController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader
 
 assignment_bp = Blueprint('assignments', __name__)

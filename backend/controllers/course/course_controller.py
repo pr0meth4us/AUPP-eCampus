@@ -9,6 +9,7 @@ from services.cloudinary_service import delete_from_cloudinary
 from services.youtube_service import delete_from_youtube
 from utils.upload_video import upload_video
 from bson import ObjectId
+from services.aws_service import upload_to_s3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,7 +36,27 @@ class CourseController:
                 'tag_ids': [str(tid) for tid in course.get('tag_ids', [])],
                 'created_at': course.get('created_at'),
                 'updated_at': course.get('updated_at'),
-                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])]
+                'enrolled_students': [str(student_id) for student_id in course.get('enrolled_students', [])],
+                'price': course.get('price')
+            }
+            for course in courses
+        ]
+        return jsonify(serialized_courses), 200
+
+    @staticmethod
+    def preview_courses():
+        courses = Course.get_all()
+        serialized_courses = [
+            {
+                'id': str(course['_id']),
+                'title': course.get('title'),
+                'description': course.get('description'),
+                'instructor_name': str(
+                    User.find_by_id(course['instructor_id']).get('name', 'Unknown')) if User.find_by_id(
+                    course['instructor_id']) else 'Unknown',
+                'major_ids': [str(mid) for mid in course.get('major_ids', [])],
+                'price': course.get('price'),
+                'cover_image_url': course.get('cover_image_url')
             }
             for course in courses
         ]
@@ -66,7 +87,8 @@ class CourseController:
         for tag_name in tag_names:
             existing_tag = Tag.find_by_name(tag_name)
             if existing_tag:
-                created_tags.append({'tag_name': tag_name, 'tag_id': str(existing_tag)})
+                tag_id = str(existing_tag['_id']) if isinstance(existing_tag, dict) else str(existing_tag)
+                created_tags.append({'tag_name': tag_name, 'tag_id': tag_id})
             else:
                 new_tag = Tag(name=tag_name)
                 tag_id = new_tag.save_to_db()
@@ -95,7 +117,6 @@ class CourseController:
         instructor_id = request.form.get('instructor_id') or g.user_id
         price = request.form.get('price')
         video_file = request.files.get('video')
-        print(request.form)
 
         def parse_form_data(form, key):
             json_data = form.get(key)
@@ -135,14 +156,34 @@ class CourseController:
 
     @staticmethod
     def create_course():
+        logging.info("Form Data Received: %s", request.form)
+        logging.info("Files Received: %s", request.files)
         data = CourseController.extract_request_data()
-        if not data['title'] or not data['description'] or not data['instructor_id']:
-            return jsonify({'message': 'Title, description, and instructor are required.'}), 400
+
+        if not data['title'] or not data['description']:
+            return jsonify({'message': 'Title and description are required.'}), 400
+
+        if g.current_user['role'] == 'instructor':
+            data['instructor_id'] = g.current_user['_id']
+        elif g.current_user['role'] == 'admin':
+            if not data['instructor_id']:
+                return jsonify({'message': 'Instructor ID is required for admin-created courses.'}), 400
+        else:
+            return jsonify({'message': 'Only instructors or admins can create courses.'}), 403
 
         created_tags = CourseController.create_tags(data['tag_names'])
         tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
-        video_url, thumbnail_url = CourseController.handle_video_upload(data['video_file'], data['title'],
-                                                                        data['description'])
+
+        video_url, thumbnail_url = CourseController.handle_video_upload(
+            data['video_file'], data['title'], data['description'])
+
+        cover_image_url = None
+        if 'cover_image' in request.files:
+            cover_image = request.files['cover_image']
+            try:
+                cover_image_url = upload_to_s3(cover_image, data['title'].strip())
+            except Exception as e:
+                return jsonify({'message': f'Failed to upload cover image: {str(e)}'}), 500
 
         course = Course(
             title=data['title'],
@@ -151,13 +192,19 @@ class CourseController:
             video_url=video_url,
             uploader_id=ObjectId(g.current_user['_id']),
             thumbnail_url=thumbnail_url,
+            cover_image_url=cover_image_url,
             major_ids=data['major_ids'],
             tag_ids=tag_ids,
             price=data['price'],
             enrolled_students=[]
         )
         course_id = course.save_to_db()
-        return jsonify({'message': 'Course created successfully', 'course_id': course_id}), 201
+
+        User.update_courses(data['instructor_id'], course_id, add=True)
+
+        return jsonify({'message': 'Course created successfully', 'course_id': str(course_id)}), 201
+
+
 
     @staticmethod
     def update_course(course_id):
@@ -225,8 +272,6 @@ class CourseController:
             enrolled_students = []
 
         enrolled_students = [str(student_id) for student_id in enrolled_students]
-
-
         if user_id not in enrolled_students:
             enrolled_students.append(user_id)
             enrolled_students = list(set(ObjectId(sid) for sid in enrolled_students))
@@ -259,5 +304,9 @@ class CourseController:
 
     @payment_required
     def get_course_material(course_id):
-        # Logic to retrieve course material
         return jsonify({"material": "This is the paid course material."})
+
+    @staticmethod
+    def get_course_by_id(course_id):
+        course = Course.get_course_by_id(course_id)
+        return jsonify(course.to_dict()), 200

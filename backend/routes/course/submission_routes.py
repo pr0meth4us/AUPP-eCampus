@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from controllers.course.submission_controller import SubmissionController
+from controllers.course import SubmissionController
 from middleware.auth_middleware import token_required
 from middleware.course_middleware import require_admin_or_instructor_or_uploader
 

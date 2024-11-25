@@ -5,7 +5,18 @@ import { useAuth } from '../context/authContext';
 const PrivateRoute = ({ element, allowedRoles }) => {
     const { user } = useAuth();
     const hasAccess = user && allowedRoles.includes(user.role);
-    return hasAccess ? element : <Navigate to="/login" replace />;
+
+    if (!user) {
+        // Redirect to login if user is not authenticated
+        return <Navigate to="/login" replace />;
+    }
+
+    if (!hasAccess) {
+        // Redirect to unauthorized page if the user doesn't have the required role
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    return element;
 };
 
 export default PrivateRoute;

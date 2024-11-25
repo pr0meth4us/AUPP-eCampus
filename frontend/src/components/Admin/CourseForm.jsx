@@ -11,10 +11,10 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
         instructor_id: '',
         tag_names: [],
         major_ids: [],
-        price: '0' // Keep this as a string initially to avoid confusion
+        price: '0'
     });
     const [selectedPrice, setSelectedPrice] = useState('');
-    const [courseVideo, setCourseVideo] = useState(null);
+    const [coverImage, setCoverImage] = useState(null);
 
     const getUniqueTags = (data, allTags) => {
         let uniqueTags = new Set();
@@ -46,7 +46,6 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // If the field is the price, set it as a number
         if (name === 'price') {
             setCourse(prevCourse => ({ ...prevCourse, [name]: value }));
         } else {
@@ -57,7 +56,6 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
     const handlePriceChange = (event) => {
         const value = event.target.value;
         setSelectedPrice(value);
-        // If price is charged, clear price
         if (value !== "charge") {
             setCourse(prevCourse => ({ ...prevCourse, price: '0' }));
         }
@@ -75,7 +73,7 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
                 formData.append(key, value);
             }
         });
-        if (courseVideo) formData.append('video', courseVideo);
+        if (coverImage) formData.append('cover_image', coverImage);
         onSubmit(formData);
     };
 
@@ -155,9 +153,9 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
                 <Form.Label>Majors</Form.Label>
                 <Select
                     isMulti
-                    options={majors.map(major => major ? ({ value: major.id, label: major.name }) : null).filter(Boolean)}
-                    value={(course.major_ids || []).map(id => {
-                        const major = majors.find(m => m && m.id === id);
+                    options={majors.map((major) => major ? { value: major._id, label: major.name } : null).filter(Boolean)}
+                    value={(course.major_ids || []).map((id) => {
+                        const major = majors.find((m) => m && m._id === id);
                         return major ? { value: id, label: major.name } : null;
                     }).filter(Boolean)}
                     onChange={(selected) => setCourse(prevCourse => ({ ...prevCourse, major_ids: selected.map(option => option.value) }))}
@@ -165,11 +163,11 @@ const CourseForm = ({ onSubmit, users = [], tags = [], majors = [], loading, but
                 />
             </Form.Group>
             <Form.Group className="mb-3">
-                <Form.Label>Upload Video</Form.Label>
+                <Form.Label>Upload Cover Image</Form.Label>
                 <Form.Control
                     type="file"
-                    accept="video/*"
-                    onChange={(e) => setCourseVideo(e.target.files[0])}
+                    accept="image/*"
+                    onChange={(e) => setCoverImage(e.target.files[0])}
                 />
             </Form.Group>
             <Button type="submit" isLoading={loading}>{buttonText}</Button>

@@ -1,11 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import { course } from '../services';
 
 const ProfilePage = () => {
     const { id } = useParams();
     const { user } = useAuth();
     const isOwnProfile = user?._id === id;
+    const [courseNames, setCourseNames] = useState({});
+
+    useEffect(() => {
+        const fetchCourseNames = async () => {
+            if (user?.courses && user.courses.length > 0) {
+                try {
+                    const names = await Promise.all(
+                        user.courses.map(async (courseId) => {
+                            const courseData = await course.getCourseById(courseId);
+                            return { id: courseId, name: courseData.title };
+                        })
+                    );
+                    const nameMap = names.reduce((acc, { id, name }) => {
+                        acc[id] = name;
+                        return acc;
+                    }, {});
+                    setCourseNames(nameMap);
+                } catch (error) {
+                    console.error("Error fetching course names:", error);
+                }
+            }
+        };
+
+        fetchCourseNames();
+    }, [user]);
 
     return (
         <div className="max-w-4xl mx-auto mt-[100px] mb-16 p-6 bg-white shadow-md rounded-lg">
@@ -39,12 +65,14 @@ const ProfilePage = () => {
                     <h3 className="text-xl font-semibold text-gray-800 mb-3">Courses Enrolled</h3>
                     {user?.courses && user.courses.length > 0 ? (
                         <ul className="space-y-2 text-gray-700">
-                            {user.courses.map((course, index) => (
+                            {user.courses.map((courseId, index) => (
                                 <li
                                     key={index}
                                     className="bg-white p-2 rounded shadow-sm hover:bg-blue-50 transition-colors"
                                 >
-                                    {course}
+                                    <Link to={`/courses/${courseId}`} className="text-blue-600 hover:underline">
+                                        {courseNames[courseId]}
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -60,12 +88,14 @@ const ProfilePage = () => {
                         <h3 className="text-xl font-semibold text-gray-800 mb-3">Courses Taught</h3>
                         {user?.courses && user.courses.length > 0 ? (
                             <ul className="space-y-2 text-gray-700">
-                                {user.courses.map((course, index) => (
+                                {user.courses.map((courseId, index) => (
                                     <li
                                         key={index}
                                         className="bg-white p-2 rounded shadow-sm hover:bg-blue-50 transition-colors"
                                     >
-                                        {course}
+                                        <Link to={`/courses/${courseId}`} className="text-blue-600 hover:underline">
+                                            {courseNames[courseId]}
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>
