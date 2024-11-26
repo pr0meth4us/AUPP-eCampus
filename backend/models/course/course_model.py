@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from services.mongo_service import db
 from .assignment_model import Assignment
+from flask import jsonify
 
 
 class Course:
@@ -133,3 +134,43 @@ class Course:
 
     def get_assignments(self):
         return Assignment.get_by_course(self._id)
+
+    @staticmethod
+    def get_details_with_names(course_id):
+        try:
+            course = Course.get_course_by_id(course_id)
+            if not course:
+                raise ValueError("Course not found")
+
+            # Fetch instructor details
+            instructor = db.users.find_one({"_id": ObjectId(course.instructor_id)}, {"name": 1, "profile_image": 1})
+
+            if not instructor:
+                raise ValueError("Instructor not found")
+
+            # Fetch major names
+            major_names = [
+                major.get("name", "Unknown")
+                for major in db.majors.find({"_id": {"$in": [ObjectId(mid) for mid in course.major_ids]}})
+            ]
+
+            # Fetch tag names
+            tag_names = [
+                tag.get("name", "Unknown")
+                for tag in db.tags.find({"_id": {"$in": [ObjectId(tid) for tid in course.tag_ids]}})
+            ]
+
+            # Construct response
+            course_data = course.to_dict()
+            course_data["majors"] = major_names
+            course_data["tags"] = tag_names
+            course_data["instructor"] = {
+                "name": instructor.get("name", "Unknown"),
+                "profile_image": instructor.get("profile_image", None),
+            }
+
+            return course_data
+
+        except Exception as e:
+            print(f"Error in get_details_with_names: {e}")  # Add logging
+            raise

@@ -113,5 +113,11 @@ export const course = {
     gradeSubmission: async (submissionId, gradeData) => {
         const response = await api.post(`/courses/submissions/${submissionId}/grade`, gradeData);
         return response.data;
-    }
+    },
+
+    getDetailsById: async (courseId) => {
+        const response = await api.get(`/courses/${courseId}/details`);
+        return response.data;
+    },
+
 };

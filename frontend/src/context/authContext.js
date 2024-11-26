@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
             setUser(data.user);
             localStorage.setItem('user', JSON.stringify(data.user));
         }
-        window.location.reload(); // Reload the page after login
+        window.location.reload();
         return data;
     };
 
