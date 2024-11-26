@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/authContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Recaptcha from '../Recaptcha';
 import '../../assets/css/elements/login.css';
 
@@ -12,23 +12,35 @@ const LoginPage = () => {
     const [error, setError] = useState('');
     const [captchaValue, setCaptchaValue] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
     const closeButtonRef = useRef(null);
 
+    useEffect(() => {
+        if (location.pathname !== '/login') {
+            localStorage.setItem('previousPath', location.pathname + location.search);
+        }
+    }, [location]);
+
     const handleLogin = async () => {
+        setError('');
         try {
             if (!role) {
-                setError('Please select a role.');
-                return;
+                throw new Error('Please select a role.');
             }
             if (!captchaValue) {
-                setError('Please complete the reCAPTCHA.');
-                return;
+                throw new Error('Please complete the reCAPTCHA.');
             }
             await login(email, password, role, captchaValue);
-            closeButtonRef.current.click();
-            navigate('/');
+
+            if (closeButtonRef.current) {
+                closeButtonRef.current.click();
+            }
+
+            const previousPath = localStorage.getItem('previousPath') || '/';
+            localStorage.removeItem('previousPath');
+            navigate(previousPath);
         } catch (err) {
-            setError('Login failed. Please check your credentials.');
+            setError(err.message || 'Login failed. Please check your credentials.');
         }
     };
 
@@ -36,18 +48,21 @@ const LoginPage = () => {
         <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="login" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div
-                        className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
+                    <div className="modal-header color-primary border-bottom-0 d-flex justify-content-between align-items-center w-100">
                         <div className="text-center flex-grow-1">
-                            <h2 className="modal-title fw-bold" id="login" style={{fontSize: '2rem'}}>Welcome Back!</h2>
+                            <h2 className="modal-title fw-bold" id="login" style={{ fontSize: '2rem' }}>
+                                Welcome Back!
+                            </h2>
                         </div>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button
+                            type="button"
+                            className="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
                     </div>
                     <div className="modal-body">
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            handleLogin().then(null);
-                        }}>
+                        <form onSubmit={(e) => e.preventDefault()}>
                             <div className="mb-3">
                                 <label className="form-label">Login as</label>
                                 <div className="d-flex gap-4">
@@ -92,14 +107,8 @@ const LoginPage = () => {
                                 />
                                 <a href="#" className="d-block mt-2">Forgot password?</a>
                             </div>
-                            <div className="mb-3 d-flex justify-content-between align-items-center">
-                                <div className="form-check">
-                                    <input type="checkbox" className="form-check-input" id="rememberMe"/>
-                                    <label className="form-check-label" htmlFor="rememberMe">Remember me</label>
-                                </div>
-                            </div>
-                            <Recaptcha onVerify={setCaptchaValue}/>
-                            {error && <p className="text-danger">{error}</p>}
+                            <Recaptcha onVerify={setCaptchaValue} />
+                            {error && <p className="text-danger mt-3">{error}</p>}
                         </form>
                     </div>
                     <div className="modal-footer d-flex justify-content-between align-items-center">

@@ -14,13 +14,13 @@ import {
     useDisclosure,
 } from "@nextui-org/react";
 import CardVideoSkeleton from "../../components/Skeletons/CardVideoSkeleton";
-import { Lock, User, BookOpen } from "lucide-react"; // Updated icon
+import { Lock, User, BookOpen, LogIn } from "lucide-react";
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
 
 const CourseCatalog = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [courses, setCourses] = useState([]);
@@ -34,39 +34,55 @@ const CourseCatalog = () => {
         fetchData();
     }, []);
 
+    const openLoginModal = () => {
+        const loginButton = document.querySelector('[data-bs-target="#login"]');
+        if (loginButton) {
+            loginButton.click();
+        }
+    };
+
     const fetchData = async () => {
+        setLoading(true);
         try {
             const courseData = await course.getAllCourses();
             setCourses(courseData || []);
-        } catch (error) {
-            console.error("Failed to fetch data:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleCreatePayment = async (courseId) => {
+        if (!user) {
+            openLoginModal();
+            return;
+        }
+
         setLoadingPayment(courseId);
         try {
             const response = await payment.createPayment(courseId);
+            await refreshUser();
+            await fetchData();
             window.location.href = `${response.approval_url}&courseID=${courseId}`;
-        } catch (error) {
-            console.error("Payment failed:", error);
         } finally {
             setLoadingPayment(null);
         }
     };
 
     const handleEnrollment = async () => {
+        if (!user) {
+            openLoginModal();
+            return;
+        }
+
         if (!selectedCourse) return;
 
         setEnrolling(true);
         try {
             await course.enrollStudent(selectedCourse.id);
+            await refreshUser();
+            await fetchData();
             onClose();
             navigate(`/course/${selectedCourse.id}`);
-        } catch (error) {
-            console.error("Enrollment failed:", error);
         } finally {
             setEnrolling(false);
             setSelectedCourse(null);
@@ -74,6 +90,11 @@ const CourseCatalog = () => {
     };
 
     const handleEnrollClick = (course) => {
+        if (!user) {
+            openLoginModal();
+            return;
+        }
+
         setSelectedCourse(course);
         onOpen();
     };
@@ -152,7 +173,15 @@ const CourseCatalog = () => {
                                                         size="sm"
                                                         className="button-no-after bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2"
                                                     >
-                                                        <Lock size={16} /> Buy - ${course.price}
+                                                        {!user ? (
+                                                            <>
+                                                                <LogIn size={16} /> Login to Buy - ${course.price}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Lock size={16} /> Buy - ${course.price}
+                                                            </>
+                                                        )}
                                                     </Button>
                                                 ) : (
                                                     <Button
@@ -160,7 +189,15 @@ const CourseCatalog = () => {
                                                         size="sm"
                                                         className="button-no-after bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2"
                                                     >
-                                                        <BookOpen size={16} /> Enroll Now
+                                                        {!user ? (
+                                                            <>
+                                                                <LogIn size={16} /> Login to Enroll
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <BookOpen size={16} /> Enroll Now
+                                                            </>
+                                                        )}
                                                     </Button>
                                                 )}
                                             </CardFooter>

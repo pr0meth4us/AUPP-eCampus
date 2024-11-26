@@ -1,27 +1,37 @@
 from bson import ObjectId
 from flask import jsonify, g
 from models.course.course_model import Course
-from models.payment_model import Payment
+from models.payment_model import Payment, PaymentException
 
 
 class PaymentController:
     @staticmethod
     def create_payment(data):
-        course_to_pay = Course.find_by_id(data['course_id'])
-        price = course_to_pay.get('price')
-        payment_id = Payment.create_payment_record(
-            user_id=ObjectId(g.current_user['_id']),
-            course_id=data['course_id'],
-            price=price,
-            currency='USD'
-        )
+        try:
+            if 'course_id' not in data:
+                return jsonify({'error': 'Missing course_id'}), 400
 
-        payment = Payment.find_payment_by_id(payment_id)
-        return jsonify({
-            'payment_id': str(payment_id),
-            'approval_url': payment['approval_url'],
-            'price': price,
-        }), 201
+            course_to_pay = Course.find_by_id(data['course_id'])
+            if not course_to_pay:
+                return jsonify({'error': 'Course not found'}), 404
+
+            price = course_to_pay.get('price', 0)
+            payment_id = Payment.create_payment_record(
+                user_id=ObjectId(g.current_user['_id']),
+                course_id=data['course_id'],
+                price=price,
+                currency='USD'
+            )
+
+            payment = Payment.find_payment_by_id(payment_id)
+            return jsonify({
+                'payment_id': str(payment_id),
+                'approval_url': payment['approval_url'],
+                'price': price,
+            }), 201
+
+        except PaymentException as e:
+            return jsonify({'error': str(e)}), 400
 
     @staticmethod
     def payment_success(paypal_payment_id, payer_id):

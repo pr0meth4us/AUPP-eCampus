@@ -17,6 +17,7 @@ import InstructorCoursePage from "./components/Course/InstructorCoursePage";
 import InstructorCourseCreate from "./components/Course/InstructorCourseCreate";
 import MyCourseInstructor from "./components/Course/MyCourseInstructor";
 import Unauthorized from "./pages/Unauthorized";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const App = () => {
     return (
