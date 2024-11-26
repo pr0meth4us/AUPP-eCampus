@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
                     setUser(null);
                     localStorage.removeItem('user');
                 }
-            } catch (error) {
+            } catch {
                 setUser(null);
                 localStorage.removeItem('user');
             } finally {
@@ -39,33 +39,22 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const sendOtp = async (email) => {
-        try {
-            await auth.sendOtp(email);
-        } catch (error) {
-            throw error;
-        }
+        await auth.sendOtp(email);
     };
 
     const signup = async (name, email, password, role, verificationCode) => {
-        try {
-            await auth.register(name, email, password, role, verificationCode);
-            await login(email, password, role); // Auto-login after successful registration
-        } catch (error) {
-            throw error;
-        }
+        await auth.register(name, email, password, role, verificationCode);
+        await login(email, password, role);
     };
 
     const login = async (email, password, role) => {
-        try {
-            const data = await auth.login(email, password, role);
-            if (data.user) {
-                setUser(data.user);
-                localStorage.setItem('user', JSON.stringify(data.user));
-            }
-            return data;
-        } catch (error) {
-            throw error;
+        const data = await auth.login(email, password, role);
+        if (data.user) {
+            setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
         }
+        window.location.reload(); // Reload the page after login
+        return data;
     };
 
     const logout = async () => {
@@ -74,8 +63,24 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
     };
 
+    const refreshUser = async () => {
+        try {
+            const data = await auth.checkAuth();
+            if (data.authenticated && data.user) {
+                setUser(data.user);
+                localStorage.setItem('user', JSON.stringify(data.user));
+            } else {
+                setUser(null);
+                localStorage.removeItem('user');
+            }
+        } catch {
+            setUser(null);
+            localStorage.removeItem('user');
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, logout, sendOtp }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, logout, sendOtp, refreshUser }}>
             {!loading && children}
         </AuthContext.Provider>
     );

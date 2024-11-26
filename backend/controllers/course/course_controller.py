@@ -280,7 +280,7 @@ class CourseController:
             User.update_courses(user_id, course_id, add=True)
             return jsonify({'message': 'Student enrolled successfully.'}), 200
         else:
-            return jsonify({'message': 'Student already enrolled.'}), 400
+            return jsonify({'message': 'Student already enrolled.'}), 200
 
     @staticmethod
     def unenroll_student(course_id, student_id):

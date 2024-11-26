@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-import Recaptcha from '../Recaptcha';
+import Recaptcha from "../Recaptcha";
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -13,6 +13,7 @@ const Signup = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation(); // Capture the current location
     const { signup, sendOtp } = useAuth();
 
     const handleSendOtp = async () => {
@@ -37,7 +38,10 @@ const Signup = () => {
                 return;
             }
             await signup(name, email, password, "student", verificationCode, captchaValue);
-            navigate('/');
+
+            // Redirect to the previous page or the home page if no referrer
+            const from = location.state?.from || "/";
+            navigate(from);
         } catch (err) {
             setError(err.response.data.message);
         }
