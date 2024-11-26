@@ -137,6 +137,7 @@ class Course:
 
     @staticmethod
     def get_details_with_names(course_id):
+        """Fetch course details, including majors, tags, instructor name, profile image, and enrolled students."""
         try:
             course = Course.get_course_by_id(course_id)
             if not course:
@@ -160,6 +161,14 @@ class Course:
                 for tag in db.tags.find({"_id": {"$in": [ObjectId(tid) for tid in course.tag_ids]}})
             ]
 
+            # Fetch enrolled students details
+            enrolled_students_details = []
+            if course.enrolled_students:
+                enrolled_students_details = list(db.users.find(
+                    {"_id": {"$in": [ObjectId(sid) for sid in course.enrolled_students]}},
+                    {"name": 1, "profile_image": 1}
+                ))
+
             # Construct response
             course_data = course.to_dict()
             course_data["majors"] = major_names
@@ -169,8 +178,16 @@ class Course:
                 "profile_image": instructor.get("profile_image", None),
             }
 
+            # Transform enrolled students to include only name and profile image
+            course_data["enrolled_students"] = [
+                {
+                    "id": str(student["_id"]),
+                    "name": student.get("name", "Unknown"),
+                    "profile_image": student.get("profile_image", None)
+                } for student in enrolled_students_details
+            ]
+
             return course_data
 
         except Exception as e:
-            print(f"Error in get_details_with_names: {e}")  # Add logging
             raise
