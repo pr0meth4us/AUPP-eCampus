@@ -67,7 +67,7 @@ class PaymentController:
             return jsonify({'error': 'Payment not found'}), 404
 
         if str(payment['user_id']) != str(g.current_user['_id']):
-            return jsonify({'error': 'Unauthorized access'}), 403
+            return jsonify({'error': 'UnauthorizedPage access'}), 403
 
         payment['_id'] = str(payment.get('_id'))
         payment['user_id'] = str(payment['user_id'])
