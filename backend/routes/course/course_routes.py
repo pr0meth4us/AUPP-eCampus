@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from controllers.course import CourseController, TagController, MajorController
 from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
 from middleware.payment_middleware import payment_required
-
+from services.mongo_service import db
+from bson import ObjectId
 course_bp = Blueprint('course', __name__)
 
 
@@ -120,3 +121,22 @@ def update_major(major_id):
 def delete_major(major_id):
     success = MajorController.delete_major(major_id)
     return jsonify({'message': 'Major deleted.' if success else 'Major not found.'}), 200
+
+
+@course_bp.route('/<course_id>/details', methods=['GET'])
+@payment_required
+def get_course_details_with_names(course_id):
+    try:
+        course = db.courses.find_one({"_id": ObjectId(course_id)})
+
+        if not course:
+            return jsonify({"error": "Course not found"}), 404
+
+        course_data, status_code = CourseController.get_course_details_with_names(course_id)
+        return jsonify(course_data), status_code
+    except Exception as e:
+        return jsonify({
+            "error": "Unexpected server error",
+            "details": str(e)
+        }), 500
+

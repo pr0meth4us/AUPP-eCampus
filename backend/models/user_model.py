@@ -110,6 +110,16 @@ class User:
 
         db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'courses': user['courses']}})
 
+    @staticmethod
+    def get_profile(user_id):
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            raise ValueError("User not found.")
+
+        return {
+            "name": user.get('name', ''),
+            "profile_image": user.get('profile_image', '')
+        }
 
 
 class Student(User):
