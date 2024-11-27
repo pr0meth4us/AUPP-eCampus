@@ -9,8 +9,7 @@ import {
     Textarea,
     Avatar,
     Chip,
-    Divider,
-    useDisclosure
+    Divider
 } from "@nextui-org/react";
 import {
     PencilIcon,
@@ -59,16 +58,6 @@ const EditCourse = () => {
                 description: updatedDescription
             };
             await CourseApi.updateCourse(id, updatedData);
-
-            if (newCoverImage) {
-                // Implement cover image upload logic
-                console.log("New cover image to upload:", newCoverImage);
-            }
-
-            if (newMaterial) {
-                console.log("New material to upload:", newMaterial);
-            }
-
             fetchCourseData();
             setEditing(false);
         } catch (error) {
