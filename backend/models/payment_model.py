@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from bson import ObjectId
-from services.paypal_service import PaymentService
+from services.paypal_service import PaymentService, PayPalFees
 import json
 import logging
 from services.redis_service import redis_client
@@ -28,7 +28,7 @@ class Payment:
         if not price:
             return None
 
-        paypal_payment = PaymentService.create_payment(price, currency)
+        paypal_payment = PaymentService.create_payment(course_id, price, currency)
 
         payment_id = str(ObjectId())
 
@@ -169,12 +169,31 @@ class Payment:
     @staticmethod
     def generate_receipt(payment_data):
         receipt = {
-            "Receipt ID": payment_data.get("_id", "N/A"),
-            "Date": payment_data.get("updated_at", datetime.now(timezone.utc).isoformat()),
-            "Price": payment_data["price"],
-            "Currency": payment_data["currency"],
-            "Status": payment_data["status"],
-            "Approval URL": payment_data.get("approval_url", "N/A"),
+            "Receipt ID": str(payment_data.get("_id", payment_data.get("paypal_payment_id", "N/A"))),
+            "Date": payment_data.get("completed_at", payment_data.get("updated_at", datetime.now(timezone.utc).isoformat())),
+            "Transaction Type": "PayPal Checkout",
+
+            "Course ID": str(payment_data.get("course_id", "N/A")),
+            "Price": payment_data.get("price", 0),
+            "Currency": payment_data.get("currency", "USD"),
+
+            "Status": payment_data.get("status", "Unknown"),
+            "Payment Method": payment_data.get("payment_method", "PayPal"),
+
+            "PayPal Payment ID": payment_data.get("paypal_payment_id", "N/A"),
             "Payer ID": payment_data.get("payer_id", "N/A"),
+            "Approval URL": payment_data.get("approval_url", "N/A"),
+
+            "Created At": payment_data.get("created_at"),
+            "Updated At": payment_data.get("updated_at")
         }
+
+        if 'price' in payment_data:
+            try:
+                fees = PayPalFees.calculate_fees(payment_data['price'], payment_data.get('currency', 'USD'))
+                receipt["Transaction Fees"] = f"{fees:.2f} {payment_data.get('currency', 'USD')}"
+                receipt["Total Amount"] = f"{payment_data['price'] + fees:.2f} {payment_data.get('currency', 'USD')}"
+            except Exception as fee_error:
+                logger.warning(f"Could not calculate fees: {fee_error}")
+
         return receipt

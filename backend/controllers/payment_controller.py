@@ -5,12 +5,17 @@ from models.payment_model import Payment, PaymentException
 
 
 class PaymentController:
-
     @staticmethod
     def create_payment(data):
         try:
+            if 'course_id' not in data:
+                return jsonify({'error': 'Missing course_id'}), 400
+
             course_to_pay = Course.find_by_id(data['course_id'])
-            price = course_to_pay.get('price')
+            if not course_to_pay:
+                return jsonify({'error': 'Course not found'}), 404
+
+            price = course_to_pay.get('price', 0)
             payment_id = Payment.create_payment_record(
                 user_id=ObjectId(g.current_user['_id']),
                 course_id=data['course_id'],
@@ -24,8 +29,9 @@ class PaymentController:
                 'approval_url': payment['approval_url'],
                 'price': price,
             }), 201
+
         except PaymentException as e:
-            return jsonify({"error": str(e)}), 409
+            return jsonify({'error': str(e)}), 400
 
     @staticmethod
     def payment_success(paypal_payment_id, payer_id):
@@ -36,24 +42,23 @@ class PaymentController:
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
 
-        success = Payment.execute_payment_completion(
+        result = Payment.execute_payment_completion(
             payment_data=payment,
             paypal_payment_id=paypal_payment_id,
             payer_id=payer_id
         )
 
-        if success:
-            receipt = Payment.generate_receipt(
-                payment_data=payment
-            )
+        payment['_id'] = str(result)
+        payment['user_id'] = str(payment['user_id'])
+        payment['course_id'] = str(payment['course_id'])
 
-            return jsonify({
-                'message': 'Payment completed successfully',
-                'payment_id': str(payment['_id']),
-                'receipt': receipt
-            }), 200
+        receipt = Payment.generate_receipt(payment)
 
-        return jsonify({'error': 'Payment execution failed'}), 400
+        return jsonify({
+            'message': 'Payment completed successfully',
+            'payment_id': payment['_id'],
+            'receipt': receipt
+        }), 200
 
     @staticmethod
     def get_payment(payment_id):
@@ -61,16 +66,20 @@ class PaymentController:
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
 
-        if str(payment['user_id']) != g.current_user['_id']:
-            return jsonify({'error': 'Unauthorized access'}), 403
+        if str(payment['user_id']) != str(g.current_user['_id']):
+            return jsonify({'error': 'UnauthorizedPage access'}), 403
+
+        payment['_id'] = str(payment.get('_id'))
+        payment['user_id'] = str(payment['user_id'])
+        payment['course_id'] = str(payment['course_id'])
 
         return jsonify({
-            'payment_id': str(payment['_id']),
+            'payment_id': payment['_id'],
             'price': payment['price'],
             'currency': payment['currency'],
             'status': payment['status'],
-            'created_at': payment['created_at'].isoformat(),
-            'payment_details': payment['payment_details']
+            'created_at': payment['created_at'],
+            'payment_details': payment.get('payment_details', {})
         }), 200
 
     @staticmethod
@@ -80,10 +89,14 @@ class PaymentController:
         if not payment:
             return jsonify({'error': 'No completed payment found for this course'}), 404
 
+        payment['_id'] = str(payment['_id'])
+        payment['user_id'] = str(payment['user_id'])
+        payment['course_id'] = str(payment['course_id'])
+
         return jsonify({
-            'payment_id': str(payment['_id']),
+            'payment_id': payment['_id'],
             'price': payment['price'],
             'currency': payment['currency'],
             'status': payment['status'],
-            'created_at': payment['created_at'].isoformat()
+            'created_at': payment['created_at']
         }), 200
