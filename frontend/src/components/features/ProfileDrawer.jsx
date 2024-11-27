@@ -100,12 +100,13 @@ export default function DrawerButton({ id }) {
                 </div>
 
                 <div className="p-4 space-y-2">
+                    {user.role === 'student' && (
                     <a
                         href="/my-courses"
                         className="block px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
                     >
                         My Courses
-                    </a>
+                    </a>)}
                     {user.role === 'instructor' && (
                         <a
                             href="/course-i-teach"

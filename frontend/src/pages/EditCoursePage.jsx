@@ -1,10 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardBody, Spinner, Button, Input, Textarea, Avatar, Divider } from "@nextui-org/react";
+import {
+    Card,
+    CardBody,
+    Spinner,
+    Button,
+    Input,
+    Textarea,
+    Avatar,
+    Chip,
+    Divider,
+    useDisclosure
+} from "@nextui-org/react";
+import {
+    PencilIcon,
+    DocumentIcon,
+    TrashIcon,
+    AcademicCapIcon,
+    UserGroupIcon,
+    DocumentTextIcon
+} from '@heroicons/react/24/outline';
 import { course as CourseApi } from "services";
+import {UploadIcon} from "lucide-react";
 
 const EditCourse = () => {
-    const { id } = useParams(); // Get course ID from route
+    const { id } = useParams();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -34,17 +54,22 @@ const EditCourse = () => {
 
     const saveChanges = async () => {
         try {
-            const updatedData = { title: updatedTitle, description: updatedDescription };
+            const updatedData = {
+                title: updatedTitle,
+                description: updatedDescription
+            };
             await CourseApi.updateCourse(id, updatedData);
+
             if (newCoverImage) {
-                // Placeholder: API integration for updating the cover image
+                // Implement cover image upload logic
                 console.log("New cover image to upload:", newCoverImage);
             }
+
             if (newMaterial) {
-                // Placeholder: API integration for adding course materials
                 console.log("New material to upload:", newMaterial);
             }
-            fetchCourseData(); // Refresh the course data
+
+            fetchCourseData();
             setEditing(false);
         } catch (error) {
             console.error("Failed to save changes:", error);
@@ -53,135 +78,226 @@ const EditCourse = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Spinner size="lg" />
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+                <Spinner size="lg" color="primary" />
             </div>
         );
     }
 
     if (!course) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p>Course not found or data unavailable.</p>
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+                <Card className="w-full max-w-md p-6 text-center">
+                    <p className="text-gray-600">Course not found or data unavailable.</p>
+                </Card>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-6 pb-12">
-            <div className="max-w-[1200px] mx-auto px-4">
-                <Card>
-                    <CardBody>
-                        <div className="flex items-center justify-between mb-6">
-                            <h1 className="text-2xl font-bold">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12">
+            <div className="max-w-4xl mx-auto px-4">
+                <Card className="shadow-2xl border-none">
+                    <CardBody className="space-y-8 p-8">
+                        {/* Header Section */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                            <div>
                                 {editing ? (
                                     <Input
                                         value={updatedTitle}
                                         onChange={(e) => setUpdatedTitle(e.target.value)}
-                                        className="w-full"
+                                        placeholder="Course Title"
+                                        variant="bordered"
+                                        className="w-full md:w-96"
+                                        startContent={<PencilIcon className="w-5 h-5 text-default-400" />}
                                     />
                                 ) : (
-                                    course.title
+                                    <h1 className="text-3xl font-bold text-gray-800">
+                                        {course.title}
+                                    </h1>
                                 )}
-                            </h1>
+                            </div>
+
                             <Button
                                 color={editing ? "success" : "primary"}
+                                variant="solid"
                                 onClick={editing ? saveChanges : () => setEditing(true)}
+                                startContent={editing ? null : <PencilIcon className="w-5 h-5" />}
+                                className="w-full md:w-auto"
                             >
                                 {editing ? "Save Changes" : "Edit Course"}
                             </Button>
                         </div>
 
-                        <Divider className="my-6" />
+                        <Divider />
 
-                        {/* Course Description */}
-                        <h2 className="text-lg font-semibold mb-4">Course Description</h2>
-                        {editing ? (
-                            <Textarea
-                                value={updatedDescription}
-                                onChange={(e) => setUpdatedDescription(e.target.value)}
-                                rows={4}
-                                className="w-full"
-                            />
-                        ) : (
-                            <p>{course.description}</p>
-                        )}
-
-                        <Divider className="my-6" />
-
-                        {/* Course Cover Image */}
-                        <h2 className="text-lg font-semibold mb-4">Course Cover Image</h2>
-                        <div className="flex items-center gap-4">
-                            <Avatar
-                                src={course.thumbnail_url || "https://via.placeholder.com/150"}
-                                className="w-32 h-32"
-                            />
-                            {editing && (
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setNewCoverImage(e.target.files[0])}
-                                />
-                            )}
-                        </div>
-
-                        <Divider className="my-6" />
-
-                        {/* Add Course Materials */}
-                        <h2 className="text-lg font-semibold mb-4">Add Materials</h2>
-                        <div>
-                            <input
-                                type="file"
-                                accept="application/pdf,application/vnd.ms-excel,application/msword"
-                                onChange={(e) => setNewMaterial(e.target.files[0])}
-                            />
-                            {newMaterial && <p>Selected file: {newMaterial.name}</p>}
-                        </div>
-
-                        <Divider className="my-6" />
-
-                        {/* Enrolled Students */}
-                        <h2 className="text-lg font-semibold mb-4">Enrolled Students</h2>
-                        <p>{course.enrolled_students?.length || 0} students are enrolled in this course.</p>
-                        <ul className="list-disc ml-5">
-                            {course.enrolled_students?.map((student, index) => (
-                                <li key={index}>{student.name || `Student ${index + 1}`}</li>
-                            ))}
-                        </ul>
-
-                        <Divider className="my-6" />
-
-                        {/* Assignments Management */}
-                        <h2 className="text-lg font-semibold mb-4">Assignments</h2>
-                        <ul className="list-disc ml-5">
-                            {course.assignments?.map((assignment, index) => (
-                                <li key={index}>
-                                    <span>{assignment.title}</span>
-                                    {editing && (
-                                        <Button
-                                            color="danger"
-                                            size="sm"
-                                            className="ml-4"
-                                            onClick={() =>
-                                                console.log(`Delete assignment ID: ${assignment.id}`)
-                                            }
-                                        >
-                                            Delete
-                                        </Button>
+                        {/* Course Details Grid */}
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {/* Left Column */}
+                            <div className="space-y-6">
+                                {/* Description */}
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                                        <DocumentTextIcon className="w-6 h-6 mr-2 text-primary" />
+                                        Description
+                                    </h2>
+                                    {editing ? (
+                                        <Textarea
+                                            value={updatedDescription}
+                                            onChange={(e) => setUpdatedDescription(e.target.value)}
+                                            variant="bordered"
+                                            minRows={6}
+                                            placeholder="Enter course description"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-600">{course.description || 'No description available'}</p>
                                     )}
-                                </li>
-                            ))}
-                        </ul>
-                        {editing && (
-                            <Button
-                                color="primary"
-                                size="sm"
-                                className="mt-4"
-                                onClick={() => console.log("Add new assignment")}
-                            >
-                                Add Assignment
-                            </Button>
-                        )}
+                                </div>
+
+                                {/* Course Cover */}
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                                        <AcademicCapIcon className="w-6 h-6 mr-2 text-primary" />
+                                        Course Cover
+                                    </h2>
+                                    <div className="flex items-center space-x-4">
+                                        {course.cover_image || course.thumbnail_url ? (
+                                            <Avatar
+                                                src={course.cover_image || course.thumbnail_url}
+                                                className="w-48 h-48 rounded-xl"
+                                            />
+                                        ) : (
+                                            <div className="w-48 h-48 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 border border-dashed">
+                                                No Image
+                                            </div>
+                                        )}
+
+                                        {editing && (
+                                            <div>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    id="coverUpload"
+                                                    className="hidden"
+                                                    onChange={(e) => setNewCoverImage(e.target.files[0])}
+                                                />
+                                                <label htmlFor="coverUpload">
+                                                    <Button
+                                                        as="span"
+                                                        color="primary"
+                                                        variant="flat"
+                                                        startContent={<UploadIcon className="w-5 h-5" />}
+                                                        disabled={!course.cover_image && !course.thumbnail_url}
+                                                    >
+                                                        {course.cover_image || course.thumbnail_url
+                                                            ? "Change Cover"
+                                                            : "Add Cover"}
+                                                    </Button>
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column */}
+                            <div className="space-y-6">
+                                {/* Enrolled Students */}
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                                        <UserGroupIcon className="w-6 h-6 mr-2 text-primary" />
+                                        Enrolled Students
+                                        <Chip
+                                            size="sm"
+                                            color="primary"
+                                            variant="flat"
+                                            className="ml-2"
+                                        >
+                                            {course.enrolled_students?.length || 0}
+                                        </Chip>
+                                    </h2>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {course.enrolled_students?.slice(0, 4).map((student, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center space-x-2 bg-gray-100 p-2 rounded-lg"
+                                            >
+                                                <Avatar
+                                                    src={student.profile_image}
+                                                    size="sm"
+                                                    className="w-8 h-8"
+                                                />
+                                                <span className="text-sm truncate">{student.name}</span>
+                                            </div>
+                                        ))}
+                                        {(course.enrolled_students?.length || 0) > 4 && (
+                                            <Chip color="default" variant="flat">
+                                                +{(course.enrolled_students?.length || 0) - 4} more
+                                            </Chip>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Course Materials */}
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                                        <DocumentIcon className="w-6 h-6 mr-2 text-primary" />
+                                        Course Materials
+                                        <Chip
+                                            size="sm"
+                                            color="primary"
+                                            variant="flat"
+                                            className="ml-2"
+                                        >
+                                            {course.materials?.length || 0}
+                                        </Chip>
+                                    </h2>
+                                    <div className="space-y-2">
+                                        {editing && (
+                                            <div className="mb-4">
+                                                <input
+                                                    type="file"
+                                                    id="materialUpload"
+                                                    className="hidden"
+                                                    onChange={(e) => setNewMaterial(e.target.files[0])}
+                                                />
+                                                <label htmlFor="materialUpload">
+                                                    <Button
+                                                        as="span"
+                                                        color="primary"
+                                                        variant="flat"
+                                                        startContent={<UploadIcon className="w-5 h-5" />}
+                                                    >
+                                                        Upload Material
+                                                    </Button>
+                                                </label>
+                                            </div>
+                                        )}
+                                        {course.materials?.map((material, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex justify-between items-center bg-gray-100 p-3 rounded-lg"
+                                            >
+                                                <div className="flex items-center space-x-3">
+                                                    <DocumentIcon className="w-6 h-6 text-primary" />
+                                                    <span className="text-sm">{material.name}</span>
+                                                </div>
+                                                {editing && (
+                                                    <Button
+                                                        isIconOnly
+                                                        size="sm"
+                                                        color="danger"
+                                                        variant="light"
+                                                    >
+                                                        <TrashIcon className="w-5 h-5" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </CardBody>
                 </Card>
             </div>
