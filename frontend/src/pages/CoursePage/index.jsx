@@ -1,36 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import {course as CourseApi} from "../../services";
-import {Spinner} from "@nextui-org/react";
+import React from "react";
 import CourseHeader from "./components/CourseHeader";
 import InstructorCard from "./components/InstructorCard";
 import TabsContainer from "./sections";
 import CourseDetailsCard from "./components/CourseDetailsCard";
+import { useCourseDetails } from "../../hooks/useCourseFetch";
+import { Spinner } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-    const { id } = useParams();
-    const [course, setCourse] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchCourseData = async () => {
-            try {
-                const courseData = await CourseApi.getDetailsById(id);
-                if (!courseData) throw new Error("Course data not found");
-                setCourse(courseData);
-            } catch (error) {
-                console.error("Failed to fetch course data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCourseData();
-    }, [id]);
+    const { course, loading } = useCourseDetails();
+    const navigate = useNavigate();
 
     if (loading) {
         return <Spinner />;
     }
+
+    const handleStartStudying = () => {
+        navigate(`/course/${course._id}/`);
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 pt-6 pb-12">
@@ -43,6 +30,12 @@ const Index = () => {
                     </div>
                     <div className="lg:col-span-1">
                         <CourseDetailsCard course={course} />
+                        <button
+                            onClick={handleStartStudying}
+                            className="mt-6 w-full py-2 px-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+                        >
+                            Start Studying
+                        </button>
                     </div>
                 </div>
             </div>
