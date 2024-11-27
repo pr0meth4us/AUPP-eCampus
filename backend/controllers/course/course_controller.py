@@ -280,7 +280,7 @@ class CourseController:
             User.update_courses(user_id, course_id, add=True)
             return jsonify({'message': 'Student enrolled successfully.'}), 200
         else:
-            return jsonify({'message': 'Student already enrolled.'}), 400
+            return jsonify({'message': 'Student already enrolled.'}), 200
 
     @staticmethod
     def unenroll_student(course_id, student_id):
@@ -310,3 +310,15 @@ class CourseController:
     def get_course_by_id(course_id):
         course = Course.get_course_by_id(course_id)
         return jsonify(course.to_dict()), 200
+
+    @staticmethod
+    def get_course_details_with_names(course_id):
+        try:
+            course_data = Course.get_details_with_names(course_id)
+            return course_data, 200
+        except ValueError as e:
+            print(f"ValueError: {e}")  # Add logging
+            return {"message": str(e)}, 404
+        except Exception as e:
+            print(f"Unexpected error: {e}")  # Add logging
+            return {"message": "An error occurred while fetching course details.", "error": str(e)}, 500

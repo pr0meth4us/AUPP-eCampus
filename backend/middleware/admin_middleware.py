@@ -8,6 +8,6 @@ def require_admin(f):
     @token_required
     def decorated(*args, **kwargs):
         if g.current_user['role'] != 'admin':
-            return jsonify({'message': 'Unauthorized. Admins only.'}), 403
+            return jsonify({'message': 'UnauthorizedPage. Admins only.'}), 403
         return f(*args, **kwargs)
     return decorated

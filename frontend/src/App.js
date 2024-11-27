@@ -1,29 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AdminPage from './pages/AdminPage';
-import PrivateRoute from './components/PrivateRoute';
-import Home from './pages/Home';
-import AdminSignup from './components/Admin/AdminSignup';
-import AdminLogin from './components/Admin/AdminLogin';
-import ProfilePage from './pages/ProfilePage';
-import EditProfile from './pages/EditProfile';
+import AdminPage from './pages/AdminDashboardPage';
+import PrivateRoute from './constants/PrivateRoute';
+import HomePage from 'pages/HomePage';
+import ProfilePage from 'pages/ProfilePage';
+import EditProfile from 'pages/EditProfilePage';
 import Layout from "./context/Layout";
-import CourseCatalog from "./components/Course/CourseCatalog";
-import CourseSuccess from "./components/Course/CourseSuccess";
-import CourseConfirmation from "./components/Course/CourseConfirmation";
-import MyCourse from "./components/Course/MyCourse";
-import CoursePage from "./components/Course/CoursePage";
-import InstructorCoursePage from "./components/Course/InstructorCoursePage";
-import InstructorCourseCreate from "./components/Course/InstructorCourseCreate";
-import MyCourseInstructor from "./components/Course/MyCourseInstructor";
-import Unauthorized from "./pages/Unauthorized";
+import UnauthorizedPage from "pages/UnauthorizedPage";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import CourseCreate from "pages/CourseCreatePage";
+import AdminSignup from "pages/AdminSignup";
+import AdminLogin from "pages/AdminLogin";
+import MyCourse from "pages/MyCourse";
+import EditCoursePage from "./pages/EditCoursePage";
+import CoursePage from "./pages/CoursePage";
+import CourseCatalogPage from "pages/CourseCatalogPage";
+import CourseSuccessPage from "pages/CourseSuccessPage";
+import CourseConfirmationPage from "pages/CourseConfirmationPage";
 
 const App = () => {
     return (
         <Router>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-login" element={<AdminLogin />} />
 
@@ -37,26 +37,26 @@ const App = () => {
                            element={<PrivateRoute element={<EditProfile />} allowedRoles={['student', 'instructor', 'admin']} />}
                     />
                     <Route path="/my-courses"
-                           element={<PrivateRoute element={<MyCourse />} allowedRoles={['student', 'instructor', 'admin']} />}
+                           element={<PrivateRoute element={<MyCourse role="student" />} allowedRoles={['student', 'instructor', 'admin']} />}
                     />
                     <Route path="/course-i-teach"
-                           element={<PrivateRoute element={<MyCourseInstructor />} allowedRoles={['instructor', 'admin']} />}
+                           element={<PrivateRoute element={<MyCourse role="instructor" />} allowedRoles={['instructor', 'admin']} />}
                     />
                     <Route path="/course/:id"
                            element={<PrivateRoute element={<CoursePage />} allowedRoles={['student', 'instructor', 'admin']} />}
                     />
                     <Route path="/instructor/course/:id"
-                           element={<PrivateRoute element={<InstructorCoursePage />} allowedRoles={['instructor', 'admin']} />}
+                           element={<PrivateRoute element={<EditCoursePage />} allowedRoles={['instructor', 'admin']} />}
                     />
                     <Route path="/instructor/course/create"
-                           element={<PrivateRoute element={<InstructorCourseCreate />} allowedRoles={['instructor', 'admin']} />}
+                           element={<PrivateRoute element={<CourseCreate />} allowedRoles={['instructor', 'admin']} />}
                     />
 
-                    {/* Public Routes */}
-                    <Route path="/course-catalog" element={<CourseCatalog />} />
-                    <Route path="/course/success" element={<CourseSuccess />} />
-                    <Route path="/course/confirmation" element={<CourseConfirmation />} />
-                    <Route path="/unauthorized" element={<Unauthorized />} />
+                     Public Routes
+                    <Route path="/course-catalog" element={<CourseCatalogPage />} />
+                    <Route path="/course/success" element={<CourseSuccessPage />} />
+                    <Route path="/course/confirmation" element={<CourseConfirmationPage />} />
+                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 </Routes>
             </Layout>
