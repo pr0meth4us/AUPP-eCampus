@@ -9,7 +9,7 @@ def require_admin_or_instructor(f):
     @token_required
     def decorated(*args, **kwargs):
         if g.current_user['role'] not in ['admin', 'instructor']:
-            return jsonify({'message': 'Unauthorized. Admins or Instructors only.'}), 403
+            return jsonify({'message': 'UnauthorizedPage. Admins or Instructors only.'}), 403
         return f(*args, **kwargs)
 
     return decorated
@@ -41,7 +41,7 @@ def require_admin_or_instructor_or_uploader(f):
                 user_id != str(course['instructor_id']) and
                 user_id != str(course['uploader_id'])
         ):
-            return jsonify({'message': 'Unauthorized. Only admins, the instructor, or the uploader can perform this '
+            return jsonify({'message': 'UnauthorizedPage. Only admins, the instructor, or the uploader can perform this '
                                        'action.'}), 403
 
         g.course = course

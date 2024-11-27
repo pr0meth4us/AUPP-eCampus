@@ -39,12 +39,15 @@ class User:
         return self.email
 
     @staticmethod
-    def find_by_email(email: str) -> Optional[Dict]:
-        """Find user by email."""
+    def find_by_email(email):
         return db.users.find_one({'email': email})
 
     @staticmethod
-    def find_by_id(user_id: str) -> Optional[Dict]:
+    def get_name_by_id(id):
+        return db.users.find_one({'_id': ObjectId(id)})['name']
+
+    @staticmethod
+    def find_by_id(user_id):
         return db.users.find_one({'_id': ObjectId(user_id)})
 
     @staticmethod
@@ -53,7 +56,6 @@ class User:
         return check_password_hash(stored_password, provided_password)
 
     def save_to_db(self) -> None:
-        """Save user to database with email uniqueness check."""
         if self.is_email_taken(self.email):
             raise ValueError(f"Email '{self.email}' is already in use.")
         db.users.insert_one(self.to_dict())
@@ -94,16 +96,30 @@ class User:
         if not user:
             raise ValueError("User not found.")
 
+        if 'courses' not in user or not isinstance(user['courses'], list):
+            user['courses'] = []
+
+        course_id = ObjectId(course_id)
+
         if add:
             if course_id not in user['courses']:
-                user['courses'].append(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'courses': user['courses']}})
+                user['courses'].append(course_id)
         else:
-            if ObjectId(course_id) in user['courses']:
-                user['courses'].remove(ObjectId(course_id))
-                db.users.update_one({'_id': ObjectId(user_id)},
-                                    {'$set': {'courses': user['courses']}})
+            if course_id in user['courses']:
+                user['courses'].remove(course_id)
+
+        db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'courses': user['courses']}})
+
+    @staticmethod
+    def get_profile(user_id):
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            raise ValueError("User not found.")
+
+        return {
+            "name": user.get('name', ''),
+            "profile_image": user.get('profile_image', '')
+        }
 
 
 class Student(User):

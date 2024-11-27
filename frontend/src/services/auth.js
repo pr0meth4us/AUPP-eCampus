@@ -29,7 +29,7 @@ export const auth = {
     },
 
     logout: async () => {
-        const response = await api.post('/auth/logout');
+        const response = await api.post('/auth/signout');
         return response.data;
     },
 
