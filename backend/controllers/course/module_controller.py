@@ -1,25 +1,36 @@
 from models.course.module_model import Module
 from models.course.course_model import Course
-from flask import jsonify
+from flask import jsonify, request
+from services.aws_service import upload_to_s3
 
 class ModuleController:
 
     @staticmethod
-    def create_module(course_id, data):
+    def add_module(course_id):
         try:
-            title = data.get('title')
-            description = data.get('description')
-
-            course = Course.find_by_id(course_id)
+            course = Course.get_course_by_id(course_id)
             if not course:
-                return jsonify({'message': 'Course not found'}), 404
+                return jsonify({'message': 'Course not found.'}), 404
 
-            module = Module(course_id=course_id, title=title, description=description)
-            module_id = module.save_to_db()
+            title = request.form.get('title')
+            description = request.form.get('description')
+            content = request.files.get('content') or request.form.get('content')
 
-            return jsonify({'message': 'Module created successfully', 'module_id': module_id}), 201
+            if not title or not description or not content:
+                return jsonify({'message': 'Title, description, and content are required.'}), 400
+
+            # Check if content is a file or plain text
+            if hasattr(content, 'filename'):
+                content_url = upload_to_s3(content, content.filename)
+                content = content_url
+
+            module_id = course.add_module(title=title, description=description, content=content)
+
+            return jsonify({'message': 'Module added successfully.', 'module_id': module_id}), 201
+
         except Exception as e:
-            return jsonify({'message': str(e)}), 400
+            return jsonify({'message': 'Failed to add module.', 'error': str(e)}), 500
+
 
     @staticmethod
     def get_modules(course_id):

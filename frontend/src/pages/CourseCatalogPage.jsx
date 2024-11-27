@@ -160,7 +160,7 @@ const CourseCatalogPage = () => {
                                                 </div>
                                                 {isOwned ? (
                                                     <Button
-                                                        onClick={() => navigate(`/course/${course.id}`)}
+                                                        onClick={() => navigate(`/courseoverview/${course.id}`)}
                                                         size="sm"
                                                         className="button-no-after bg-green-500 text-white hover:bg-green-600 flex items-center gap-2"
                                                     >
