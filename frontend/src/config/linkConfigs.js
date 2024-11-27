@@ -6,7 +6,7 @@ export const links = {
         { label: 'Vision - Mission - Values', url: `${BASE_URL}/about-us/vision-mission-and-values/` },
         { label: 'FAQs', url: `${BASE_URL}/about-us/faqs/` },
         { label: 'Career Opportunities', url: `${BASE_URL}/about-us/career-opportunities/` },
-        { label: 'Current Weather at AUPP', url: "https://www.timeanddate.com/weather/cambodia/phnom-penh" }, // External link
+        { label: 'Current Weather at AUPP', url: "https://www.timeanddate.com/weather/cambodia/phnom-penh" },
     ],
     explore: [
         { label: 'Student Life', url: `${BASE_URL}/student-life/` },
