@@ -17,7 +17,7 @@ const Header = () => {
             <header className="bg-light py-3 fixed-top">
                 <div className="container d-flex justify-content-between align-items-center">
                     <div className="logo">
-                        <a href="/frontend/public">
+                        <a href="/">
                             <img src="/AUPP-Main-Logo.svg" alt="Logo" className="img-fluid" />
                         </a>
                     </div>

@@ -10,7 +10,6 @@ const Signup = () => {
     const [token, setToken] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    console.log(name,email, password,token);
 
     const handleSignup = async () => {
         try {
