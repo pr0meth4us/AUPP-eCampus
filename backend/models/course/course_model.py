@@ -3,7 +3,8 @@ from bson import ObjectId
 from services.mongo_service import db
 from .assignment_model import Assignment
 from .module_model import Module
-from services.cloudflare_service import handle_temp_file_upload, secure_filename
+
+
 class Course:
     def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids,
                  price, cover_image_url=None, enrolled_students=None, assignments=None, modules=None, _id=None, created_at=None, updated_at=None):
@@ -33,19 +34,19 @@ class Course:
             '_id': str(self._id) if self._id else None,  # Convert ObjectId to string
             'title': self.title,
             'description': self.description,
-            'instructor_id': str(self.instructor_id),
-            'uploader_id': str(self.uploader_id),
+            'instructor_id': self.instructor_id,
+            'uploader_id': self.uploader_id,
             'video_url': self.video_url,
             'thumbnail_url': self.thumbnail_url,
-            'cover_image_url': self.cover_image_url,  # Include cover image URL
-            'major_ids': [str(mid) for mid in self.major_ids],  # Convert ObjectId to string
-            'tag_ids': [str(tid) for tid in self.tag_ids],  # Convert ObjectId to string
+            'cover_image_url': self.cover_image_url,
+            'major_ids': [str(mid) for mid in self.major_ids],
+            'tag_ids': [str(tid) for tid in self.tag_ids],
             'created_at': self.created_at,
             'updated_at': self.updated_at,
             'price': self.price,
             'enrolled_students': [str(student) for student in self.enrolled_students],
             'assignments': self.assignments,
-            'modules': self.modules
+            "modules": [str(module) for module in self.modules]
         }
 
     def save_to_db(self):
@@ -165,15 +166,14 @@ class Course:
 
     @staticmethod
     def get_details_with_names(course_id):
-        """Fetch course details, including majors, tags, instructor name, profile image, enrolled students, and modules."""
         try:
+            # Fetch course
             course = Course.get_course_by_id(course_id)
             if not course:
                 raise ValueError("Course not found")
 
             # Fetch instructor details
             instructor = db.users.find_one({"_id": ObjectId(course.instructor_id)}, {"name": 1, "profile_image": 1})
-
             if not instructor:
                 raise ValueError("Instructor not found")
 
@@ -189,43 +189,62 @@ class Course:
                 for tag in db.tags.find({"_id": {"$in": [ObjectId(tid) for tid in course.tag_ids]}})
             ]
 
-            # Fetch enrolled students details
-            enrolled_students_details = []
+            # Fetch enrolled students
+            enrolled_students = []
             if course.enrolled_students:
-                enrolled_students_details = list(db.users.find(
-                    {"_id": {"$in": [ObjectId(sid) for sid in course.enrolled_students]}},
+                enrolled_students = list(db.users.find(
+                    {"_id": {"$in": [ObjectId(sid["$oid"]) if isinstance(sid, dict) else ObjectId(sid) for sid in course.enrolled_students]}},
                     {"name": 1, "profile_image": 1}
                 ))
 
-            modules = Module.get_by_course(course._id)
+            # Fetch modules and their materials
+            modules = []
+            courseData = course.to_dict()
+            print(courseData.get("modules", []), "sdd")
+            for module_id in course.modules:
+                print(module_id, "sdasf")
+                module = Module.find_by_id(ObjectId(module_id))
+                print(module, "dvsagfs")
+                if module:
+                    kdmv = module.get("materials")
+                    print("kdmv", kdmv)
+                    module_materials = [
+                        {
+                            "id": str(material["_id"]),
+                            "title": material.get("title", "Unknown"),
+                            "description": material.get("description", "Unknown"),
+                            "content_url": material.get("content", "")
+                        } for material in module.get("materials", [])
+                    ]
+                    modules.append({
+                        "id": str(module["_id"]),
+                        "title": module.get("title", "Unknown"),
+                        "description": module.get("description", "Unknown"),
+                        "materials": module_materials
+                    })
+                print(module, "dfsadasdfz")
+            print(modules, "dasfdsadfdsadf")
 
             # Construct response
-            course_data = course.to_dict()
-            course_data["majors"] = major_names
-            course_data["tags"] = tag_names
-            course_data["instructor"] = {
-                "name": instructor.get("name", "Unknown"),
-                "profile_image": instructor.get("profile_image", None),
+            course_data = {
+                "id": str(course._id),
+                "title": course.title,
+                "description": course.description,
+                "majors": major_names,
+                "tags": tag_names,
+                "instructor": {
+                    "name": instructor.get("name", "Unknown"),
+                    "profile_image": instructor.get("profile_image")
+                },
+                "enrolled_students": [
+                    {
+                        "id": str(student["_id"]),
+                        "name": student.get("name", "Unknown"),
+                        "profile_image": student.get("profile_image", None)
+                    } for student in enrolled_students
+                ],
+                "modules": modules
             }
-
-            # Transform enrolled students to include only name and profile image
-            course_data["enrolled_students"] = [
-                {
-                    "id": str(student["_id"]),
-                    "name": student.get("name", "Unknown"),
-                    "profile_image": student.get("profile_image", None)
-                } for student in enrolled_students_details
-            ]
-
-            # Add module details
-            course_data["modules"] = [
-                {
-                    "id": str(module["_id"]),
-                    "title": module.get("title", "Unknown"),
-                    "description": module.get("description", "Unknown"),
-                    "content": module.get("content", "")
-                } for module in modules
-            ]
 
             return course_data
 

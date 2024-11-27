@@ -57,7 +57,6 @@ def unenroll_student(course_id):
     return CourseController.unenroll_student(course_id, student_id)
 
 
-# === Tag Routes ===
 @course_bp.route('/tags', methods=['POST'])
 def create_tags():
     tag_names = request.json.get('names', [])
@@ -70,7 +69,6 @@ def create_tags():
 
 @course_bp.route('/tags', methods=['GET'])
 def get_all_tags():
-    # Using TagController logic for consistency
     tags = TagController.get_all_tags()
     return jsonify(tags), 200
 
