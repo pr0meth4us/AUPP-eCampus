@@ -4,7 +4,7 @@ from bson import ObjectId
 
 
 class Assignment:
-    def __init__(self, course_id, title, description, due_date, max_grade, file, allow_late_submission, is_locked):
+    def __init__(self, course_id, title, description, due_date, max_grade, file, allow_late_submission, is_locked= False):
         self._id = None
         self.course_id = course_id
         self.title = title
@@ -33,6 +33,7 @@ class Assignment:
         assignment_data = self.to_dict()
         result = db.assignments.insert_one(assignment_data)
         self._id = result.inserted_id
+        return result.inserted_id
 
     @staticmethod
     def get_by_id(assignment_id):
@@ -52,7 +53,6 @@ class Assignment:
 
     @staticmethod
     def get_course_id(assignment_id):
-
         return db.assignments.find_one({"_id": ObjectId(assignment_id)})['course_id']
 
     @staticmethod

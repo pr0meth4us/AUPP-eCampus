@@ -46,3 +46,21 @@ class Submission:
             {'_id': self.assignment_id},
             {'$addToSet': {'submissions': result.inserted_id}}
         )
+
+    @staticmethod
+    def get_by_course(assignment_id, student_id):
+        assignment_id = ObjectId(assignment_id) if isinstance(assignment_id, str) else assignment_id
+        student_id = ObjectId(student_id) if isinstance(student_id, str) else student_id
+        submissions = db.submissions.find({
+            'assignment_id': ObjectId(assignment_id),
+            'student_id': ObjectId(student_id)
+        })
+        submission_list = [submission for submission in submissions]
+        return submission_list
+
+    @staticmethod
+    def get_all_submissions_for_teacher(assignment_id):
+        submissions = db.submissions.find({'assignment_id':  ObjectId(assignment_id)})
+        submission_list = [submission for submission in submissions]
+        return submission_list
+
