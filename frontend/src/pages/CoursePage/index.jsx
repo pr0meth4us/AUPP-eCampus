@@ -6,7 +6,7 @@ import TabsContainer from "./sections";
 import CourseDetailsCard from "./components/CourseDetailsCard";
 import { useCourseDetails } from "../../hooks/useCourseFetch";
 import { useAuth } from "../../context/authContext";
-import { course, payment } from "../../services";
+import { payment } from "../../services";
 import { useNavigate } from "react-router-dom";
 import { Lock, LogIn, BookOpen } from "lucide-react";
 
@@ -15,7 +15,6 @@ const CoursePage = () => {
     const { user, refreshUser } = useAuth();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
-
     const [enrolling, setEnrolling] = React.useState(false);
     const [loadingPayment, setLoadingPayment] = React.useState(false);
 
@@ -23,8 +22,11 @@ const CoursePage = () => {
         return <Spinner />;
     }
 
-    const isOwned = user?.courses?.includes(courseDetails._id);
-    const isFree = !courseDetails.price || courseDetails.price === "0";
+    const course = courseDetails?.course;
+    if (!course) return <Spinner />;
+
+    const isOwned = user?.courses?.includes(course._id);
+    const isFree = !course.price || course.price === "0";
 
     const openLoginModal = () => {
         const loginButton = document.querySelector('[data-bs-target="#login"]');
@@ -41,9 +43,9 @@ const CoursePage = () => {
 
         setLoadingPayment(true);
         try {
-            const response = await payment.createPayment(courseDetails._id);
+            const response = await payment.createPayment(course._id);
             await refreshUser();
-            window.location.href = `${response.approval_url}&courseID=${courseDetails._id}`;
+            window.location.href = `${response.approval_url}&courseID=${course._id}`;
         } catch (error) {
             console.error("Payment creation failed", error);
         } finally {
@@ -59,10 +61,10 @@ const CoursePage = () => {
 
         setEnrolling(true);
         try {
-            await course.enrollStudent(courseDetails._id);
+            await course.enrollStudent(course._id);
             await refreshUser();
             onClose();
-            navigate(`/course/${courseDetails._id}`);
+            navigate(`/course/${course._id}`);
         } catch (error) {
             console.error("Enrollment failed", error);
         } finally {
@@ -71,20 +73,21 @@ const CoursePage = () => {
     };
 
     const handleStartStudying = () => {
-        navigate(`/course/${courseDetails._id}/`);
+        navigate(`/course/${course._id}/`);
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 pt-6 pb-12">
             <div className="max-w-[1400px] mx-auto px-4">
-                <CourseHeader course={courseDetails} />
+                <CourseHeader course={course} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
-                        <InstructorCard instructor={courseDetails.instructor} />
-                        <TabsContainer course={courseDetails} />
+                        <InstructorCard instructor={course.instructor_name} />
+                        <TabsContainer course={course} />
                     </div>
                     <div className="lg:col-span-1">
-                        <CourseDetailsCard course={courseDetails} />
+                        <CourseDetailsCard course={course} />
+
                         {isOwned ? (
                             <button
                                 onClick={handleStartStudying}
@@ -100,11 +103,11 @@ const CoursePage = () => {
                             >
                                 {!user ? (
                                     <>
-                                        <LogIn size={16} /> Login to Buy - ${courseDetails.price}
+                                        <LogIn size={16} /> Login to Buy - ${course.price}
                                     </>
                                 ) : (
                                     <>
-                                        <Lock size={16} /> Buy - ${courseDetails.price}
+                                        <Lock size={16} /> Buy - ${course.price}
                                     </>
                                 )}
                             </Button>
@@ -134,7 +137,7 @@ const CoursePage = () => {
                         <>
                             <ModalHeader className="flex flex-col gap-1">Confirm Enrollment</ModalHeader>
                             <ModalBody>
-                                <p>Are you sure you want to enroll in {courseDetails.title}?</p>
+                                <p>Are you sure you want to enroll in {course.title}?</p>
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>

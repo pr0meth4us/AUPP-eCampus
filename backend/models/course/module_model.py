@@ -35,7 +35,7 @@ class Module:
     def to_dict(self):
         return {
             '_id': str(self._id) if self._id else None,
-            'course_id': str(self.course_id),
+            'course_id': self.course_id,
             'title': self.title,
             'description': self.description,
             'materials': self.materials,
@@ -78,25 +78,9 @@ class Module:
             raise
 
     @staticmethod
-    def get_by_course(course_id, page=1, per_page=10):
-        try:
-            skip = (page - 1) * per_page
-            modules = list(db.modules.find({'course_id': ObjectId(course_id)})
-                           .skip(skip)
-                           .limit(per_page))
-
-            total_modules = db.modules.count_documents({'course_id': ObjectId(course_id)})
-
-            return {
-                'modules': modules,
-                'total_modules': total_modules,
-                'page': page,
-                'per_page': per_page
-            }
-        except Exception as e:
-            logging.error(f"Error retrieving modules for course: {e}")
-            raise
-
+    def get_by_course(course_id):
+        print(course_id, "cors")
+        return list(db.modules.find({'course_id': ObjectId(course_id)}))
     @staticmethod
     def find_by_id(module_id):
         try:
@@ -144,29 +128,6 @@ class Module:
                 del self.materials[i]
                 return True
         raise ValueError(f"Material with ID {material_id} not found")
-
-    def to_dict(self):
-        return {
-            '_id': str(self._id) if self._id else None,
-            'course_id': str(self.course_id),
-            'title': self.title,
-            'description': self.description,
-            'materials': self.materials,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at
-        }
-
-    def save_to_db(self):
-        module_data = self.to_dict()
-        module_data.pop('_id', None)
-
-        try:
-            result = db.modules.insert_one(module_data)
-            self._id = result.inserted_id
-            return str(self._id)
-        except Exception as e:
-            logging.error(f"Error saving module to database: {e}")
-            raise
 
     def update_in_db(self):
         try:

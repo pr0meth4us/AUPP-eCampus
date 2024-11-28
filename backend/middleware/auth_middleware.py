@@ -3,7 +3,7 @@ from flask import request, jsonify, g
 from utils.token_utils import decode_token, get_token_from_request
 
 
-def token_required(f):
+def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = get_token_from_request()

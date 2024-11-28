@@ -4,19 +4,17 @@ import { Tag } from "lucide-react";
 
 const OverviewTab = ({ course }) => (
     <div className="mt-4 space-y-6">
-        {/* About This Course */}
         <div>
             <h3 className="text-lg font-semibold mb-3">About This Course</h3>
             <p className="text-gray-600 leading-relaxed">{course.description}</p>
         </div>
 
-        {/* Majors and Tags Section */}
         <div className="grid md:grid-cols-2 gap-6">
             <div>
                 <h3 className="text-lg font-semibold mb-3">Majors</h3>
                 <div className="flex flex-wrap gap-2">
-                    {course.majors?.length ? (
-                        course.majors.map((major, index) => (
+                    {course.major_names?.length ? (
+                        course.major_names.map((major, index) => (
                             <Chip
                                 key={index}
                                 startContent={<Tag size={14} />}
@@ -35,8 +33,8 @@ const OverviewTab = ({ course }) => (
             <div>
                 <h3 className="text-lg font-semibold mb-3">Tags</h3>
                 <div className="flex flex-wrap gap-2">
-                    {course.tags?.length ? (
-                        course.tags.map((tag, index) => (
+                    {course.tag_names?.length ? (
+                        course.tag_names.map((tag, index) => (
                             <Chip
                                 key={index}
                                 startContent={<Tag size={14} />}

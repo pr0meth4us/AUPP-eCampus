@@ -1,8 +1,8 @@
-import api from "./api";
-
+import endpoint from "./api";
+const api = endpoint("auth");
 export const auth = {
     login: async (email, password, role, recaptchaResponse) => {
-        const response = await api.post('/auth/login', {
+        const response = await api.post('/login', {
             email,
             password,
             role,
@@ -16,7 +16,7 @@ export const auth = {
     },
 
     register: async (name, email, password, role, otp, token = null, captchaValue) => {
-        const response = await api.post('/auth/register', {
+        const response = await api.post('/register', {
             name,
             email,
             password,
@@ -29,12 +29,12 @@ export const auth = {
     },
 
     logout: async () => {
-        const response = await api.post('/auth/signout');
+        const response = await api.post('/signout');
         return response.data;
     },
 
     checkAuth: async () => {
-        const response = await api.get('/auth/check');
+        const response = await api.get('/check');
         return response.data;
     }
 };
