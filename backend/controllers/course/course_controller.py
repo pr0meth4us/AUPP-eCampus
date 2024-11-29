@@ -55,7 +55,6 @@ class CourseController:
             if not course:
                 return jsonify({'message': 'Course not found.'}), 404
 
-            # Process tags
             created_tags = CourseController._find_or_create_tags(tag_names)
             tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
 
@@ -104,9 +103,13 @@ class CourseController:
 
         if student_id in course['enrolled_students']:
             return jsonify({'message': 'Student already enrolled.'}), 200
+        kwargs = {
+            "_id": ObjectId(course_id),
+            "$push": {"enrolled_students": ObjectId(student_id)}
+        }
 
-        course['enrolled_students'].append(ObjectId(student_id))
-        course.save()
+        Course.update_course(course_id, **kwargs)
+
         User.add_course_to_user(student_id, course_id, add=True)
         return jsonify({'message': 'Student enrolled successfully.'}), 200
 
@@ -159,8 +162,10 @@ class CourseController:
         delete_from_cloudinary(video_url)
 
     @staticmethod
-    def get_course_details(course_id, student_id):
-        course = Course.find_by_id(course_id)
+    def get_course_details(course_id,student_id, has_access=False):
+        course = Course.get_course_preview(course_id)
+        if not has_access:
+            return jsonify({"course": serialize_document(course)}), 200
         modules = Module.get_by_course(course_id)
         assignments = Assignment.get_by_course(course_id)
         people = Course.get_people(course_id)
@@ -182,8 +187,13 @@ class CourseController:
         }
 
     @staticmethod
+    def get_course_preview(course_id):
+        course = Course.get_course_preview(course_id)
+        return {"course": course}
+
+    @staticmethod
     def get_course_details_teacher(course_id):
-        course = Course.find_by_id(course_id)
+        course = Course.get_course_preview(course_id)
         modules = Module.get_by_course(course_id)
         assignments = Assignment.get_by_course(course_id)
         people = Course.get_people(course_id)
@@ -203,12 +213,6 @@ class CourseController:
             "people": people,
             "course": course
         }
-
-    @staticmethod
-    def get_course_preview(course_id):
-        course = Course.get_course_preview(course_id)
-        return {"course": course}
-
     @staticmethod
     def get_all_course_preview():
         courses = Course.get_all_courses_preview()

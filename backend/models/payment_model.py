@@ -156,7 +156,6 @@ class Payment:
                 'course_id': ObjectId(course_id),
                 'status': 'completed'
             }
-            print(query)
 
             payment = db.payments.find_one(query)
 

@@ -73,10 +73,11 @@ def get_course_by_id(course_id):
 
 @course_bp.route('/<course_id>/enroll', methods=['POST'])
 @payment_required
-def enroll_student(course_id):
-    student_id = request.json.get('student_id')
+def enroll_student(course_id, has_access=False):
+    student_id = g.current_user['_id']
+    if not has_access:
+        return jsonify({"message": "Payment required to enroll"}), 403
     return CourseController.enroll_student(course_id, student_id)
-
 
 @course_bp.route('/<course_id>/unroll', methods=['POST'])
 def unenroll_student(course_id):
@@ -132,9 +133,11 @@ def delete_major(major_id):
 
 @course_bp.route('/<course_id>/details', methods=['GET'])
 @payment_required
-def get_course_details_with_names(course_id):
-    student_id = g.current_user["_id"]
-    return CourseController.get_course_details(course_id, student_id)
+def get_course_details_with_names(course_id, has_access):
+    student_id = None
+    if hasattr(g, 'current_user') and g.current_user:
+        student_id = getattr(g.current_user, "_id", None)
+    return CourseController.get_course_details(course_id, student_id, has_access)
 
 
 @course_bp.route('/<course_id>/preview', methods=['GET'])

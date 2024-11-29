@@ -42,13 +42,13 @@ class AuthController:
                 {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
 
         user = User.find_by_email(email)
+        print(user)
         if user and User.verify_password(user['password_hash'], password):
-            user_id_str = str(user['_id'])
-            token = create_token({'_id': user_id_str, 'email': user['email'], 'role': role})
+            token = create_token(user)
 
             response = make_response(jsonify({
                 'message': 'Login successful',
-                'user': {'_id': user_id_str, 'email': user['email'], 'role': role}
+                'user': {'_id': str(user['_id']), 'email': user['email'], 'role': role}
             }), 200)
             response.set_cookie('auth_token', token, httponly=True, secure=True)
 

@@ -6,13 +6,14 @@ import TabsContainer from "./sections";
 import CourseDetailsCard from "./components/CourseDetailsCard";
 import { useCourseDetails } from "../../hooks/useCourseFetch";
 import { useAuth } from "../../context/authContext";
-import { payment } from "../../services";
+import { payment, course as CourseApi} from "../../services";
 import { useNavigate } from "react-router-dom";
 import { Lock, LogIn, BookOpen } from "lucide-react";
 
 const CoursePage = () => {
     const { course: courseDetails, loading } = useCourseDetails();
     const { user, refreshUser } = useAuth();
+
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
     const [enrolling, setEnrolling] = React.useState(false);
@@ -43,7 +44,10 @@ const CoursePage = () => {
 
         setLoadingPayment(true);
         try {
+            console.log(course._id)
+
             const response = await payment.createPayment(course._id);
+
             await refreshUser();
             window.location.href = `${response.approval_url}&courseID=${course._id}`;
         } catch (error) {
@@ -61,7 +65,7 @@ const CoursePage = () => {
 
         setEnrolling(true);
         try {
-            await course.enrollStudent(course._id);
+            await CourseApi.enrollStudent(course._id);
             await refreshUser();
             onClose();
             navigate(`/course/${course._id}`);
@@ -77,13 +81,18 @@ const CoursePage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 pt-6 pb-12">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 pb-12">
             <div className="max-w-[1400px] mx-auto px-4">
                 <CourseHeader course={course} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <InstructorCard instructor={course.instructor_name} />
-                        <TabsContainer course={course} />
+                        <TabsContainer
+                            course={course}
+                            assignments={courseDetails?.assignments}
+                            modules={courseDetails?.modules}
+                            people={courseDetails?.people}
+                        />
                     </div>
                     <div className="lg:col-span-1">
                         <CourseDetailsCard course={course} />

@@ -10,6 +10,7 @@ payment_bp = Blueprint('payment', __name__)
 @login_required
 def create_payment():
     data = request.get_json()
+    print(data)
     return PaymentController.create_payment(data)
 
 
