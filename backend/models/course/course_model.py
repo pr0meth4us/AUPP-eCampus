@@ -73,6 +73,7 @@ class Course:
 
         return course_preview
 
+    @staticmethod
     def get_all_courses_preview():
         courses = db.courses.find()
         course_previews = []
@@ -87,8 +88,8 @@ class Course:
                 "instructor_name": instructor_name,
                 "uploader_id": str(course['uploader_id']),
                 "cover_image_url": course.get('cover_image_url', ""),
-                "major_ids": major_names,
-                "tag_ids": tag_names,
+                "major_names": major_names,
+                "tag_names": tag_names,
                 "price": course['price'],
             }
             course_previews.append(course_preview)

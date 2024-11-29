@@ -2,6 +2,7 @@ from functools import wraps
 from flask import g, jsonify
 from models.course import Assignment, Course
 from .auth_middleware import login_required
+from models.payment_model import Payment
 
 
 def require_admin_or_instructor(f):
