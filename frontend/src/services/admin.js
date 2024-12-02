@@ -16,6 +16,11 @@ export const admin = {
         return response.data;
     },
 
+    getAllCourses: async () => {
+        const response = await api.get('/admin/courses');
+        return response.data;
+    },
+
     deleteUser: async (userId) => {
         const response = await api.delete(`/admin/delete-user/${userId}`);
         return response.data;
@@ -35,4 +40,5 @@ export const admin = {
         const response = await api.delete(`/admin/delete-video/${videoId}`);
         return response.data;
     }
+
 };

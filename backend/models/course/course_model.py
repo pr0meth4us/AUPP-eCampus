@@ -2,11 +2,12 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from services.mongo_service import db
 from .assignment_model import Assignment
+from flask import jsonify
 
 
 class Course:
     def __init__(self, title, description, instructor_id, video_url, uploader_id, thumbnail_url, major_ids, tag_ids,
-                 price, enrolled_students=None, assignments=None, _id=None, created_at=None, updated_at=None):
+                 price, cover_image_url=None, enrolled_students=None, assignments=None, _id=None, created_at=None, updated_at=None):
         self._id = _id
         self.title = title
         self.description = description
@@ -14,6 +15,7 @@ class Course:
         self.uploader_id = ObjectId(uploader_id)
         self.video_url = video_url
         self.thumbnail_url = thumbnail_url
+        self.cover_image_url = cover_image_url
         self.major_ids = [ObjectId(mid) for mid in major_ids]
         self.tag_ids = [ObjectId(tid) for tid in tag_ids]
         self.created_at = created_at or datetime.now(timezone.utc)
@@ -35,6 +37,7 @@ class Course:
             'uploader_id': str(self.uploader_id),
             'video_url': self.video_url,
             'thumbnail_url': self.thumbnail_url,
+            'cover_image_url': self.cover_image_url,  # Include cover image URL
             'major_ids': [str(mid) for mid in self.major_ids],  # Convert ObjectId to string
             'tag_ids': [str(tid) for tid in self.tag_ids],  # Convert ObjectId to string
             'created_at': self.created_at,
@@ -46,7 +49,7 @@ class Course:
 
     def save_to_db(self):
         course_data = self.to_dict()
-        course_data.pop('_id')
+        course_data.pop('_id')  # MongoDB generates _id automatically
         result = db.courses.insert_one(course_data)
         self._id = result.inserted_id
         return str(self._id)
@@ -67,6 +70,7 @@ class Course:
                 video_url=data.get('video_url'),
                 uploader_id=str(data.get('uploader_id')),
                 thumbnail_url=data.get('thumbnail_url'),
+                cover_image_url=data.get('cover_image_url'),  # Retrieve cover image URL
                 major_ids=data.get('major_ids', []),
                 tag_ids=data.get('tag_ids', []),
                 price=data.get('price', 0),
@@ -130,3 +134,60 @@ class Course:
 
     def get_assignments(self):
         return Assignment.get_by_course(self._id)
+
+    @staticmethod
+    def get_details_with_names(course_id):
+        """Fetch course details, including majors, tags, instructor name, profile image, and enrolled students."""
+        try:
+            course = Course.get_course_by_id(course_id)
+            if not course:
+                raise ValueError("Course not found")
+
+            # Fetch instructor details
+            instructor = db.users.find_one({"_id": ObjectId(course.instructor_id)}, {"name": 1, "profile_image": 1})
+
+            if not instructor:
+                raise ValueError("Instructor not found")
+
+            # Fetch major names
+            major_names = [
+                major.get("name", "Unknown")
+                for major in db.majors.find({"_id": {"$in": [ObjectId(mid) for mid in course.major_ids]}})
+            ]
+
+            # Fetch tag names
+            tag_names = [
+                tag.get("name", "Unknown")
+                for tag in db.tags.find({"_id": {"$in": [ObjectId(tid) for tid in course.tag_ids]}})
+            ]
+
+            # Fetch enrolled students details
+            enrolled_students_details = []
+            if course.enrolled_students:
+                enrolled_students_details = list(db.users.find(
+                    {"_id": {"$in": [ObjectId(sid) for sid in course.enrolled_students]}},
+                    {"name": 1, "profile_image": 1}
+                ))
+
+            # Construct response
+            course_data = course.to_dict()
+            course_data["majors"] = major_names
+            course_data["tags"] = tag_names
+            course_data["instructor"] = {
+                "name": instructor.get("name", "Unknown"),
+                "profile_image": instructor.get("profile_image", None),
+            }
+
+            # Transform enrolled students to include only name and profile image
+            course_data["enrolled_students"] = [
+                {
+                    "id": str(student["_id"]),
+                    "name": student.get("name", "Unknown"),
+                    "profile_image": student.get("profile_image", None)
+                } for student in enrolled_students_details
+            ]
+
+            return course_data
+
+        except Exception as e:
+            raise

@@ -1,85 +1,168 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    Avatar,
+    Button,
+    Chip,
+    Divider
+} from "@nextui-org/react";
+import {
+    UserIcon,
+    AcademicCapIcon,
+    EnvelopeIcon,
+    PencilIcon
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../context/authContext';
+import { course } from '../services';
 
 const ProfilePage = () => {
     const { id } = useParams();
     const { user } = useAuth();
     const isOwnProfile = user?._id === id;
+    const [courseNames, setCourseNames] = useState({});
+
+    useEffect(() => {
+        const fetchCourseNames = async () => {
+            if (user?.courses && user.courses.length > 0) {
+                try {
+                    const names = await Promise.all(
+                        user.courses.map(async (courseId) => {
+                            const courseData = await course.getCourseById(courseId);
+                            return { id: courseId, name: courseData.title };
+                        })
+                    );
+                    const nameMap = names.reduce((acc, { id, name }) => {
+                        acc[id] = name;
+                        return acc;
+                    }, {});
+                    setCourseNames(nameMap);
+                } catch (error) {
+                    console.error("Error fetching course names:", error);
+                }
+            }
+        };
+
+        fetchCourseNames();
+    }, [user]);
 
     return (
-        <div className="max-w-4xl mx-auto mt-[100px] mb-16 p-6 bg-white shadow-md rounded-lg">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
-                {isOwnProfile && (
-                    <Link
-                        to="/edit-profile"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                        Edit Profile
-                    </Link>
-                )}
-            </div>
-
-            <div className="flex items-center space-x-6 mb-6 p-4 bg-gray-50 rounded-lg">
-                <img
-                    src={user?.profile_image || '/default-profile.png'}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-blue-200"
-                />
-                <div>
-                    <h2 className="text-2xl font-semibold text-gray-800">{user?.name || 'No Name'}</h2>
-                    <p className="text-gray-600">{user?.role || 'Role Not Specified'}</p>
-                    <p className="text-gray-500">{user?.email}</p>
-                </div>
-            </div>
-
-            {user?.role === 'student' && (
-                <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-3">Courses Enrolled</h3>
-                    {user?.courses && user.courses.length > 0 ? (
-                        <ul className="space-y-2 text-gray-700">
-                            {user.courses.map((course, index) => (
-                                <li
-                                    key={index}
-                                    className="bg-white p-2 rounded shadow-sm hover:bg-blue-50 transition-colors"
-                                >
-                                    {course}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="text-gray-500">No courses enrolled</p>
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+            <Card className="w-full shadow-lg">
+                <CardHeader className="flex justify-between items-center p-6 bg-gradient-to-r from-blue-500 to-purple-600">
+                    <h1 className="text-3xl font-bold text-white">Profile</h1>
+                    {isOwnProfile && (
+                        <Button
+                            as={Link}
+                            to="/edit-profile"
+                            color="secondary"
+                            variant="solid"
+                            startContent={<PencilIcon className="h-5 w-5" />}
+                        >
+                            Edit Profile
+                        </Button>
                     )}
-                </div>
-            )}
+                </CardHeader>
 
-            {user?.role === 'instructor' && (
-                <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-3">Courses Taught</h3>
-                        {user?.courses && user.courses.length > 0 ? (
-                            <ul className="space-y-2 text-gray-700">
-                                {user.courses.map((course, index) => (
-                                    <li
-                                        key={index}
-                                        className="bg-white p-2 rounded shadow-sm hover:bg-blue-50 transition-colors"
-                                    >
-                                        {course}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-gray-500">No courses taught</p>
-                        )}
+                <CardBody className="p-6">
+                    <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8 mb-8">
+                        <Avatar
+                            src={user?.profile_image}
+                            fallback={<UserIcon className="h-16 w-16 text-gray-500" />}
+                            className="w-36 h-36 text-large border-4 border-white shadow-lg"
+                        />
+                        <div className="text-center md:text-left space-y-2">
+                            <h2 className="text-3xl font-bold text-gray-800">
+                                {user?.name || 'No Name'}
+                            </h2>
+                            <div className="flex items-center justify-center md:justify-start space-x-3">
+                                <Chip
+                                    color="primary"
+                                    variant="flat"
+                                    startContent={<AcademicCapIcon className="h-5 w-5" />}
+                                >
+                                    {user?.role || 'Role Not Specified'}
+                                </Chip>
+                                <div className="flex items-center text-gray-600">
+                                    <EnvelopeIcon className="h-5 w-5 mr-2" />
+                                    <span>{user?.email}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-3">Expertise</h3>
-                        <p className="text-gray-600">{user?.expertise || 'No expertise provided'}</p>
-                    </div>
-                </div>
-            )}
+                    <Divider className="my-6" />
+
+                    {user?.role === 'student' && (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-semibold text-gray-800 mb-4">Courses Enrolled</h3>
+                            {user?.courses && user.courses.length > 0 ? (
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {user.courses.map((courseId, index) => (
+                                        <Card
+                                            key={index}
+                                            isPressable
+                                            as={Link}
+                                            to={`/course/${courseId}`}
+                                            className="hover:shadow-lg transition-shadow"
+                                        >
+                                            <CardBody>
+                                                <p className="text-lg font-medium text-blue-600">
+                                                    {courseNames[courseId] || 'Loading...'}
+                                                </p>
+                                            </CardBody>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 italic">No courses enrolled</p>
+                            )}
+                        </div>
+                    )}
+
+                    {user?.role === 'instructor' && (
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Courses Taught</h3>
+                                {user?.courses && user.courses.length > 0 ? (
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        {user.courses.map((courseId, index) => (
+                                            <Card
+                                                key={index}
+                                                isPressable
+                                                as={Link}
+                                                to={`/courses/${courseId}`}
+                                                className="hover:shadow-lg transition-shadow"
+                                            >
+                                                <CardBody>
+                                                    <p className="text-lg font-medium text-blue-600">
+                                                        {courseNames[courseId] || 'Loading...'}
+                                                    </p>
+                                                </CardBody>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 italic">No courses taught</p>
+                                )}
+                            </div>
+
+                            <Divider />
+
+                            <div>
+                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Expertise</h3>
+                                <Card variant="bordered" className="p-4">
+                                    <p className="text-gray-700">
+                                        {user?.expertise || 'No expertise provided'}
+                                    </p>
+                                </Card>
+                            </div>
+                        </div>
+                    )}
+                </CardBody>
+            </Card>
         </div>
     );
 };

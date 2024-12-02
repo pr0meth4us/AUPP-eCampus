@@ -1,16 +1,17 @@
 import React from 'react';
-import Header from "../components/Home/Header";
-import Footer from "../components/Footer";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import {AuthProvider} from "./authContext";
 
 const Layout = ({ children }) => {
     return (
-        <div className="layout-wrapper">
-            <Header />
-            <main className="content">
-                {children}
-            </main>
-            <Footer />
-        </div>
+        <AuthProvider>
+            <div className="layout-wrapper">
+                <Header />
+                <main className="content mt-32">{children}</main>
+                <Footer />
+            </div>
+        </AuthProvider>
     );
 };
 
