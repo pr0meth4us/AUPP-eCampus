@@ -6,9 +6,9 @@ export const payment = {
         return response.data;
     },
 
-    paymentSuccess: async (token, paymentId, payerId) => {
+    paymentSuccess: async (token, paymentId, PayerID) => {
         const response = await api.get(`/payment/success`, {
-            params: { token, paymentId, payerId }
+            params: { token, paymentId, PayerID }
         });
         return response.data;
     },

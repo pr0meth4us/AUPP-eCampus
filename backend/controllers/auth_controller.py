@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import jwt
 from flask import jsonify, make_response, request
 from config import Config
@@ -7,6 +5,7 @@ from models.user_model import User, Student, Admin, Instructor
 from services.mail_service import send_mail
 from utils.token_utils import create_token
 from models.otp_model import OTP
+from utils.helpers import serialize_object
 
 
 def check_email(data):
@@ -78,9 +77,8 @@ def check_auth():
     if not user:
         return jsonify({"authenticated": False, "message": "User not found"}), 401
 
-    user_data = user.copy()
+    user_data = serialize_object(user.copy())
     user_data.pop('password_hash', None)
-    user_data['_id'] = str(user_data['_id'])
     if user_data.get('role') == 'admin':
         user_data.pop('courses', None)
 

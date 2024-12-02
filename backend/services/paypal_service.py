@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class PayPalFees:
-
     DOMESTIC_RATE_STANDARD = 0.0349  # 3.49%
     DOMESTIC_RATE_QR_CODE = 0.0229  # 2.29%
     DOMESTIC_FIXED_FEE = 0.49  # USD
@@ -51,9 +50,8 @@ class PayPalFees:
 
 class PaymentService:
     @staticmethod
-    def create_payment(price, currency="USD", transaction_type="domestic", description="Purchase"):
+    def create_payment(course_id, price, currency="USD", transaction_type="domestic", description="Purchase"):
         fees = PayPalFees.calculate_fees(price, currency, transaction_type)
-        print(type(fees), type(price))
         total = round(float(price) + fees, 2)
 
         payment = paypalrestsdk.Payment({
@@ -67,7 +65,7 @@ class PaymentService:
                 "description": description
             }],
             "redirect_urls": {
-                "return_url": f"{Config.CLIENT_URL}/payment/success",
+                "return_url": f"{Config.CLIENT_URL}/course/success?courseID={course_id}",
                 "cancel_url": f"{Config.CLIENT_URL}/payment/cancel"
             }
         })
@@ -79,7 +77,6 @@ class PaymentService:
     def execute_payment(payment_id, payer_id):
         payment = paypalrestsdk.Payment.find(payment_id)
         return payment
-
 
     @staticmethod
     def generate_receipt(payment, fees, total, currency):
