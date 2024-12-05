@@ -7,6 +7,7 @@ import LoginPage from "../features/Login";
 import Signup from "../features/Signup";
 import { useAuth } from "../../context/authContext";
 import DrawerButton from "../features/ProfileDrawer";
+import LanguageSwitcher from "../features/LanguageSwitcher";
 
 const Header = () => {
     const { user } = useAuth();
@@ -60,6 +61,8 @@ const Header = () => {
                             <Signup />
                         </>
                     )}
+
+                    <LanguageSwitcher />
                 </div>
             </header>
         </>
