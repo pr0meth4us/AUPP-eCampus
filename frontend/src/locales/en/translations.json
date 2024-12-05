@@ -1,0 +1,31 @@
+{
+  "footer": {
+    "quickLinks": "Quick Links",
+    "explore": "Explore",
+    "schools": "Schools",
+    "contactUs": "Contact Us",
+    "links": {
+      "history": "History",
+      "vision": "Vision - Mission - Values",
+      "faqs": "FAQs",
+      "career": "Career Opportunities",
+      "weather": "Current Weather at AUPP",
+      "studentLife": "Student Life",
+      "news": "News & Events",
+      "tuitionFees": "Tuition Fees",
+      "scholarships": "Scholarships",
+      "contactUs": "Contact",
+      "schoolLiberalArts": "School of Liberal Arts and Sciences",
+      "schoolBusiness": "School of Business",
+      "schoolDigital": "School of Digital Technologies",
+      "schoolLaw": "School of Law",
+      "schoolGraduate": "School of Graduate Studies"
+    },
+    "contactInfo": {
+      "address": "#278H, Street 201R, Kralokor Village, Sangkat Kilometer 6, Khan Russey Keo, Phnom Penh, Cambodia",
+      "phone": "(+855) 23 990 023",
+      "email": "info@aupp.edu.kh"
+    },
+    "copyright": "© Copyright {year} American University of Phnom Penh, All Rights Reserved."
+  }
+}
