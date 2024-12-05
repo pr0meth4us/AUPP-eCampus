@@ -1,5 +1,5 @@
-@import "~@fontsource/kantumruy-pro/400.css";
-@import "~@fontsource/kantumruy-pro/700.css";
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
