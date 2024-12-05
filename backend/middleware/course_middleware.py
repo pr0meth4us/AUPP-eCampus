@@ -1,12 +1,13 @@
 from functools import wraps
 from flask import g, jsonify
 from models.course import Assignment, Course
-from .auth_middleware import token_required
+from .auth_middleware import login_required
+from models.payment_model import Payment
 
 
 def require_admin_or_instructor(f):
     @wraps(f)
-    @token_required
+    @login_required
     def decorated(*args, **kwargs):
         if g.current_user['role'] not in ['admin', 'instructor']:
             return jsonify({'message': 'UnauthorizedPage. Admins or Instructors only.'}), 403
@@ -17,7 +18,7 @@ def require_admin_or_instructor(f):
 
 def require_admin_or_instructor_or_uploader(f):
     @wraps(f)
-    @token_required
+    @login_required
     def decorated(*args, **kwargs):
         assignment_id = kwargs.get('assignment_id', None)
 
