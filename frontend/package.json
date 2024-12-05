@@ -29,6 +29,7 @@
     "framer-motion": "^11.11.9",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.2.0",
+    "i18next": "^24.0.5",
     "lucide-react": "^0.460.0",
     "path": "^0.12.7",
     "react": "^18.3.1",
