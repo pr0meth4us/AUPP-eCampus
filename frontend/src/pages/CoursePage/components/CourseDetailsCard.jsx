@@ -13,7 +13,7 @@ const CourseDetailsCard = ({ course }) => (
                 <Divider />
                 <div>
                     <p className="text-sm text-gray-500">Students Enrolled</p>
-                    <p className="font-semibold">{course.enrolled_students?.length || 0}</p>
+                    <p className="font-semibold">{course.student_count}</p>
                 </div>
                 <Divider />
                 <div>

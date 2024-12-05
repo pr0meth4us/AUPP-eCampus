@@ -50,9 +50,10 @@ def handle_temp_file_upload(file, path):
 
     cloudflare_upload_service = CloudflareUploadService(Config)
     object_name = f"assignments/{path}/{filename}"
-    file_url = cloudflare_upload_service.upload_assignment(temp_file_path, object_name=object_name)
-
-    os.remove(temp_file_path)
+    try:
+        file_url = cloudflare_upload_service.upload_assignment(temp_file_path, object_name=object_name)
+    finally:
+        os.remove(temp_file_path)
     return file_url
 
 

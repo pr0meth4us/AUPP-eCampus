@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { course as CourseApi } from "../services";
+import { payment as PaymentApi, course as CourseApi } from "../services";
 
-export const useCourseDetails = () => {
+export const  useCourseDetails = () => {
     const { id } = useParams();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -10,34 +10,17 @@ export const useCourseDetails = () => {
 
     useEffect(() => {
         const fetchCourseData = async () => {
-            try {
-                setLoading(true);
-                const courseData = await CourseApi.getDetailsById(id);
-
-                if (!courseData) {
-                    throw new Error("Course data not found");
-                }
-
-                setCourse(courseData);
-                setError(null);
-            } catch (error) {
-                console.error("Failed to fetch course data:", error);
-                setError(error);
-                setCourse(null);
-            } finally {
-                setLoading(false);
-            }
+            setLoading(true);
+            const courseData = await CourseApi.getCourseById(id);
+            setCourse(courseData);
+            setError(null);
+            setLoading(false);
         };
 
         if (id) {
-            fetchCourseData();
+            fetchCourseData(); // Fetch course data when the component is mounted or `id` changes
         }
     }, [id]);
 
-    return {
-        course,
-        loading,
-        error,
-        courseId: id
-    };
+    return { course, loading, error };
 };
