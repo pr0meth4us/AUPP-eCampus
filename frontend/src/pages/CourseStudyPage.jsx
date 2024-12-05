@@ -1,177 +1,155 @@
-import React, {useEffect, useState} from 'react';
-import {
-    Card,
-    CardBody,
-    Button,
-    Avatar,
-    Divider,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter, Spinner
-} from "@nextui-org/react";
+import React, { useState, useEffect } from 'react';
 import {
     BookOpen,
     Users,
     User,
     File,
     Clock,
-    Tag
+    Tag,
+    Clipboard
 } from 'lucide-react';
 import {useCourseDetails} from "../hooks/useCourseFetch";
+import {Spinner} from "@nextui-org/react";
+
+const formatDate = (dateString) => {
+    try {
+        return new Date(dateString).toLocaleDateString()
+    } catch {
+        return 'Invalid Date'
+    }
+};
 
 const CourseStudyPage = () => {
     const [activeSection, setActiveSection] = useState('overview');
-    const [selectedModule, setSelectedModule] = useState(null);
-    const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
-    const { course, loading } = useCourseDetails();
-
+    const { course: courseData, loading } = useCourseDetails();
     if (loading) {
         return <Spinner />;
     }
+    console.log(courseData);
 
-    const renderContentPreview = (content) => {
-        const isImage = content.match(/\.(jpg|jpeg|png|gif)$/i);
-        const isVideo = content.match(/\.(mp4|webm|ogg)$/i);
-
-        if (isImage) {
-            return (
-                <img
-                    src={content}
-                    alt="Content Preview"
-                    className="w-full h-48 object-cover rounded-xl"
-                />
-            );
-        }
-
-        if (isVideo) {
-            return (
-                <video
-                    src={content}
-                    controls
-                    className="w-full h-48 rounded-xl"
-                >
-                    Your browser does not support the video tag.
-                </video>
-            );
-        }
-
-        return null;
-    };
 
     const renderSection = () => {
         switch (activeSection) {
             case 'overview':
                 return (
-                    <div className="space-y-6">
-                        <Card>
-                            <CardBody>
-                                <h2 className="text-xl font-bold mb-3">Course Description</h2>
-                                <p className="text-gray-600">{course.description || 'No description available'}</p>
-                            </CardBody>
-                        </Card>
-
-                        <Card>
-                            <CardBody>
-                                <h2 className="text-xl font-bold mb-3">Course Details</h2>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Tag size={20} className="text-primary" />
-                                        <span>Tags: {course.tags.join(', ') || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <BookOpen size={20} className="text-primary" />
-                                        <span>Major: {course.majors.join(', ') || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock size={20} className="text-primary" />
-                                        <span>Price: {course.price === '0' ? 'Free' : `$${course.price}`}</span>
-                                    </div>
+                    <div className="space-y-4">
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-3">Course Description</h2>
+                            <p className="text-gray-600">
+                                {courseData.course.description || 'No description available'}
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-3">Course Details</h2>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex items-center">
+                                    <Tag className="mr-2 text-blue-500" />
+                                    <span>Tags: {courseData.course.tag_names?.join(', ') || 'N/A'}</span>
                                 </div>
-                            </CardBody>
-                        </Card>
+                                <div className="flex items-center">
+                                    <BookOpen className="mr-2 text-blue-500" />
+                                    <span>Major: {courseData.course.major_names?.join(', ') || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <Clock className="mr-2 text-blue-500" />
+                                    <span>Price: {courseData.course.price === '0' ? 'Free' : `$${courseData.course.price}`}</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <Users className="mr-2 text-blue-500" />
+                                    <span>Students: {courseData.course.student_count || 0}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 );
-
             case 'modules':
                 return (
                     <div className="space-y-4">
-                        {course.modules.length === 0 ? (
+                        {courseData.modules.length === 0 ? (
                             <div className="text-center py-8 bg-gray-50 rounded-lg">
                                 <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
-                                <p className="text-gray-600">No modules available for this course.</p>
+                                <p className="text-gray-600">No modules available</p>
                             </div>
                         ) : (
-                            course.modules.map((module) => (
-                                <Card
-                                    key={module.id}
-                                    isPressable
-                                    onPress={() => {
-                                        setSelectedModule(module);
-                                        setIsModuleModalOpen(true);
-                                    }}
-                                >
-                                    <CardBody className="flex flex-row items-center justify-between">
-                                        <div className="flex items-center space-x-4">
-                                            {renderContentPreview(module.content)}
-                                            <div>
-                                                <h3 className="text-lg font-semibold">{module.title}</h3>
-                                                <p className="text-gray-500 line-clamp-2">{module.description}</p>
-                                            </div>
-                                        </div>
-                                        <Button size="sm" color="primary" variant="light">
-                                            View Details
-                                        </Button>
-                                    </CardBody>
-                                </Card>
+                            courseData.modules.map((module) => (
+                                <div key={module._id} className="bg-white p-4 rounded-lg shadow">
+                                    <h3 className="text-lg font-semibold">{module.title}</h3>
+                                    <p className="text-gray-500">{module.description}</p>
+                                </div>
                             ))
                         )}
                     </div>
                 );
-
+            case 'assignments':
+                return (
+                    <div className="space-y-4">
+                        {courseData.assignments.length === 0 ? (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                <Clipboard className="mx-auto mb-4 text-gray-400" size={48} />
+                                <p className="text-gray-600">No assignments available</p>
+                            </div>
+                        ) : (
+                            courseData.assignments.map((assignment) => (
+                                <div key={assignment._id} className="bg-white p-4 rounded-lg shadow">
+                                    <h3 className="text-lg font-semibold">{assignment.title}</h3>
+                                    <p className="text-gray-600">{assignment.description}</p>
+                                    <div className="mt-2 text-sm text-gray-500">
+                                        <p>Due Date: {formatDate(assignment.due_date)}</p>
+                                        <p>Max Grade: {assignment.max_grade}</p>
+                                    </div>
+                                    {assignment.submissions && (
+                                        <div className="mt-2">
+                                            <h4 className="font-medium">Submissions: {assignment.submissions.length}</h4>
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                );
             case 'people':
                 return (
                     <div className="space-y-4">
-                        <Card>
-                            <CardBody>
-                                <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-                                    <User size={24} className="text-primary" /> Instructor
-                                </h2>
-                                <div className="flex items-center space-x-4">
-                                    <Avatar
-                                        src={course.instructor.profile_image || undefined}
-                                        name={course.instructor.name}
-                                        size="lg"
-                                    />
-                                    <div>
-                                        <h3 className="text-lg font-semibold">{course.instructor.name}</h3>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-3 flex items-center">
+                                <User className="mr-2 text-blue-500" />
+                                Instructor
+                            </h2>
+                            <div className="flex items-center">
+                                <div className="mr-4">
+                                    <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center">
+                                        <User className="text-blue-500" />
                                     </div>
                                 </div>
-                            </CardBody>
-                        </Card>
-
-                        <Card>
-                            <CardBody>
-                                <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-                                    <Users size={24} className="text-primary" /> Enrolled Students
-                                </h2>
-                                <div className="space-y-3">
-                                    {course.enrolled_students.map((student) => (
-                                        <div key={student.id} className="flex items-center space-x-3">
-                                            <Avatar
-                                                src={student.profile_image || undefined}
-                                                name={student.name}
-                                            />
+                                <div>
+                                    <h3 className="text-lg font-semibold">
+                                        {courseData.people.instructor.name || 'No Instructor'}
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-3 flex items-center">
+                                <Users className="mr-2 text-blue-500" />
+                                Students
+                            </h2>
+                            <div className="space-y-2">
+                                {courseData.people.students.length === 0 ? (
+                                    <p className="text-gray-500">No students enrolled</p>
+                                ) : (
+                                    courseData.people.students.map((student) => (
+                                        <div key={student.id} className="flex items-center">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full mr-3 flex items-center justify-center">
+                                                <User className="text-gray-500" />
+                                            </div>
                                             <span>{student.name}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </CardBody>
-                        </Card>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 );
-
             default:
                 return null;
         }
@@ -182,77 +160,40 @@ const CourseStudyPage = () => {
             {/* Sidebar */}
             <div className="w-64 bg-white shadow-md p-6 space-y-4">
                 <div className="text-center">
-                    <img
-                        src={course.cover_image_url || '/placeholder-course.jpg'}
-                        alt={course.title}
-                        className="w-full h-48 object-cover rounded-xl mb-4"
-                    />
-                    <h1 className="text-xl font-bold">{course.title}</h1>
+                    <div className="w-full h-48 bg-gray-200 rounded-xl mb-4 flex items-center justify-center">
+                    </div>
+                    <h1 className="text-xl font-bold">{courseData.course.title || 'Untitled Course'}</h1>
                 </div>
 
-                <Divider />
+                <div className="border-t my-4"></div>
 
                 <div className="space-y-2">
                     {[
-                        { key: 'overview', icon: <BookOpen />, label: 'Overview' },
-                        { key: 'modules', icon: <File />, label: 'Modules' },
-                        { key: 'people', icon: <Users />, label: 'People' }
+                        { key: 'overview', icon: BookOpen, label: 'Overview' },
+                        { key: 'modules', icon: File, label: 'Modules' },
+                        { key: 'people', icon: Users, label: 'People' },
+                        { key: 'assignments', icon: Clipboard, label: 'Assignments' }
                     ].map((item) => (
-                        <Button
+                        <button
                             key={item.key}
-                            fullWidth
-                            variant={activeSection === item.key ? 'solid' : 'light'}
-                            color="primary"
-                            startContent={item.icon}
-                            onPress={() => setActiveSection(item.key)}
+                            onClick={() => setActiveSection(item.key)}
+                            className={`w-full text-left p-2 rounded flex items-center ${
+                                activeSection === item.key
+                                    ? 'bg-blue-500 text-white'
+                                    : 'hover:bg-gray-100'
+                            }`}
                         >
+                            <item.icon className="mr-2" size={20} />
                             {item.label}
-                        </Button>
+                        </button>
                     ))}
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-8 overflow-y-auto">
+            <div className="flex-1 p-6">
                 {renderSection()}
             </div>
-
-            {/* Module Modal */}
-            <Modal
-                isOpen={isModuleModalOpen}
-                onClose={() => setIsModuleModalOpen(false)}
-                size="2xl"
-            >
-                <ModalContent>
-                    {selectedModule && (
-                        <>
-                            <ModalHeader>{selectedModule.title}</ModalHeader>
-                            <ModalBody>
-                                {renderContentPreview(selectedModule.content)}
-                                <div className="mt-4">
-                                    <h4 className="text-lg font-semibold">Description</h4>
-                                    <p>{selectedModule.description}</p>
-                                </div>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button
-                                    color="primary"
-                                    onPress={() => window.open(selectedModule.content, '_blank')}
-                                >
-                                    Open Content
-                                </Button>
-                                <Button
-                                    color="danger"
-                                    variant="light"
-                                    onPress={() => setIsModuleModalOpen(false)}
-                                >
-                                    Close
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
         </div>
     );
 };

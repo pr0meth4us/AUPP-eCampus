@@ -156,10 +156,8 @@ class Payment:
                 'course_id': ObjectId(course_id),
                 'status': 'completed'
             }
-            print("Querying with:", query)
 
             payment = db.payments.find_one(query)
-            print("Query Result:", payment)
 
             return payment
         except Exception as e:
@@ -172,18 +170,14 @@ class Payment:
             "Receipt ID": str(payment_data.get("_id", payment_data.get("paypal_payment_id", "N/A"))),
             "Date": payment_data.get("completed_at", payment_data.get("updated_at", datetime.now(timezone.utc).isoformat())),
             "Transaction Type": "PayPal Checkout",
-
             "Course ID": str(payment_data.get("course_id", "N/A")),
             "Price": payment_data.get("price", 0),
             "Currency": payment_data.get("currency", "USD"),
-
             "Status": payment_data.get("status", "Unknown"),
             "Payment Method": payment_data.get("payment_method", "PayPal"),
-
             "PayPal Payment ID": payment_data.get("paypal_payment_id", "N/A"),
             "Payer ID": payment_data.get("payer_id", "N/A"),
             "Approval URL": payment_data.get("approval_url", "N/A"),
-
             "Created At": payment_data.get("created_at"),
             "Updated At": payment_data.get("updated_at")
         }

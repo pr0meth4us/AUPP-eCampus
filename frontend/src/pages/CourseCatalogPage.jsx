@@ -84,7 +84,7 @@ const CourseCatalogPage = () => {
                                             <span>{course.instructor_name}</span>
                                         </div>
                                         <Button
-                                            onClick={() => handleCourseOverview(course.id)}
+                                            onClick={() => handleCourseOverview(course._id)}
                                             size="sm"
                                             className="button-no-after bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2"
                                         >

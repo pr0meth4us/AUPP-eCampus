@@ -1,53 +1,27 @@
-from models.course.module_model import Module
-from models.course.course_model import Course
-from flask import jsonify, request, g
-from services.aws_service import upload_to_s3
-import logging
+from bson import ObjectId
 from utils.helpers import serialize_document
 
 class ModuleController:
     @staticmethod
     def add_module(course_id):
         try:
-            # Validate course existence
-            course = Course.get_course_by_id(course_id)
-            if not course:
-                return jsonify({'message': 'Course not found.'}), 404
-
-            # Extract module details
             title = request.form.get('title')
             description = request.form.get('description')
-
-            # Validate required module fields
-            if not title or not description:
-                return jsonify({'message': 'Title and description are required.'}), 400
-
-            # Create module
             module = Module(course_id=course_id, title=title, description=description)
-
-            # Handle materials upload
             materials = request.files.getlist('materials')
             material_titles = request.form.getlist('material_titles')
             material_descriptions = request.form.getlist('material_descriptions')
-
-            # Upload materials and add to module
             for material, title, description in zip(materials, material_titles, material_descriptions):
-                try:
-                    # Upload material to cloud storage
-                    material_url = upload_to_s3(material, material.filename)
+                material_url = upload_to_s3(material, material.filename)
+                module.add_material(
+                    title=title,
+                    description=description,
+                    content_url=material_url
+                )
 
-                    # Add material to module
-                    module.add_material(
-                        title=title,
-                        description=description,
-                        content_url=material_url
-                    )
-                except Exception as upload_error:
-                    logging.error(f"Material upload error: {upload_error}")
-                    return jsonify({'message': f'Failed to upload material: {material.filename}'}), 500
-
-            # Save module to database
             module_id = module.save_to_db()
+            print(module_id)
+            Course.update_course(course_id=course_id, **{"$push": {"modules": ObjectId(module_id)}})
 
             return jsonify({
                 'message': 'Module with materials added successfully.',

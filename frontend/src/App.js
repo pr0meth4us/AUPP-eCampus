@@ -44,7 +44,7 @@ const App = () => {
                            element={<PrivateRoute element={<MyCourse role="instructor" />} allowedRoles={['instructor', 'admin']} />}
                     />
                     <Route path="/courseoverview/:id"
-                           element={<PrivateRoute element={<CoursePage />} allowedRoles={['student', 'instructor', 'admin']} />}
+                           element={<CoursePage />}
                     />
                     <Route path="/instructor/course/:id"
                            element={<PrivateRoute element={<EditCoursePage />} allowedRoles={['instructor', 'admin']} />}

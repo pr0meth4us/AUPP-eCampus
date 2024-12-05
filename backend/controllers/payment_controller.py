@@ -31,6 +31,7 @@ class PaymentController:
             }), 201
 
         except PaymentException as e:
+            print(e)
             return jsonify({'error': str(e)}), 400
 
     @staticmethod
@@ -64,7 +65,7 @@ class PaymentController:
     def get_payment(payment_id):
         payment = Payment.find_payment_by_id(payment_id)
         if not payment:
-            return jsonify({'error': 'Payment not found'}), 404
+            return jsonify({'error': 'Payment not found'}), 204
 
         if str(payment['user_id']) != str(g.current_user['_id']):
             return jsonify({'error': 'UnauthorizedPage access'}), 403
@@ -87,7 +88,7 @@ class PaymentController:
         user_id = g.current_user['_id']
         payment = Payment.get_user_course_payment(user_id, course_id)
         if not payment:
-            return jsonify({'error': 'No completed payment found for this course'}), 404
+            return jsonify({'error': 'No completed payment found for this course'}), 204
 
         payment['_id'] = str(payment['_id'])
         payment['user_id'] = str(payment['user_id'])
