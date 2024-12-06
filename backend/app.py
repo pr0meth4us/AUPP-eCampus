@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from services.mongo_service import init_mongo
 from config import Config
 import traceback
@@ -24,6 +24,13 @@ def create_app():
     @flask_app.route('/health')
     def health_check():
         return jsonify(status="healthy"), 200
+
+    @flask_app.route('/set_cookie')
+    def set_cookie():
+        resp = make_response("Setting cookie")
+        resp.set_cookie('__vercel_live_token', 'value', samesite='None', secure=True)
+        return resp
+
 
     @flask_app.after_request
     def add_csp_headers(response):
