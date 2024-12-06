@@ -5,6 +5,6 @@ cors = CORS()
 
 def init_cors(app):
     cors.init_app(app, resources={r"/*": {
-        "origins": "*",
+        "origins": "https://ecampusaupp-tau.vercel.app",
         "supports_credentials": True
     }})
