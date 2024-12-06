@@ -7,10 +7,12 @@ const PrivateRoute = ({ element, allowedRoles }) => {
     const hasAccess = user && allowedRoles.includes(user.role);
 
     if (!user) {
+        // Redirect to login if user is not authenticated
         return <Navigate to="/login" replace />;
     }
 
     if (!hasAccess) {
+        // Redirect to unauthorized page if the user doesn't have the required role
         return <Navigate to="/unauthorized" replace />;
     }
 

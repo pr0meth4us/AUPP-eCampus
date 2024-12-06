@@ -17,7 +17,6 @@ import CoursePage from "./pages/CoursePage";
 import CourseCatalogPage from "pages/CourseCatalogPage";
 import CourseSuccessPage from "pages/CourseSuccessPage";
 import CourseConfirmationPage from "pages/CourseConfirmationPage";
-import CourseStudyPage from "./pages/CourseStudyPage";
 
 const App = () => {
     return (
@@ -43,8 +42,8 @@ const App = () => {
                     <Route path="/course-i-teach"
                            element={<PrivateRoute element={<MyCourse role="instructor" />} allowedRoles={['instructor', 'admin']} />}
                     />
-                    <Route path="/courseoverview/:id"
-                           element={<CoursePage />}
+                    <Route path="/course/:id"
+                           element={<PrivateRoute element={<CoursePage />} allowedRoles={['student', 'instructor', 'admin']} />}
                     />
                     <Route path="/instructor/course/:id"
                            element={<PrivateRoute element={<EditCoursePage />} allowedRoles={['instructor', 'admin']} />}
@@ -58,9 +57,7 @@ const App = () => {
                     <Route path="/course/success" element={<CourseSuccessPage />} />
                     <Route path="/course/confirmation" element={<CourseConfirmationPage />} />
                     <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                    <Route path="/course/:id"
-                           element={<PrivateRoute element={<CourseStudyPage />} allowedRoles={['student', 'instructor', 'admin']} />}
-                    />
+
                 </Routes>
             </Layout>
         </Router>

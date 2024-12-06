@@ -1,9 +1,13 @@
-from flask import Blueprint, request
+from flask import Blueprint
 from controllers.student_controller import StudentController
 from middleware.profile_middleware import own_profile_required
-from datetime import datetime, timezone
 
 student_bp = Blueprint('student', __name__)
+
+
+@student_bp.route('/', methods=['POST'])
+def create_student():
+    return StudentController.create_student_profile()
 
 
 @student_bp.route('/<student_id>', methods=['GET'])
@@ -14,18 +18,8 @@ def get_student(student_id):
 
 @student_bp.route('/<student_id>', methods=['PUT'])
 @own_profile_required
-def update_student(student_id):
-    data = request.json
-    updated_data = {
-        "name": data.get("name"),
-        "email": data.get("email"),
-        "bio": data.get("bio"),
-        "courses_enrolled": data.get("courses_enrolled"),
-        "password": data.get("password"),
-        "updated_at": datetime.now(timezone.utc)
-    }
-
-    return StudentController.update_student_profile(updated_data, student_id)
+def update_student():
+    return StudentController.update_student_profile()
 
 
 @student_bp.route('/<student_id>', methods=['DELETE'])
@@ -37,5 +31,4 @@ def delete_student(student_id):
 @student_bp.route('/<student_id>/upload-image', methods=['POST'])
 @own_profile_required
 def upload_student_image(student_id):
-    image_file = request.files['image']
-    return StudentController.upload_profile_image(student_id, image_file)
+    return StudentController.upload_profile_image(student_id)

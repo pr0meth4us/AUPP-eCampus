@@ -1,25 +1,25 @@
-import endpoint from "./api";
-const api = endpoint("payment");
+import api from "./api";
+
 export const payment = {
     createPayment: async (courseId) => {
-        const response = await api.post('/create', { course_id: courseId });
+        const response = await api.post('/payment/create', { course_id: courseId });
         return response.data;
     },
 
     paymentSuccess: async (token, paymentId, PayerID) => {
-        const response = await api.get(`/success`, {
+        const response = await api.get(`/payment/success`, {
             params: { token, paymentId, PayerID }
         });
         return response.data;
     },
 
     getPaymentById: async (paymentId) => {
-        const response = await api.get(`/${paymentId}`);
+        const response = await api.get(`/payment/${paymentId}`);
         return response.data;
     },
 
     getCoursePayment: async (courseId) => {
-        const response = await api.get(`/${courseId}`);
+        const response = await api.get(`/payment/course/${courseId}`);
         return response.data;
     }
 };

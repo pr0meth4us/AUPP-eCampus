@@ -1,0 +1,130 @@
+Index: backend/controllers/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/backend/controllers/__init__.py b/backend/controllers/__init__.py
+--- a/backend/controllers/__init__.py	(revision b6e64352f55fa057947e4784a1207d8485b3ffa6)
++++ b/backend/controllers/__init__.py	(date 1733407988343)
+@@ -1,0 +1,95 @@
++import pandas as pd
++from pymongo import MongoClient
++
++# Read the CSV file
++df = pd.read_csv('wtv.csv')
++
++# Function to transform the dataframe into a MongoDB-friendly format
++def transform_dataframe(df):
++    # Create a list to store transformed documents
++    documents = []
++
++    for _, row in df.iterrows():
++        # Create the base document structure
++        doc = {
++            '_id': row['_id'],
++            'qualifications': {
++                'is_cambodian': row['qualifications.is_cambodian'],
++                'sent_received_items': row['qualifications.sent_received_items'],
++                'used_logistics_app': row['qualifications.used_logistics_app']
++            },
++            'imageSelections': {
++                'natureOfGoods': {
++                    'Less_Technical': row['imageSelections.natureOfGoods.Less_Technical'],
++                    'More_Technical': row['imageSelections.natureOfGoods.More_Technical'],
++                    'Intuitive': row['imageSelections.natureOfGoods.Intuitive'],
++                    'Informative': row['imageSelections.natureOfGoods.Informative'],
++                    'Professional': row['imageSelections.natureOfGoods.Professional'],
++                    'Simplicity': row['imageSelections.natureOfGoods.Simplicity'],
++                    'Concise': row['imageSelections.natureOfGoods.Concise'],
++                    'Clarity': row['imageSelections.natureOfGoods.Clarity'],
++                    'CustomReason': row['imageSelections.natureOfGoods.CustomReason'],
++                    'original': row['imageSelections.natureOfGoods']
++                },
++                'hs': {
++                    # Removed 'wording' layer from 'hs'
++                    'Less_Technical': row['imageSelections.hs.Less_Technical'],
++                    'More_Technical': row['imageSelections.hs.More_Technical'],
++                    'Intuitive': row['imageSelections.hs.Intuitive'],
++                    'Informative': row['imageSelections.hs.Informative'],
++                    'Professional': row['imageSelections.hs.Professional'],
++                    'Simplicity': row['imageSelections.hs.Simplicity'],
++                    'Concise': row['imageSelections.hs.Concise'],
++                    'Clarity': row['imageSelections.hs.Clarity'],
++                    'CustomReason': row['imageSelections.hs.CustomReason'],
++                    'original': row['imageSelections.hs']
++                },
++                'serviceRepresentation': {
++                    'Less_Technical': row['imageSelections.serviceRepresentation.Less_Technical'],
++                    'More_Technical': row['imageSelections.serviceRepresentation.More_Technical'],
++                    'Intuitive': row['imageSelections.serviceRepresentation.Intuitive'],
++                    'Informative': row['imageSelections.serviceRepresentation.Informative'],
++                    'Professional': row['imageSelections.serviceRepresentation.Professional'],
++                    'Simplicity': row['imageSelections.serviceRepresentation.Simplicity'],
++                    'Concise': row['imageSelections.serviceRepresentation.Concise'],
++                    'Clarity': row['imageSelections.serviceRepresentation.Clarity'],
++                    'hsCustomReason': row['imageSelections.serviceRepresentation.hsCustomReason'],
++                    'original': row['imageSelections.serviceRepresentation']
++                },
++                'weightVisualization': {
++                    'Less_Technical': row['imageSelections.weightVisualization.Less_Technical'],
++                    'More_Technical': row['imageSelections.weightVisualization.More_Technical'],
++                    'Intuitive': row['imageSelections.weightVisualization.Intuitive'],
++                    'Informative': row['imageSelections.weightVisualization.Informative'],
++                    'Professional': row['imageSelections.weightVisualization.Professional'],
++                    'Simplicity': row['imageSelections.weightVisualization.Simplicity'],
++                    'Concise': row['imageSelections.weightVisualization.Concise'],
++                    'Clarity': row['imageSelections.weightVisualization.Clarity'],
++                    'hsCustomReason': row['imageSelections.weightVisualization.hsCustomReason'],
++                    'original': row['imageSelections.weightVisualization']
++                }
++            }
++        }
++
++        # Replace empty strings with None for proper MongoDB handling
++        def replace_empty_with_none(obj):
++            if isinstance(obj, dict):
++                return {k: replace_empty_with_none(v) for k, v in obj.items() if v != ''}
++            return obj
++
++        doc = replace_empty_with_none(doc)
++        documents.append(doc)
++
++    return documents
++
++
++# Connect to MongoDB
++client = MongoClient('mongodb://localhost:27017/')
++db = client['your_database_name']
++collection = db['your_collection_name']
++
++# Transform and insert documents
++documents = transform_dataframe(df)
++collection.insert_many(documents)
++
++print(f"Inserted {len(documents)} documents")
+\ No newline at end of file
+Index: backend/controllers/wtv.csv
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/backend/controllers/wtv.csv b/backend/controllers/wtv.csv
+new file mode 100644
+--- /dev/null	(date 1733407988353)
++++ b/backend/controllers/wtv.csv	(date 1733407988353)
+@@ -0,0 +1,14 @@
++_id,qualifications.is_cambodian,qualifications.sent_received_items,qualifications.used_logistics_app,imageSelections.natureOfGoods,imageSelections.natureOfGoods.Less_Technical,imageSelections.natureOfGoods.More_Technical,imageSelections.natureOfGoods.Intuitive,imageSelections.natureOfGoods.Informative,imageSelections.natureOfGoods.Professional,imageSelections.natureOfGoods.Simplicity,imageSelections.natureOfGoods.Concise,imageSelections.natureOfGoods.Clarity,imageSelections.natureOfGoods.CustomReason,imageSelections.wording,imageSelections.wording.hs.Less_Technical,imageSelections.wording.hs.More_Technical,imageSelections.wording.hs.Intuitive,imageSelections.wording.hs.Informative,imageSelections.wording.hs.Professional,imageSelections.wording.hs.Simplicity,imageSelections.wording.hs.Concise,imageSelections.wording.hs.Clarity,imageSelections.wording.hs.CustomReason,imageSelections.serviceRepresentation,imageSelections.serviceRepresentation.Less_Technical,imageSelections.serviceRepresentation.More_Technical,imageSelections.serviceRepresentation.Intuitive,imageSelections.serviceRepresentation.Informative,imageSelections.serviceRepresentation.Professional,imageSelections.serviceRepresentation.Simplicity,imageSelections.serviceRepresentation.Concise,imageSelections.serviceRepresentation.Clarity,imageSelections.serviceRepresentation.hsCustomReason,imageSelections.weightVisualization,imageSelections.weightVisualization.Less_Technical,imageSelections.weightVisualization.More_Technical,imageSelections.weightVisualization.Intuitive,imageSelections.weightVisualization.Informative,imageSelections.weightVisualization.Professional,imageSelections.weightVisualization.Simplicity,imageSelections.weightVisualization.Concise,imageSelections.weightVisualization.Clarity,imageSelections.weightVisualization.hsCustomReason
++674ede3bf6ee679862c0f63d,Yes,Yes,Yes,natureOfGood3,,,,,,1,,,,hs1,,,1,,,,,,,service3,,,,,,,,,,weight2-IMAGE,,,,1,1,,1,1,
++674ee491f6ee679862c0f63e,Yes,Yes,Yes,natureOfGood1-1,1,,1,,,,,1,,hs1,,1,,,,,,,,service3,,,,1,,,,,,weight2-IMAGE,,,1,,,,1,1,
++674ee9c5f6ee679862c0f640,Yes,Yes,Yes,natureOfGood1-1,1,,1,,,,1,,,hs3,,,1,,,,,,,service3,,,,1,,,,,,weight3,,,,,1,,,,
++674eec33f6ee679862c0f641,Yes,Yes,Yes,natureOfGood1-1,,,1,,,,1,1,,hs2,,1,,,1,,1,1,,service2,,,,1,,,,,,weight2-IMAGE,,,1,1,,,,,
++674eed5cf6ee679862c0f643,Yes,Yes,Yes,natureOfGood1-1,,,,,,,,1,,hs1,,,,1,,,,,,service3,,,,1,,,,,,weight4,,,,,,,,,
++674eeddff6ee679862c0f644,Yes,Yes,Yes,natureOfGood1-1,,,1,,,,1,,,hs1,,,,1,,,,1,,service3,,,,1,1,,1,1,,weight1-IMAGE,,,1,,,1,,,
++674eefa8f6ee679862c0f646,Yes,Yes,No,natureOfGood1-1,,,1,,,,,,,hs2,,,,1,1,,1,1,,service1,1,,1,,,1,,1,,weight2-IMAGE,,,1,,,,,,
++674f0103f6ee679862c0f648,Yes,Yes,Yes,natureOfGood1,1,,,,,,,,,hs3,,,1,,,,,,harmonized system can be viable option but i think i would not understand what it is anyways so code is better since its more intuitive ,service3,,,,1,1,,,1,,weight2-IMAGE,,,,,,,,,
++674f0132f6ee679862c0f649,Yes,Yes,Yes,natureOfGood3,,,1,,,1,,,,hs1,,1,1,,,,,,,service3,,,,1,,,1,,,weight2-IMAGE,,,1,,,,,,
++674f015af6ee679862c0f64a,Yes,Yes,No,natureOfGood1-1,,,,,,,1,1,,hs1,,,,1,1,,,,,service3,,,,1,1,,,1,,weight2-IMAGE,,,,1,,,,1,
++674f0179f6ee679862c0f64b,Yes,Yes,Yes,natureOfGood1-1,1,,1,,,,,1,,hs3,,,1,,,,,,,service3,,,,1,1,,1,1,,weight3,,,,,,,,,
++674f0198f6ee679862c0f64c,Yes,Yes,Yes,natureOfGood1-1,,,1,,,,1,1,,hs2,,,,,,,,,,service2,,,,,,,,,,weight2-IMAGE,,,1,1,1,,1,1,
++674f015af6ee635862c0f64a,Yes,Yes,Yes,natureOfGood1-1,1,,,,,,,1,,hs1,,1,,1,1,,1,1,,service3,,,,1,1,,1,1,,weight4,,,,,,,,,
+\ No newline at end of file

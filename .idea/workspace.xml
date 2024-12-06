@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a22bd1ca-92ec-421b-bdd9-609f1c80793d" name="Changes" comment="host">
+      <change beforePath="$PROJECT_DIR$/backend/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/cors_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/cors_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/config.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dockerfile" />
+        <option value="JSX File" />
+        <option value="JavaScript File" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;pr0meth4us&quot;
+  }
+}</component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="main" />
+        <option value="dev" />
+      </list>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/pr0meth4us/AUPP-eCampus.git&quot;,
+    &quot;accountId&quot;: &quot;4839056f-fc42-4dc0-957c-66c01efd5414&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;pr0meth4us&quot;,
+    &quot;repository&quot;: &quot;AUPP-eCampus&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2pPyodXqY1GCTbeGVG0k4KIdpGn" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Docker.Dockerfile.executor&quot;: &quot;Run&quot;,
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.course_model.executor&quot;: &quot;Run&quot;,
+    &quot;Python.o.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;host&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/nicksng/Desktop/code/AUPP-eCampus/backend/controllers&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.start.executor&quot;: &quot;Run&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/PyCharm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backend/controllers" />
+      <recent name="$PROJECT_DIR$/frontend/public" />
+      <recent name="$PROJECT_DIR$/backend" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backend/routes/course" />
+      <recent name="$PROJECT_DIR$/backend/controllers/course" />
+      <recent name="$PROJECT_DIR$/backend/models/course" />
+      <recent name="$PROJECT_DIR$/backend/models" />
+      <recent name="$PROJECT_DIR$/backend/routes" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.app">
+    <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AUPP-eCampus" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="sourceFilePath" value="Dockerfile" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="start" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/frontend/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in paypal_service.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AUPP-eCampus" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/services" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/backend/services/paypal_service.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AUPP-eCampus" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/services" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/backend/services/test.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.app" />
+        <item itemvalue="npm.start" />
+        <item itemvalue="Docker.Dockerfile" />
+        <item itemvalue="Python tests.Python tests in test.py" />
+        <item itemvalue="Python tests.Python tests in paypal_service.py" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19072.16" />
+        <option value="bundled-python-sdk-8336bb23522e-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19072.16" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a22bd1ca-92ec-421b-bdd9-609f1c80793d" name="Changes" comment="header" />
+      <created>1726801906218</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1726801906218</updated>
+      <workItem from="1726801908096" duration="3465000" />
+      <workItem from="1726820524067" duration="323000" />
+      <workItem from="1726938480619" duration="1858000" />
+      <workItem from="1726940352006" duration="2795000" />
+      <workItem from="1727055095865" duration="5639000" />
+      <workItem from="1727061926841" duration="4180000" />
+      <workItem from="1727106366613" duration="2778000" />
+      <workItem from="1727109177585" duration="14653000" />
+      <workItem from="1727174567147" duration="8273000" />
+      <workItem from="1727183542220" duration="1366000" />
+      <workItem from="1727234485713" duration="4595000" />
+      <workItem from="1727246451740" duration="2915000" />
+      <workItem from="1727355699165" duration="6000" />
+      <workItem from="1727355776383" duration="1358000" />
+      <workItem from="1727361004093" duration="4331000" />
+      <workItem from="1727408394657" duration="1551000" />
+      <workItem from="1727413583262" duration="625000" />
+      <workItem from="1727414805004" duration="139000" />
+      <workItem from="1727415051477" duration="271000" />
+      <workItem from="1727416343329" duration="9261000" />
+      <workItem from="1727428132289" duration="318000" />
+      <workItem from="1727428838280" duration="4000" />
+      <workItem from="1727432647716" duration="7000" />
+      <workItem from="1727434251306" duration="281000" />
+      <workItem from="1727434777101" duration="322000" />
+      <workItem from="1727435161573" duration="12891000" />
+      <workItem from="1727506383368" duration="25000" />
+      <workItem from="1727506419069" duration="4629000" />
+      <workItem from="1728012417366" duration="1570000" />
+      <workItem from="1728022147776" duration="1953000" />
+      <workItem from="1728196013979" duration="77000" />
+      <workItem from="1728485282738" duration="2564000" />
+      <workItem from="1728526782968" duration="4000" />
+      <workItem from="1728529524959" duration="2414000" />
+      <workItem from="1728578187060" duration="2543000" />
+      <workItem from="1728611975526" duration="2000" />
+      <workItem from="1728612063992" duration="11750000" />
+      <workItem from="1728630688172" duration="33000" />
+      <workItem from="1728632945666" duration="7545000" />
+      <workItem from="1728643841496" duration="1150000" />
+      <workItem from="1728725950396" duration="3726000" />
+      <workItem from="1728730430926" duration="4225000" />
+      <workItem from="1728799760117" duration="6303000" />
+      <workItem from="1728806945464" duration="60000" />
+      <workItem from="1728807196044" duration="5000" />
+      <workItem from="1728827102189" duration="7707000" />
+      <workItem from="1728837680601" duration="1364000" />
+      <workItem from="1728885885158" duration="5000" />
+      <workItem from="1728886079232" duration="126000" />
+      <workItem from="1728886213575" duration="1309000" />
+      <workItem from="1728917231768" duration="1000" />
+      <workItem from="1728917247907" duration="2175000" />
+      <workItem from="1728972285529" duration="593000" />
+      <workItem from="1728980545656" duration="9211000" />
+      <workItem from="1729001012289" duration="1000" />
+      <workItem from="1729001021828" duration="15514000" />
+      <workItem from="1729018184967" duration="5000" />
+      <workItem from="1729018198827" duration="7600000" />
+      <workItem from="1729051757919" duration="422000" />
+      <workItem from="1729070248557" duration="2927000" />
+      <workItem from="1729075266594" duration="14074000" />
+      <workItem from="1729096100186" duration="173000" />
+      <workItem from="1729096312452" duration="32000" />
+      <workItem from="1729096396138" duration="1226000" />
+      <workItem from="1729158910486" duration="697000" />
+      <workItem from="1729162211437" duration="1313000" />
+      <workItem from="1729175636930" duration="2618000" />
+      <workItem from="1729178269846" duration="9172000" />
+      <workItem from="1729189300264" duration="1863000" />
+      <workItem from="1729219992723" duration="2551000" />
+      <workItem from="1729231226314" duration="549000" />
+      <workItem from="1729231799471" duration="10000" />
+      <workItem from="1729439144724" duration="3465000" />
+      <workItem from="1729486090215" duration="8890000" />
+      <workItem from="1729506889143" duration="6000" />
+      <workItem from="1729650100025" duration="18287000" />
+      <workItem from="1729681789270" duration="496000" />
+      <workItem from="1729695038864" duration="936000" />
+      <workItem from="1729695989857" duration="2271000" />
+      <workItem from="1729698587298" duration="3539000" />
+      <workItem from="1729734293150" duration="10950000" />
+      <workItem from="1729746694529" duration="1203000" />
+      <workItem from="1729823807675" duration="104000" />
+      <workItem from="1729831203226" duration="3304000" />
+      <workItem from="1729840067635" duration="4768000" />
+      <workItem from="1730260892611" duration="622000" />
+      <workItem from="1730526094441" duration="15877000" />
+      <workItem from="1730790957426" duration="12808000" />
+      <workItem from="1730872317919" duration="35000" />
+      <workItem from="1730875083615" duration="85000" />
+      <workItem from="1731312994984" duration="2601000" />
+      <workItem from="1731326673503" duration="3526000" />
+      <workItem from="1731431335218" duration="13308000" />
+      <workItem from="1731598625965" duration="8796000" />
+      <workItem from="1731758903886" duration="3090000" />
+      <workItem from="1731833944010" duration="16000" />
+      <workItem from="1732020333919" duration="5808000" />
+      <workItem from="1732159094830" duration="17244000" />
+      <workItem from="1732188286117" duration="28791000" />
+      <workItem from="1732339460190" duration="23000" />
+      <workItem from="1732339547062" duration="6000" />
+      <workItem from="1732348695588" duration="1874000" />
+      <workItem from="1732352511411" duration="775000" />
+      <workItem from="1732426119366" duration="8617000" />
+      <workItem from="1732514521972" duration="4704000" />
+      <workItem from="1732588723694" duration="13511000" />
+      <workItem from="1732625741142" duration="4227000" />
+      <workItem from="1732635922229" duration="15398000" />
+      <workItem from="1732682184971" duration="771000" />
+      <workItem from="1732682964777" duration="94000" />
+      <workItem from="1732683067341" duration="343000" />
+      <workItem from="1732683417236" duration="7005000" />
+      <workItem from="1732705231442" duration="10426000" />
+      <workItem from="1732720273634" duration="47849000" />
+      <workItem from="1732877455311" duration="4043000" />
+      <workItem from="1732943899795" duration="16832000" />
+      <workItem from="1733177173292" duration="898000" />
+      <workItem from="1733179911786" duration="910000" />
+      <workItem from="1733181348260" duration="3120000" />
+      <workItem from="1733225305148" duration="1100000" />
+      <workItem from="1733342378514" duration="5000" />
+      <workItem from="1733345228482" duration="4331000" />
+      <workItem from="1733364130504" duration="1315000" />
+      <workItem from="1733407852773" duration="6409000" />
+      <workItem from="1733452497142" duration="4871000" />
+    </task>
+    <task id="LOCAL-00181" summary="merge">
+      <option name="closed" value="true" />
+      <created>1732191443249</created>
+      <option name="number" value="00181" />
+      <option name="presentableId" value="LOCAL-00181" />
+      <option name="project" value="LOCAL" />
+      <updated>1732191443249</updated>
+    </task>
+    <task id="LOCAL-00182" summary="merge">
+      <option name="closed" value="true" />
+      <created>1732191576431</created>
+      <option name="number" value="00182" />
+      <option name="presentableId" value="LOCAL-00182" />
+      <option name="project" value="LOCAL" />
+      <updated>1732191576431</updated>
+    </task>
+    <task id="LOCAL-00183" summary="merge">
+      <option name="closed" value="true" />
+      <created>1732191684739</created>
+      <option name="number" value="00183" />
+      <option name="presentableId" value="LOCAL-00183" />
+      <option name="project" value="LOCAL" />
+      <updated>1732191684739</updated>
+    </task>
+    <task id="LOCAL-00184" summary="drawer profile and edit profile page">
+      <option name="closed" value="true" />
+      <created>1732198460657</created>
+      <option name="number" value="00184" />
+      <option name="presentableId" value="LOCAL-00184" />
+      <option name="project" value="LOCAL" />
+      <updated>1732198460658</updated>
+    </task>
+    <task id="LOCAL-00185" summary="cofiguration bug">
+      <option name="closed" value="true" />
+      <created>1732253800718</created>
+      <option name="number" value="00185" />
+      <option name="presentableId" value="LOCAL-00185" />
+      <option name="project" value="LOCAL" />
+      <updated>1732253800718</updated>
+    </task>
+    <task id="LOCAL-00186" summary="register bug">
+      <option name="closed" value="true" />
+      <created>1732255781535</created>
+      <option name="number" value="00186" />
+      <option name="presentableId" value="LOCAL-00186" />
+      <option name="project" value="LOCAL" />
+      <updated>1732255781536</updated>
+    </task>
+    <task id="LOCAL-00187" summary="register bug">
+      <option name="closed" value="true" />
+      <created>1732258711770</created>
+      <option name="number" value="00187" />
+      <option name="presentableId" value="LOCAL-00187" />
+      <option name="project" value="LOCAL" />
+      <updated>1732258711771</updated>
+    </task>
+    <task id="LOCAL-00188" summary="payment frontend">
+      <option name="closed" value="true" />
+      <created>1732358843412</created>
+      <option name="number" value="00188" />
+      <option name="presentableId" value="LOCAL-00188" />
+      <option name="project" value="LOCAL" />
+      <updated>1732358843414</updated>
+    </task>
+    <task id="LOCAL-00189" summary="fix auth">
+      <option name="closed" value="true" />
+      <created>1732377972880</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1732377972880</updated>
+    </task>
+    <task id="LOCAL-00190" summary="my course">
+      <option name="closed" value="true" />
+      <created>1732381885048</created>
+      <option name="number" value="00190" />
+      <option name="presentableId" value="LOCAL-00190" />
+      <option name="project" value="LOCAL" />
+      <updated>1732381885048</updated>
+    </task>
+    <task id="LOCAL-00191" summary="course name">
+      <option name="closed" value="true" />
+      <created>1732384114049</created>
+      <option name="number" value="00191" />
+      <option name="presentableId" value="LOCAL-00191" />
+      <option name="project" value="LOCAL" />
+      <updated>1732384114049</updated>
+    </task>
+    <task id="LOCAL-00192" summary="manage tag and major">
+      <option name="closed" value="true" />
+      <created>1732421206186</created>
+      <option name="number" value="00192" />
+      <option name="presentableId" value="LOCAL-00192" />
+      <option name="project" value="LOCAL" />
+      <updated>1732421206186</updated>
+    </task>
+    <task id="LOCAL-00193" summary="manage tag and major">
+      <option name="closed" value="true" />
+      <created>1732421354286</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
+      <option name="project" value="LOCAL" />
+      <updated>1732421354286</updated>
+    </task>
+    <task id="LOCAL-00194" summary="frontend and backend for courses">
+      <option name="closed" value="true" />
+      <created>1732430993834</created>
+      <option name="number" value="00194" />
+      <option name="presentableId" value="LOCAL-00194" />
+      <option name="project" value="LOCAL" />
+      <updated>1732430993835</updated>
+    </task>
+    <task id="LOCAL-00195" summary="a lot">
+      <option name="closed" value="true" />
+      <created>1732434793283</created>
+      <option name="number" value="00195" />
+      <option name="presentableId" value="LOCAL-00195" />
+      <option name="project" value="LOCAL" />
+      <updated>1732434793283</updated>
+    </task>
+    <task id="LOCAL-00196" summary="requirements.txt">
+      <option name="closed" value="true" />
+      <created>1732514965178</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
+      <option name="project" value="LOCAL" />
+      <updated>1732514965178</updated>
+    </task>
+    <task id="LOCAL-00197" summary="requirements.txt">
+      <option name="closed" value="true" />
+      <created>1732515597717</created>
+      <option name="number" value="00197" />
+      <option name="presentableId" value="LOCAL-00197" />
+      <option name="project" value="LOCAL" />
+      <updated>1732515597718</updated>
+    </task>
+    <task id="LOCAL-00198" summary="requirements.txt">
+      <option name="closed" value="true" />
+      <created>1732515619158</created>
+      <option name="number" value="00198" />
+      <option name="presentableId" value="LOCAL-00198" />
+      <option name="project" value="LOCAL" />
+      <updated>1732515619158</updated>
+    </task>
+    <task id="LOCAL-00199" summary="handle auth">
+      <option name="closed" value="true" />
+      <created>1732621508576</created>
+      <option name="number" value="00199" />
+      <option name="presentableId" value="LOCAL-00199" />
+      <option name="project" value="LOCAL" />
+      <updated>1732621508576</updated>
+    </task>
+    <task id="LOCAL-00200" summary="course page">
+      <option name="closed" value="true" />
+      <created>1732625487785</created>
+      <option name="number" value="00200" />
+      <option name="presentableId" value="LOCAL-00200" />
+      <option name="project" value="LOCAL" />
+      <updated>1732625487785</updated>
+    </task>
+    <task id="LOCAL-00201" summary="restructure">
+      <option name="closed" value="true" />
+      <created>1732639915449</created>
+      <option name="number" value="00201" />
+      <option name="presentableId" value="LOCAL-00201" />
+      <option name="project" value="LOCAL" />
+      <updated>1732639915450</updated>
+    </task>
+    <task id="LOCAL-00202" summary="update ui and receipt">
+      <option name="closed" value="true" />
+      <created>1732672423004</created>
+      <option name="number" value="00202" />
+      <option name="presentableId" value="LOCAL-00202" />
+      <option name="project" value="LOCAL" />
+      <updated>1732672423005</updated>
+    </task>
+    <task id="LOCAL-00203" summary="links">
+      <option name="closed" value="true" />
+      <created>1732672481275</created>
+      <option name="number" value="00203" />
+      <option name="presentableId" value="LOCAL-00203" />
+      <option name="project" value="LOCAL" />
+      <updated>1732672481275</updated>
+    </task>
+    <task id="LOCAL-00204" summary="implement multilang">
+      <option name="closed" value="true" />
+      <created>1732677497117</created>
+      <option name="number" value="00204" />
+      <option name="presentableId" value="LOCAL-00204" />
+      <option name="project" value="LOCAL" />
+      <updated>1732677497117</updated>
+    </task>
+    <task id="LOCAL-00205" summary="modules">
+      <option name="closed" value="true" />
+      <created>1732682835412</created>
+      <option name="number" value="00205" />
+      <option name="presentableId" value="LOCAL-00205" />
+      <option name="project" value="LOCAL" />
+      <updated>1732682835412</updated>
+    </task>
+    <task id="LOCAL-00206" summary="Merge remote-tracking branch 'origin/89-coursemodule-v2' into 89-coursemodule-v2&#10;&#10;# Conflicts:&#10;#&#9;backend/models/course/module_model.py">
+      <option name="closed" value="true" />
+      <created>1732682878545</created>
+      <option name="number" value="00206" />
+      <option name="presentableId" value="LOCAL-00206" />
+      <option name="project" value="LOCAL" />
+      <updated>1732682878545</updated>
+    </task>
+    <task id="LOCAL-00207" summary="Merge remote-tracking branch 'origin/89-coursemodule-v2' into 89-coursemodule-v2&#10;&#10;# Conflicts:&#10;#&#9;backend/models/course/module_model.py">
+      <option name="closed" value="true" />
+      <created>1732683435485</created>
+      <option name="number" value="00207" />
+      <option name="presentableId" value="LOCAL-00207" />
+      <option name="project" value="LOCAL" />
+      <updated>1732683435487</updated>
+    </task>
+    <task id="LOCAL-00208" summary="implement module">
+      <option name="closed" value="true" />
+      <created>1732683632518</created>
+      <option name="number" value="00208" />
+      <option name="presentableId" value="LOCAL-00208" />
+      <option name="project" value="LOCAL" />
+      <updated>1732683632518</updated>
+    </task>
+    <task id="LOCAL-00209" summary="implement module">
+      <option name="closed" value="true" />
+      <created>1732689117323</created>
+      <option name="number" value="00209" />
+      <option name="presentableId" value="LOCAL-00209" />
+      <option name="project" value="LOCAL" />
+      <updated>1732689117324</updated>
+    </task>
+    <task id="LOCAL-00210" summary="implement module">
+      <option name="closed" value="true" />
+      <created>1732712999523</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
+      <option name="project" value="LOCAL" />
+      <updated>1732712999524</updated>
+    </task>
+    <task id="LOCAL-00211" summary="payment course info and submission database">
+      <option name="closed" value="true" />
+      <created>1732786828941</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
+      <option name="project" value="LOCAL" />
+      <updated>1732786828941</updated>
+    </task>
+    <task id="LOCAL-00212" summary="payment course info and submission database">
+      <option name="closed" value="true" />
+      <created>1732882076880</created>
+      <option name="number" value="00212" />
+      <option name="presentableId" value="LOCAL-00212" />
+      <option name="project" value="LOCAL" />
+      <updated>1732882076880</updated>
+    </task>
+    <task id="LOCAL-00213" summary="payment course info and submission database">
+      <option name="closed" value="true" />
+      <created>1733181364798</created>
+      <option name="number" value="00213" />
+      <option name="presentableId" value="LOCAL-00213" />
+      <option name="project" value="LOCAL" />
+      <updated>1733181364798</updated>
+    </task>
+    <task id="LOCAL-00214" summary="ts version">
+      <option name="closed" value="true" />
+      <created>1733408019522</created>
+      <option name="number" value="00214" />
+      <option name="presentableId" value="LOCAL-00214" />
+      <option name="project" value="LOCAL" />
+      <updated>1733408019522</updated>
+    </task>
+    <task id="LOCAL-00215" summary="ts version">
+      <option name="closed" value="true" />
+      <created>1733408030008</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
+      <option name="project" value="LOCAL" />
+      <updated>1733408030008</updated>
+    </task>
+    <task id="LOCAL-00216" summary="ts version">
+      <option name="closed" value="true" />
+      <created>1733408317902</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
+      <option name="project" value="LOCAL" />
+      <updated>1733408317902</updated>
+    </task>
+    <task id="LOCAL-00217" summary="ts version">
+      <option name="closed" value="true" />
+      <created>1733408722209</created>
+      <option name="number" value="00217" />
+      <option name="presentableId" value="LOCAL-00217" />
+      <option name="project" value="LOCAL" />
+      <updated>1733408722209</updated>
+    </task>
+    <task id="LOCAL-00218" summary="ts version">
+      <option name="closed" value="true" />
+      <created>1733409013280</created>
+      <option name="number" value="00218" />
+      <option name="presentableId" value="LOCAL-00218" />
+      <option name="project" value="LOCAL" />
+      <updated>1733409013280</updated>
+    </task>
+    <task id="LOCAL-00219" summary="package.json">
+      <option name="closed" value="true" />
+      <created>1733409316167</created>
+      <option name="number" value="00219" />
+      <option name="presentableId" value="LOCAL-00219" />
+      <option name="project" value="LOCAL" />
+      <updated>1733409316167</updated>
+    </task>
+    <task id="LOCAL-00220" summary="package.json">
+      <option name="closed" value="true" />
+      <created>1733409473740</created>
+      <option name="number" value="00220" />
+      <option name="presentableId" value="LOCAL-00220" />
+      <option name="project" value="LOCAL" />
+      <updated>1733409473741</updated>
+    </task>
+    <task id="LOCAL-00221" summary="api">
+      <option name="closed" value="true" />
+      <created>1733410805305</created>
+      <option name="number" value="00221" />
+      <option name="presentableId" value="LOCAL-00221" />
+      <option name="project" value="LOCAL" />
+      <updated>1733410805305</updated>
+    </task>
+    <task id="LOCAL-00222" summary="ដេផលោយ">
+      <option name="closed" value="true" />
+      <created>1733413503983</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
+      <option name="project" value="LOCAL" />
+      <updated>1733413503983</updated>
+    </task>
+    <task id="LOCAL-00223" summary="backend location">
+      <option name="closed" value="true" />
+      <created>1733453088303</created>
+      <option name="number" value="00223" />
+      <option name="presentableId" value="LOCAL-00223" />
+      <option name="project" value="LOCAL" />
+      <updated>1733453088303</updated>
+    </task>
+    <task id="LOCAL-00224" summary="config cors">
+      <option name="closed" value="true" />
+      <created>1733453871998</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1733453871998</updated>
+    </task>
+    <task id="LOCAL-00225" summary="config cors">
+      <option name="closed" value="true" />
+      <created>1733454119863</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1733454119863</updated>
+    </task>
+    <task id="LOCAL-00226" summary="config cors">
+      <option name="closed" value="true" />
+      <created>1733454515409</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1733454515409</updated>
+    </task>
+    <task id="LOCAL-00227" summary="host">
+      <option name="closed" value="true" />
+      <created>1733455829046</created>
+      <option name="number" value="00227" />
+      <option name="presentableId" value="LOCAL-00227" />
+      <option name="project" value="LOCAL" />
+      <updated>1733455829047</updated>
+    </task>
+    <task id="LOCAL-00228" summary="host">
+      <option name="closed" value="true" />
+      <created>1733456840740</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1733456840740</updated>
+    </task>
+    <task id="LOCAL-00229" summary="host">
+      <option name="closed" value="true" />
+      <created>1733457330248</created>
+      <option name="number" value="00229" />
+      <option name="presentableId" value="LOCAL-00229" />
+      <option name="project" value="LOCAL" />
+      <updated>1733457330248</updated>
+    </task>
+    <option name="localTasksCounter" value="230" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="modules" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/89-coursemodule-v2' into 89-coursemodule-v2&#10;&#10;# Conflicts:&#10;#&#9;backend/models/course/module_model.py" />
+    <MESSAGE value="implement module" />
+    <MESSAGE value="payment course info and submission database" />
+    <MESSAGE value="ts version" />
+    <MESSAGE value="package.json" />
+    <MESSAGE value="api" />
+    <MESSAGE value="ដេផលោយ" />
+    <MESSAGE value="backend location" />
+    <MESSAGE value="config cors" />
+    <MESSAGE value="host" />
+    <option name="LAST_COMMIT_MESSAGE" value="host" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$user_model.coverage" NAME="user_model Coverage Results" MODIFIED="1731338774380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/models" />
+    <SUITE FILE_PATH="coverage/log2_js$yes.coverage" NAME="yes Coverage Results" MODIFIED="1732521197234" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$youtube_service.coverage" NAME="youtube_service Coverage Results" MODIFIED="1728729573083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$payment_model.coverage" NAME="payment_model Coverage Results" MODIFIED="1731433236212" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/models" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$app.coverage" NAME="app Coverage Results" MODIFIED="1733458195388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/log2_js$app.coverage" NAME="app Coverage Results" MODIFIED="1732639544313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/log2_js$user_model.coverage" NAME="user_model Coverage Results" MODIFIED="1732427240517" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/models" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$cloudinary_service.coverage" NAME="cloudinary_service Coverage Results" MODIFIED="1728806384964" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$test.coverage" NAME="test Coverage Results" MODIFIED="1728733408042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$config.coverage" NAME="config Coverage Results" MODIFIED="1727114360136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$token_utils.coverage" NAME="token_utils Coverage Results" MODIFIED="1728621973848" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/utils" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$yes.coverage" NAME="yes Coverage Results" MODIFIED="1732190662429" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1733346078653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/controllers" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$o.coverage" NAME="o Coverage Results" MODIFIED="1732955164619" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$mail_service.coverage" NAME="mail_service Coverage Results" MODIFIED="1727123871921" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$course_model.coverage" NAME="course_model Coverage Results" MODIFIED="1732777950596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/models/course" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$.coverage" NAME=" Coverage Results" MODIFIED="1731439066664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$admin_routes.coverage" NAME="admin_routes Coverage Results" MODIFIED="1727439913671" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/routes" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$course_controller.coverage" NAME="course_controller Coverage Results" MODIFIED="1728623633599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/controllers" />
+    <SUITE FILE_PATH="coverage/AUPP_eCampus$mongo_service.coverage" NAME="mongo_service Coverage Results" MODIFIED="1732253460051" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/services" />
+  </component>
+</project>

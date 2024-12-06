@@ -1,0 +1,1408 @@
+from datetime import datetime, timezone
+from bson import ObjectId
+from services.mongo_service import db
+from models.course.assignment_model import Assignment
+from models.course.tag_model import Tag
+from models.course.major_model import Major
+from models.user_model import User
+
+class Course:
+    def __init__(self, title, description, instructor_id, uploader_id, major_ids, tag_ids, price, cover_image_url=None,
+                 enrolled_students=None, assignments=None, modules=None, _id=None, created_at=None, updated_at=None):
+        self._id = ObjectId(_id) if _id else None
+        self.title = title
+        self.description = description
+        self.instructor_id = ObjectId(instructor_id)
+        self.uploader_id = ObjectId(uploader_id)
+        self.cover_image_url = cover_image_url
+        self.major_ids = [ObjectId(mid) for mid in major_ids]
+        self.tag_ids = [ObjectId(tid) for tid in tag_ids]
+        self.price = price
+        self.enrolled_students = enrolled_students or []
+        self.assignments = assignments or []
+        self.modules = modules or []
+        self.created_at = created_at or datetime.now(timezone.utc)
+        self.updated_at = updated_at or datetime.now(timezone.utc)
+
+    def to_dict(self):
+        return {
+            "_id": str(self._id) if self._id else None,
+            "title": self.title,
+            "description": self.description,
+            "instructor_id": str(self.instructor_id),
+            "uploader_id": str(self.uploader_id),
+            "cover_image_url": self.cover_image_url,
+            "major_ids": [str(mid) for mid in self.major_ids],
+            "tag_ids": [str(tid) for tid in self.tag_ids],
+            "price": self.price,
+            "enrolled_students": [str(student) for student in self.enrolled_students],
+            "assignments": [str(assignment) for assignment in self.assignments],
+            "modules": [str(module) for module in self.modules],
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
+
+    @staticmethod
+    def get_all():
+        return [Course(**course).to_dict() for course in db.courses.find()]
+
+    @staticmethod
+    def get_course_preview(course_id):
+        course = db.courses.find_one({'_id': ObjectId(course_id)})
+
+        if not course:
+            return None
+
+        instructor_name = User.get_name_by_id(course['instructor_id'])
+        major_names = [Major.find_by_id(mid)['name'] for mid in course['major_ids']]
+        tag_names = [Tag.find_by_id(tid)['name'] for tid in course['tag_ids']]
+
+        course_preview = {
+            "_id": str(course['_id']),
+            "title": course['title'],
+            "description": course['description'],
+            "instructor_name": instructor_name,
+            "cover_image_url": course.get('cover_image_url', ""),
+            "major_names": major_names,
+            "tag_names": tag_names,
+            "student_count": len(course['enrolled_students']) if isinstance(course['enrolled_students'], list) else 0,
+            "created_at": course['created_at'],
+            "updated_at": course['updated_at'],
+            "price": course['price']
+        }
+
+        return course_preview
+
+    @staticmethod
+    def get_all_courses_preview():
+        courses = db.courses.find()
+        course_previews = []
+        for course in courses:
+            instructor_name = User.get_name_by_id(course['instructor_id'])
+            uploader_name = User.get_name_by_id(course['uploader_id'])
+            major_names = [Major.find_by_id(mid)['name'] for mid in course['major_ids']]
+            tag_names = [Tag.find_by_id(tid)['name'] for tid in course['tag_ids']]
+            course_preview = {
+                "_id": str(course['_id']),
+                "title": course['title'],
+                "description": course['description'],
+                "instructor_name": instructor_name,
+                "uploader_name": uploader_name,
+                "cover_image_url": course.get('cover_image_url', ""),
+                "major_names": major_names,
+                "tag_names": tag_names,
+                "price": course['price'],
+            }
+            course_previews.append(course_preview)
+        return course_previews
+
+    @staticmethod
+    def find_by_id(course_id):
+        data = db.courses.find_one({"_id": ObjectId(course_id)})
+        return Course(**data).to_dict()
+
+    def save_to_db(self):
+        course_data = self.to_dict()
+        course_data.pop("_id")
+        result = db.courses.insert_one(course_data)
+        self._id = result.inserted_id
+        return str(self._id)
+
+    @staticmethod
+    def update_course(course_id, **kwargs):
+        set_fields = {k: v for k, v in kwargs.items() if k != "$push"}
+        push_fields = kwargs.get("$push", None)
+        set_fields["updated_at"] = datetime.now(timezone.utc)
+        update_query = {}
+        if set_fields:
+            update_query["$set"] = set_fields
+        if push_fields:
+            update_query["$push"] = push_fields
+        result = db.courses.update_one({"_id": ObjectId(course_id)}, update_query)
+        if result.modified_count == 0:
+            raise ValueError("Course not found or no changes made.")
+
+    @staticmethod
+    def delete_course(course_id):
+        result = db.courses.delete_one({"_id": ObjectId(course_id)})
+        if result.deleted_count == 0:
+            raise ValueError("Course not found.")
+
+    def add_student(self, student_id):
+        student_id = ObjectId(student_id)
+        if student_id not in self.enrolled_students:
+            self.enrolled_students.append(student_id)
+            db.courses.update_one({"_id": self._id}, {"$addToSet": {"enrolled_students": student_id}})
+
+    def remove_student(self, student_id):
+        student_id = ObjectId(student_id)
+        if student_id in self.enrolled_students:
+            self.enrolled_students.remove(student_id)
+            db.courses.update_one({"_id": self._id}, {"$pull": {"enrolled_students": student_id}})
+
+    def add_assignment(self, title, description, due_date, max_grade, file= None, allow_late_submission=False):
+        assignment = Assignment(
+            title=title,
+            description=description,
+            due_date=due_date,
+            max_grade=max_grade,
+            allow_late_submission=allow_late_submission,
+            file=file,
+
+        )
+        assignment_id = assignment.save_to_db()
+        self.assignments.append(assignment_id)
+        db.courses.update_one({"_id": self._id}, {"$push": {"assignments": assignment_id}})
+        return assignment_id
+
+    def get_assignments(self):
+        return Assignment.get_by_course(self._id)
+
+    @staticmethod
+    def get_people(course_id):
+        course = db.courses.find_one({"_id": ObjectId(course_id)})
+        instructor = db.users.find_one({"_id": ObjectId(course["instructor_id"])}, {"_id": 1, "name": 1})
+        instructor_data = {"id": str(instructor["_id"]), "name": instructor.get("name", "Unknown")}
+        student_ids = course.get("enrolled_students", [])
+        students = list(db.users.find({"_id": {"$in": [ObjectId(sid) for sid in student_ids]}}, {"_id": 1, "name": 1}))
+        student_data = [{"id": str(student["_id"]), "name": student.get("name", "Unknown")} for student in students]
+        return {
+            "instructor": instructor_data,
+            "students": student_data
+        }
+
+
+from datetime import datetime, timezone
+from services.mongo_service import db
+from bson import ObjectId
+
+
+class Major:
+    def __init__(self, name):
+        self.name = name
+        self.created_at = datetime.now(timezone.utc)
+
+    def save_to_db(self):
+        major_data = {
+            'name': self.name,
+            'created_at': self.created_at
+        }
+        result = db.majors.insert_one(major_data)
+        return str(result.inserted_id)
+
+    @staticmethod
+    def get_all():
+        return list(db.majors.find())
+
+    @staticmethod
+    def find_by_id(major_id):
+        return db.majors.find_one({'_id': ObjectId(major_id)})
+
+from services.mongo_service import db
+from datetime import datetime, timezone
+from bson import ObjectId
+
+
+class Tag:
+    def __init__(self, name):
+        self.name = name
+        self.created_at = datetime.now(timezone.utc)
+
+    def save_to_db(self):
+        tag_data = {
+            'name': self.name,
+            'created_at': self.created_at
+        }
+        result = db.tags.insert_one(tag_data)
+        return str(result.inserted_id)
+
+    @staticmethod
+    def get_all():
+        return list(db.tags.find())
+
+    @staticmethod
+    def find_by_id(tag_id):
+        return db.tags.find_one({'_id': ObjectId(tag_id)})
+
+    @staticmethod
+    def find_by_name(name):
+        return db.tags.find_one({'name': name})
+
+from .assignment_model import Assignment
+from .course_model import Course
+from .major_model import Major
+from .submission_model import Submission
+from .tag_model import Tag
+
+from bson import ObjectId
+from services.mongo_service import db
+from datetime import datetime, timezone
+
+
+class Submission:
+    def __init__(self, assignment_id, student_id, content, submitted_at=None, grade=None, feedback=None):
+        self.assignment_id = ObjectId(assignment_id)
+        self.student_id = ObjectId(student_id)
+        self.content = content
+        self.submitted_at = submitted_at if submitted_at else datetime.now(timezone.utc)
+        self.grade = grade
+        self.feedback = feedback
+        self.is_late = False
+
+    def save_to_db(self):
+        assignment = db.assignments.find_one({'_id': self.assignment_id})
+
+        if not assignment:
+            raise ValueError("Assignment not found.")
+
+        if assignment.get('is_locked', False):
+            raise ValueError("Submissions are locked for this assignment.")
+
+        due_date = assignment['due_date']
+        if due_date.tzinfo is None:
+            due_date = due_date.replace(tzinfo=timezone.utc)
+
+        if self.submitted_at > due_date:
+            if not assignment.get('allow_late_submissions', False):
+                raise ValueError("Late submissions are not allowed.")
+            self.is_late = True
+
+        submission_data = {
+            'assignment_id': self.assignment_id,
+            'student_id': self.student_id,
+            'content': self.content,
+            'submitted_at': self.submitted_at,
+            'grade': self.grade,
+            'feedback': self.feedback,
+            'is_late': self.is_late
+        }
+        result = db.submissions.insert_one(submission_data)
+
+        db.assignments.update_one(
+            {'_id': self.assignment_id},
+            {'$addToSet': {'submissions': result.inserted_id}}
+        )
+
+    @staticmethod
+    def get_by_course(assignment_id, student_id):
+        assignment_id = ObjectId(assignment_id) if isinstance(assignment_id, str) else assignment_id
+        student_id = ObjectId(student_id) if isinstance(student_id, str) else student_id
+        submissions = db.submissions.find({
+            'assignment_id': ObjectId(assignment_id),
+            'student_id': ObjectId(student_id)
+        })
+        submission_list = [submission for submission in submissions]
+        return submission_list
+
+    @staticmethod
+    def get_all_submissions_for_teacher(assignment_id):
+        submissions = db.submissions.find({'assignment_id':  ObjectId(assignment_id)})
+        submission_list = [submission for submission in submissions]
+        return submission_list
+
+from datetime import datetime
+from services.mongo_service import db
+from bson import ObjectId
+import logging
+
+
+class Material:
+    def __init__(self, title, description, content_url, _id=None):
+        self._id = _id or str(ObjectId())
+        self.title = title
+        self.description = description
+        self.content_url = content_url
+
+    def to_dict(self):
+        return {
+            '_id': self._id,
+            'title': self.title,
+            'description': self.description,
+            'content_url': self.content_url
+        }
+
+
+class Module:
+    def __init__(self, course_id, title, description, materials=None, _id=None, created_at=None, updated_at=None):
+        self._id = _id
+        self.course_id = ObjectId(course_id)
+        self.title = title
+        self.description = description
+        self.materials = materials or []
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
+
+    def to_dict(self):
+        return {
+            '_id': str(self._id) if self._id else None,
+            'course_id': self.course_id,
+            'title': self.title,
+            'description': self.description,
+            'materials': self.materials,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+
+    def save_to_db(self):
+        module_data = self.to_dict()
+        module_data.pop('_id', None)
+
+        try:
+            result = db.modules.insert_one(module_data)
+            self._id = result.inserted_id
+            return str(self._id)
+        except Exception as e:
+            logging.error(f"Error saving module to database: {e}")
+            raise
+
+    @staticmethod
+    def get_by_course(course_id):
+        print(course_id, "cors")
+        return list(db.modules.find({'course_id': ObjectId(course_id)}))
+
+    @staticmethod
+    def find_by_id(module_id):
+        try:
+            return db.modules.find_one({'_id': ObjectId(module_id)})
+        except Exception as e:
+            logging.error(f"Error finding module by ID: {e}")
+            raise
+
+    @staticmethod
+    def delete_by_id(module_id):
+        try:
+            result = db.modules.delete_one({'_id': ObjectId(module_id)})
+            if result.deleted_count == 0:
+                raise ValueError("No module found to delete")
+            return True
+        except Exception as e:
+            logging.error(f"Error deleting module: {e}")
+            raise
+
+    def add_material(self, title, description, content_url):
+        material = {
+            '_id': str(ObjectId()),
+            'title': title,
+            'description': description,
+            'content_url': content_url
+        }
+        self.materials.append(material)
+        return material['_id']
+
+    def update_material(self, material_id, title=None, description=None, content_url=None):
+        for material in self.materials:
+            if material['_id'] == material_id:
+                if title is not None:
+                    material['title'] = title
+                if description is not None:
+                    material['description'] = description
+                if content_url is not None:
+                    material['content_url'] = content_url
+                return material_id
+        raise ValueError(f"Material with ID {material_id} not found")
+
+    def delete_material(self, material_id):
+        for i, material in enumerate(self.materials):
+            if material['_id'] == material_id:
+                del self.materials[i]
+                return True
+        raise ValueError(f"Material with ID {material_id} not found")
+
+    def update_in_db(self):
+        try:
+            update_data = {
+                'title': self.title,
+                'description': self.description,
+                'materials': self.materials,
+                'updated_at': datetime.now()
+            }
+
+            result = db.modules.update_one(
+                {'_id': ObjectId(self._id)},
+                {'$set': update_data}
+            )
+
+            if result.modified_count == 0:
+                raise ValueError("No module found to update")
+
+            return str(self._id)
+        except Exception as e:
+            logging.error(f"Error updating module in database: {e}")
+            raise
+
+    @staticmethod
+    def find_material_in_module(module_id, material_id):
+        try:
+            module = db.modules.find_one(
+                {'_id': ObjectId(module_id), 'materials._id': material_id},
+                {'materials.$': 1}
+            )
+            return module['materials'][0] if module else None
+        except Exception as e:
+            logging.error(f"Error finding material in module: {e}")
+            raise
+
+from datetime import datetime, timezone
+from services.mongo_service import db
+from bson import ObjectId
+
+
+class Assignment:
+    def __init__(self, course_id, title, description, due_date, max_grade, file, allow_late_submission, is_locked= False):
+        self._id = None
+        self.course_id = course_id
+        self.title = title
+        self.description = description
+        self.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M:%SZ")
+        self.max_grade = max_grade
+        self.file = file if file is not None else None
+        self.created_at = datetime.now(timezone.utc)
+        self.submissions = []
+        self.allow_late_submission = allow_late_submission
+        self.is_locked = is_locked
+
+    def to_dict(self):
+        return {
+            "course_id": self.course_id,
+            "title": self.title,
+            "description": self.description,
+            "due_date": self.due_date,
+            "max_grade": self.max_grade,
+            "file": self.file,
+            "submissions": self.submissions,
+            "created_at": self.created_at
+        }
+
+    def save_to_db(self):
+        assignment_data = self.to_dict()
+        result = db.assignments.insert_one(assignment_data)
+        self._id = result.inserted_id
+        return result.inserted_id
+
+    @staticmethod
+    def get_by_id(assignment_id):
+        return db.assigments.find_one({"_id": assignment_id})
+
+    @staticmethod
+    def delete_from_db(assignment_id):
+        return db.assigments.delete_one({"_id": assignment_id})
+
+    def lock_submissions(self):
+        self.is_locked = True
+        db.assignments.update_one({'_id': self._id}, {'$set': {'is_locked': True}})
+
+    def open_submissions(self):
+        self.is_locked = False
+        db.assignments.update_one({'_id': self._id}, {'$set': {'is_locked': False}})
+
+    @staticmethod
+    def get_course_id(assignment_id):
+        return db.assignments.find_one({"_id": ObjectId(assignment_id)})['course_id']
+
+    @staticmethod
+    def get_by_course(course_id):
+        return list(db.assignments.find({'course_id': ObjectId(course_id)}))
+
+    @staticmethod
+    def add_submission(self, submission_id):
+        result = db.assignments.update_one(
+            {'_id': self._id},
+            {'$addToSet': {'submissions': ObjectId(submission_id)}}
+        )
+        return result
+
+from flask import jsonify
+from models.course.assignment_model import Assignment
+from models.course import Course
+from bson import ObjectId
+
+class AssignmentController:
+    @staticmethod
+    def add_assignment(course_id, title, description, due_date, max_grade, file_url=None, allow_late_submission=False):
+        assignment = Assignment(
+            course_id=ObjectId(course_id),
+            title=title,
+            description=description,
+            due_date=due_date,
+            max_grade=max_grade,
+            file=file_url,
+            allow_late_submission=allow_late_submission
+        )
+
+        assignment_id = assignment.save_to_db()
+
+        kwargs = {
+            "$push": {"assignments": ObjectId(assignment_id)}
+        }
+
+        Course.update_course(course_id, **kwargs)
+
+        return jsonify({"message": "Assignment added successfully", "assignment_id": str(assignment_id)}), 201
+
+    @staticmethod
+    def get_assignments(course_id):
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({"error": "Course not found"}), 404
+
+        assignments = course.get_assignments()
+
+    @staticmethod
+    def get_assignment_by_id(assignment_id):
+        try:
+            assignment = Assignment.get_by_id(assignment_id)
+            if not assignment:
+                return jsonify({"error": "Assignment not found"}), 404
+            return jsonify(assignment), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+    @staticmethod
+    def delete_assignment(assignment_id):
+        try:
+            Assignment.delete_from_db(assignment_id)
+            return jsonify({"message": "Assignment deleted successfully"}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+from bson import ObjectId
+from utils.helpers import serialize_document
+from models.course.module_model import Module
+from models.course.course_model import Course
+from flask import jsonify, request
+from services.aws_service import upload_to_s3
+import logging
+
+
+class ModuleController:
+
+    @staticmethod
+    def add_module(course_id):
+        try:
+            title = request.form.get('title')
+            description = request.form.get('description')
+            module = Module(course_id=course_id, title=title, description=description)
+            materials = request.files.getlist('materials')
+            material_titles = request.form.getlist('material_titles')
+            material_descriptions = request.form.getlist('material_descriptions')
+            for material, title, description in zip(materials, material_titles, material_descriptions):
+                material_url = upload_to_s3(material, material.filename)
+                module.add_material(
+                    title=title,
+                    description=description,
+                    content_url=material_url
+                )
+
+            module_id = module.save_to_db()
+            print(module_id)
+            Course.update_course(course_id=course_id, **{"$push": {"modules": ObjectId(module_id)}})
+
+            return jsonify({
+                'message': 'Module with materials added successfully.',
+                'module_id': module_id
+            }), 201
+
+        except Exception as e:
+            logging.error(f"Module creation error: {e}")
+            return jsonify({
+                'message': 'Failed to add module.',
+                'error': str(e)
+            }), 500
+
+    @staticmethod
+    def update_module(module_id):
+        try:
+            existing_module = Module.find_by_id(module_id)
+            if not existing_module:
+                return jsonify({'message': 'Module not found.'}), 404
+
+            title = request.form.get('title', existing_module['title'])
+            description = request.form.get('description', existing_module['description'])
+
+            module = Module(
+                course_id=existing_module['course_id'],
+                title=title,
+                description=description,
+                materials=existing_module.get('materials', []),
+                _id=module_id
+            )
+
+            materials = request.files.getlist('materials')
+            material_titles = request.form.getlist('material_titles')
+            material_descriptions = request.form.getlist('material_descriptions')
+
+            if materials and material_titles and material_descriptions:
+                module.materials = []
+                for material, title, description in zip(materials, material_titles, material_descriptions):
+                    try:
+                        material_url = upload_to_s3(material, material.filename)
+
+                        module.add_material(
+                            title=title,
+                            description=description,
+                            content_url=material_url
+                        )
+                    except Exception as upload_error:
+                        logging.error(f"Material upload error: {upload_error}")
+                        return jsonify({'message': f'Failed to upload material: {material.filename}'}), 500
+
+            updated_module_id = module.update_in_db()
+
+            return jsonify({
+                'message': 'Module updated successfully.',
+                'module_id': updated_module_id
+            }), 200
+
+        except Exception as e:
+            logging.error(f"Module update error: {e}")
+            return jsonify({
+                'message': 'Failed to update module.',
+                'error': str(e)
+            }), 500
+
+    @staticmethod
+    def get_modules(course_id):
+        try:
+            modules = Module.get_by_course(course_id)
+            return jsonify([module.to_dict() for module in modules]), 200
+        except Exception as e:
+            return jsonify({'message': str(e)}), 400
+
+    @staticmethod
+    def get_module_by_id(module_id):
+        try:
+            module = Module.find_by_id(module_id)
+            if not module:
+                return jsonify({'message': 'Module not found'}), 404
+
+            # Serialize the module document for JSON compatibility
+            serialized_module = serialize_document(module)
+            return jsonify(serialized_module), 200
+        except Exception as e:
+            return jsonify({'message': str(e)}), 400
+
+
+class ModuleMaterialController:
+    @staticmethod
+    def add_material(module_id):
+        try:
+            existing_module = Module.find_by_id(module_id)
+            if not existing_module:
+                return jsonify({'message': 'Module not found.'}), 404
+
+            title = request.form.get('title')
+            description = request.form.get('description')
+            content_file = request.files.get('content')
+
+            if not all([title, description, content_file]):
+                return jsonify({'message': 'Title, description, and content are required.'}), 400
+
+            try:
+                content_url = upload_to_s3(content_file, content_file.filename)
+            except Exception as upload_error:
+                logging.error(f"Material upload error: {upload_error}")
+                return jsonify({'message': 'Failed to upload material.'}), 500
+
+            module = Module(
+                course_id=existing_module['course_id'],
+                title=existing_module['title'],
+                description=existing_module['description'],
+                materials=existing_module.get('materials', []),
+                _id=module_id
+            )
+
+            material_id = module.add_material(
+                title=title,
+                description=description,
+                content_url=content_url
+            )
+
+            module.update_in_db()
+
+            return jsonify({
+                'message': 'Material added successfully.',
+                'material_id': material_id
+            }), 201
+
+        except Exception as e:
+            logging.error(f"Material addition error: {e}")
+            return jsonify({
+                'message': 'Failed to add material.',
+                'error': str(e)
+            }), 500
+
+    @staticmethod
+    def update_material(module_id, material_id):
+        try:
+            existing_module = Module.find_by_id(module_id)
+            if not existing_module:
+                return jsonify({'message': 'Module not found.'}), 404
+
+            module = Module(
+                course_id=existing_module['course_id'],
+                title=existing_module['title'],
+                description=existing_module['description'],
+                materials=existing_module.get('materials', []),
+                _id=module_id
+            )
+
+            title = request.form.get('title')
+            description = request.form.get('description')
+            content_file = request.files.get('content')
+
+            update_data = {}
+            if title:
+                update_data['title'] = title
+            if description:
+                update_data['description'] = description
+
+            if content_file:
+                try:
+                    content_url = upload_to_s3(content_file, content_file.filename)
+                    update_data['content_url'] = content_url
+                except Exception as upload_error:
+                    logging.error(f"Material upload error: {upload_error}")
+                    return jsonify({'message': 'Failed to upload material.'}), 500
+
+            module.update_material(material_id, **update_data)
+
+            module.update_in_db()
+
+            return jsonify({
+                'message': 'Material updated successfully.',
+                'material_id': material_id
+            }), 200
+
+        except ValueError as ve:
+            return jsonify({'message': str(ve)}), 404
+        except Exception as e:
+            logging.error(f"Material update error: {e}")
+            return jsonify({
+                'message': 'Failed to update material.',
+                'error': str(e)
+            }), 500
+
+    @staticmethod
+    def delete_material(module_id, material_id):
+        try:
+            existing_module = Module.find_by_id(module_id)
+            if not existing_module:
+                return jsonify({'message': 'Module not found.'}), 404
+
+            module = Module(
+                course_id=existing_module['course_id'],
+                title=existing_module['title'],
+                description=existing_module['description'],
+                materials=existing_module.get('materials', []),
+                _id=module_id
+            )
+
+            module.delete_material(material_id)
+
+            module.update_in_db()
+
+            return jsonify({
+                'message': 'Material deleted successfully.'
+            }), 200
+
+        except ValueError as ve:
+            return jsonify({'message': str(ve)}), 404
+        except Exception as e:
+            logging.error(f"Material deletion error: {e}")
+            return jsonify({
+                'message': 'Failed to delete material.',
+                'error': str(e)
+            }), 500
+
+    @staticmethod
+    def get_material(module_id, material_id):
+        try:
+            material = Module.find_material_in_module(module_id, material_id)
+
+            if not material:
+                return jsonify({'message': 'Material not found'}), 404
+
+            return jsonify(material), 200
+
+        except Exception as e:
+            logging.error(f"Error retrieving material: {e}")
+            return jsonify({
+                'message': 'Failed to retrieve material.',
+                'error': str(e)
+            }), 400
+from .course_controller import CourseController
+from .major_controller import MajorController
+from .tag_controller import TagController
+from .assignment_controller import AssignmentController
+from .submission_controller import SubmissionController
+
+from flask import g, request
+from bson import ObjectId
+from models.course import Submission
+from services.mongo_service import db
+
+
+class SubmissionController:
+    @staticmethod
+    def upload_submission_content(assigment_id, file_url):
+        student_id = g.current_user['_id']
+        submission = Submission(
+            assignment_id=assigment_id,
+            student_id=student_id,
+            content=file_url
+        )
+        submission.save_to_db()
+        return "Submission successfully uploaded"
+
+    @staticmethod
+    def grade_submission_content(submission_id):
+        data = request.json
+        grade = data['grade']
+        feedback = data.get('feedback', None)
+        print("grde", grade, feedback, submission_id)
+
+        result = db.submissions.update_one(
+            {'_id': ObjectId(submission_id)},
+            {'$set': {'grade': grade, 'feedback': feedback}}
+        )
+        print("result", result)
+
+        return "graded"
+
+from services.mongo_service import db
+from .course_controller import BaseController
+
+
+class MajorController(BaseController):
+    def __init__(self):
+        super().__init__(db.majors)
+
+import logging
+from datetime import datetime, timezone
+
+from bson import ObjectId
+from flask import jsonify, g
+
+from models.course import Course, Tag, Submission, Assignment
+from models.course.module_model import Module
+from models.user_model import User
+from services.cloudinary_service import upload_to_cloudinary, delete_from_cloudinary
+from utils.helpers import serialize_document
+from utils.upload_video import upload_video
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class CourseController:
+
+    @staticmethod
+    def create_course(title, description, instructor_id, price, tag_names, major_ids, cover_image):
+        try:
+            if not title or not description:
+                return jsonify({'message': 'Title and description are required.'}), 400
+            if not instructor_id:
+                return jsonify({'message': 'Instructor ID is required.'}), 400
+
+            created_tags = CourseController._find_or_create_tags(tag_names)
+            tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
+            cover_image_url = None
+            if cover_image:
+                cover_image_url = upload_to_cloudinary(cover_image, cover_image.filename)
+
+            course = Course(
+                title=title,
+                description=description,
+                instructor_id=ObjectId(instructor_id),
+                price=price,
+                cover_image_url=cover_image_url,
+                tag_ids=tag_ids,
+                major_ids=major_ids,
+                uploader_id=g.current_user['_id'],
+                enrolled_students=[]
+            )
+            course_id = course.save_to_db()
+            User.add_course_to_user(instructor_id, course_id, add=True)
+            return jsonify({'message': 'Course created successfully.', 'course_id': str(course_id)}), 201
+
+        except Exception as e:
+            logger.error(f"Error creating course: {str(e)}")
+            return jsonify({'message': 'An error occurred while creating the course.', 'details': str(e)}), 500
+
+    @staticmethod
+    def update_course(course_id, title, description, instructor_id, tag_names, major_ids):
+        try:
+            course = Course.find_by_id(course_id)
+            if not course:
+                return jsonify({'message': 'Course not found.'}), 404
+
+            created_tags = CourseController._find_or_create_tags(tag_names)
+            tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
+
+            course.update(
+                title=title,
+                description=description,
+                instructor_id=ObjectId(instructor_id),
+                major_ids=major_ids,
+                tag_ids=tag_ids
+            )
+            return jsonify({'message': 'Course updated successfully.'}), 200
+
+        except Exception as e:
+            logger.error(f"Error updating course: {str(e)}")
+            return jsonify({'message': 'An error occurred while updating the course.', 'details': str(e)}), 500
+
+    @staticmethod
+    def delete_course(course_id):
+        try:
+            course = Course.find_by_id(course_id)
+            if not course:
+                return jsonify({'message': 'Course not found.'}), 404
+
+            if course.get('video_url'):
+                CourseController._delete_video(course['video_url'])
+
+            course.delete()
+            return jsonify({'message': 'Course deleted successfully.'}), 200
+
+        except Exception as e:
+            logger.error(f"Error deleting course: {str(e)}")
+            return jsonify({'message': 'An error occurred while deleting the course.', 'details': str(e)}), 500
+
+    @staticmethod
+    def enroll_student(course_id, student_id):
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        if student_id in course['enrolled_students']:
+            return jsonify({'message': 'Student already enrolled.'}), 200
+        kwargs = {
+            "_id": ObjectId(course_id),
+            "$push": {"enrolled_students": ObjectId(student_id)}
+        }
+
+        Course.update_course(course_id, **kwargs)
+
+        User.add_course_to_user(student_id, course_id, add=True)
+        return jsonify({'message': 'Student enrolled successfully.'}), 200
+
+    @staticmethod
+    def unenroll_student(course_id, student_id):
+        course = Course.find_by_id(course_id)
+        if not course:
+            return jsonify({'message': 'Course not found.'}), 404
+
+        if ObjectId(student_id) not in course['enrolled_students']:
+            return jsonify({'message': 'Student is not enrolled in this course.'}), 400
+
+        course['enrolled_students'].remove(ObjectId(student_id))
+        course.save()
+        User.add_course_to_user(student_id, course_id, add=False)
+        return jsonify({'message': 'Student unenrolled successfully.'}), 200
+
+    @staticmethod
+    def _find_or_create_tags(tag_names):
+        tags = []
+        for name in tag_names:
+            tag = Tag.find_by_name(name)
+            if tag:
+                tags.append({'tag_id': str(tag['_id']), 'name': name})
+            else:
+                new_tag = Tag(name=name)
+                tag_id = new_tag.save_to_db()
+                tags.append({'tag_id': str(tag_id), 'name': name})
+        return tags
+
+    @staticmethod
+    def _delete_video(video_url):
+        delete_from_cloudinary(video_url)
+
+    @staticmethod
+    def get_course_details(course_id, student_id, has_access=False):
+        course = Course.get_course_preview(course_id)
+        if not has_access:
+            return jsonify({"course": serialize_document(course)}), 200
+        modules = Module.get_by_course(course_id)
+        assignments = Assignment.get_by_course(course_id)
+        people = Course.get_people(course_id)
+
+        for assignment in assignments:
+            assignment_id = assignment.get('_id')
+            if assignment_id:
+                submissions = Submission.get_by_course(assignment_id, student_id)
+                if submissions:
+                    assignment['submissionsData'] = [serialize_document(submission) for submission in submissions]
+                else:
+                    assignment['submissionsData'] = []
+
+        return {
+            "modules": [serialize_document(module) for module in modules],
+            "assignments": [serialize_document(assignment) for assignment in assignments],
+            "people": people,
+            "course": course
+        }
+
+    @staticmethod
+    def get_course_preview(course_id):
+        course = Course.get_course_preview(course_id)
+        return {"course": course}
+
+    @staticmethod
+    def get_course_details_teacher(course_id):
+        course = Course.get_course_preview(course_id)
+        modules = Module.get_by_course(course_id)
+        assignments = Assignment.get_by_course(course_id)
+        people = Course.get_people(course_id)
+
+        for assignment in assignments:
+            assignment_id = assignment.get('_id')
+            if assignment_id:
+                submissions = Submission.get_all_submissions_for_teacher(assignment_id)
+                if submissions:
+                    assignment['submissionsData'] = [serialize_document(submission) for submission in submissions]
+                else:
+                    assignment['submissionsData'] = []
+
+        return {
+            "modules": [serialize_document(module) for module in modules],
+            "assignments": [serialize_document(assignment) for assignment in assignments],
+            "people": people,
+            "course": course
+        }
+
+    @staticmethod
+    def get_all_course_preview():
+        courses = Course.get_all_courses_preview()
+        return courses
+
+
+class BaseController:
+    def __init__(self, collection):
+        self.collection = collection
+
+    def find_or_create_items(self, names):
+        item_ids = []
+        for name in names:
+            existing_item = self.collection.find_one({'name': name})
+            if existing_item:
+                item_ids.append(ObjectId(existing_item['_id']))
+            else:
+                item_data = {
+                    'name': name,
+                    'created_at': datetime.now(timezone.utc),
+                    'updated_at': datetime.now(timezone.utc)
+                }
+                result = self.collection.insert_one(item_data)
+                item_ids.append(result.inserted_id)
+        return item_ids
+
+    def get_all_items(self):
+        items = list(self.collection.find())
+        for item in items:
+            item['_id'] = str(item['_id'])
+        return items
+
+    def delete_item(self, item_id):
+        return self.collection.delete_one({'_id': ObjectId(item_id)}).deleted_count > 0
+
+    def update_item(self, item_id, name):
+        updated = self.collection.update_one(
+            {'_id': ObjectId(item_id)},
+            {'$set': {'name': name, 'updated_at': datetime.now(timezone.utc)}}
+        )
+        return updated.modified_count > 0
+
+from services.mongo_service import db
+from .course_controller import BaseController
+
+
+class TagController(BaseController):
+    def __init__(self):
+        super().__init__(db.tags)
+
+from flask import Blueprint, request
+from controllers.course import SubmissionController
+from middleware.auth_middleware import login_required
+from middleware.course_middleware import require_admin_or_instructor_or_uploader
+from services.supabase_service import upload_to_s3
+
+submission_bp = Blueprint('submissions', __name__)
+
+
+@submission_bp.route('/submissions', methods=['POST'])
+@login_required
+def add_submission(assignment_id):
+    content = request.files.get("content")
+    file_url = None
+    if content:
+        destination_path = f"submissions/{assignment_id}/{content.filename}"
+        file_url = upload_to_s3(content, destination_path)
+    return SubmissionController.upload_submission_content(assignment_id, file_url)
+
+
+@submission_bp.route('/<submission_id>/grade', methods=['POST'])
+@require_admin_or_instructor_or_uploader
+def get_grade(submission_id, **kwargs):
+    return SubmissionController.grade_submission_content(submission_id)
+
+from flask import Blueprint, jsonify, request, g
+from controllers.course import CourseController, TagController, MajorController
+from middleware.course_middleware import require_admin_or_instructor_or_uploader, require_admin_or_instructor
+from middleware.payment_middleware import payment_required
+from bson import ObjectId
+
+course_bp = Blueprint('course', __name__)
+
+tag_controller = TagController()
+major_controller = MajorController()
+
+
+@course_bp.route('/', methods=['POST'])
+@require_admin_or_instructor
+def create_course():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    instructor_id = request.form.get('instructor_id')
+    price = request.form.get('price')
+    tag_names = request.form.getlist('tag_names')
+    major_ids = [ObjectId(mid) for mid in request.form.getlist('major_ids')]
+    cover_image = request.files.get('cover_image') if 'cover_image' in request.files else None
+
+    return CourseController.create_course(
+        title=title,
+        description=description,
+        instructor_id=instructor_id,
+        price=price,
+        tag_names=tag_names,
+        major_ids=major_ids,
+        cover_image=cover_image
+    )
+
+
+@course_bp.route('/', methods=['GET'])
+def get_all_courses():
+    return CourseController.get_all_course_preview()
+
+
+@course_bp.route('/<course_id>', methods=['PUT'])
+@require_admin_or_instructor_or_uploader
+def update_course(course_id):
+    title = request.form.get('title')
+    description = request.form.get('description')
+    instructor_id = request.form.get('instructor_id')
+    tag_names = request.form.getlist('tag_names')
+    major_ids = [ObjectId(mid) for mid in request.form.getlist('major_ids')]
+
+    return CourseController.update_course(
+        course_id=course_id,
+        title=title,
+        description=description,
+        instructor_id=instructor_id,
+        tag_names=tag_names,
+        major_ids=major_ids
+    )
+
+
+@course_bp.route('/<course_id>', methods=['DELETE'])
+@require_admin_or_instructor_or_uploader
+def delete_course(course_id):
+    return CourseController.delete_course(course_id)
+
+
+@course_bp.route('/<course_id>/enroll', methods=['POST'])
+@payment_required
+def enroll_student(course_id, has_access):
+    student_id = g.current_user['_id']
+    return CourseController.enroll_student(course_id, student_id)
+
+
+@course_bp.route('/<course_id>/unroll', methods=['POST'])
+def unenroll_student(course_id):
+    student_id = request.json.get('student_id')
+    if not student_id:
+        return jsonify({'message': 'Student ID is required.'}), 400
+    return CourseController.unenroll_student(course_id, student_id)
+
+
+@course_bp.route('/<course_id>/details', methods=['GET'])
+@payment_required
+def get_course_by_id(course_id, has_access):
+    student_id = None
+    if hasattr(g, 'current_user') and g.current_user:
+        student_id = getattr(g.current_user, "_id", None)
+    return CourseController.get_course_details(course_id, student_id, has_access)
+
+
+@course_bp.route('/<course_id>/preview', methods=['GET'])
+def get_course_preview(course_id):
+    return CourseController.get_course_preview(course_id)
+
+
+@course_bp.route('/tags', methods=['GET'])
+def get_all_tags():
+    tags = tag_controller.get_all_items()
+    return jsonify(tags), 200
+
+
+@course_bp.route('/tags', methods=['POST'])
+@require_admin_or_instructor
+def create_tags():
+    tag_names = request.json.get('names', [])
+    if not tag_names:
+        return jsonify({'message': 'Tag names are required'}), 400
+    tag_ids = tag_controller.find_or_create_items(tag_names)
+    return jsonify({'message': 'Tags created or updated', 'tag_ids': [str(tid) for tid in tag_ids]}), 201
+
+
+@course_bp.route('/tags/<tag_id>', methods=['PUT'])
+@require_admin_or_instructor
+def update_tag(tag_id):
+    name = request.json.get('name')
+    if not name:
+        return jsonify({'message': 'Tag name is required'}), 400
+    success = tag_controller.update_item(tag_id, name)
+    if success:
+        return jsonify({'message': 'Tag updated successfully'}), 200
+    return jsonify({'message': 'Failed to update tag'}), 400
+
+
+@course_bp.route('/tags/<tag_id>', methods=['DELETE'])
+@require_admin_or_instructor
+def delete_tag(tag_id):
+    success = tag_controller.delete_item(tag_id)
+    if success:
+        return jsonify({'message': 'Tag deleted successfully'}), 200
+    return jsonify({'message': 'Failed to delete tag'}), 400
+
+
+@course_bp.route('/majors', methods=['GET'])
+def get_all_majors():
+    majors = major_controller.get_all_items()
+    return jsonify(majors), 200
+
+
+@course_bp.route('/majors', methods=['POST'])
+@require_admin_or_instructor
+def create_majors():
+    major_names = request.json.get('names', [])
+    if not major_names:
+        return jsonify({'message': 'Major names are required'}), 400
+    major_ids = major_controller.find_or_create_items(major_names)
+    return jsonify({'message': 'Majors created or updated', 'major_ids': [str(mid) for mid in major_ids]}), 201
+
+
+@course_bp.route('/majors/<major_id>', methods=['PUT'])
+@require_admin_or_instructor
+def update_major(major_id):
+    name = request.json.get('name')
+    if not name:
+        return jsonify({'message': 'Major name is required'}), 400
+    success = major_controller.update_item(major_id, name)
+    if success:
+        return jsonify({'message': 'Major updated successfully'}), 200
+
+
+@course_bp.route('/majors/<major_id>', methods=['DELETE'])
+@require_admin_or_instructor
+def delete_major(major_id):
+    success = major_controller.delete_item(major_id)
+    if success:
+        return jsonify({'message': 'Major deleted successfully'}), 200
+
+from flask import Blueprint, request
+from controllers.course import AssignmentController
+from middleware.course_middleware import require_admin_or_instructor_or_uploader
+from services.cloudflare_service import handle_temp_file_upload
+
+assignment_bp = Blueprint('assignments', __name__)
+
+
+@assignment_bp.route('', methods=['POST'])
+@require_admin_or_instructor_or_uploader
+def add_assignment(course_id):
+    data = request.form.to_dict()
+    file = request.files.get('file')
+    if file:
+        file_url = handle_temp_file_upload(file, "assignment")
+        data['file'] = file_url
+    title = request.form.get('title')
+    description = request.form.get('description')
+    due_date = request.form.get('due_date')
+    max_grade = request.form.get('max_grade')
+    allow_late_submission = request.form.get('allow_late_submission', 'false').lower() == 'true'
+    return AssignmentController.add_assignment(course_id, title, description, due_date, max_grade,
+                                               allow_late_submission)
+
+
+@assignment_bp.route('', methods=['GET'])
+def get_assignments(course_id):
+    return AssignmentController.get_assignments(course_id)
+
+
+@assignment_bp.route('/<assignment_id>', methods=['GET'])
+def get_assignment(assignment_id):
+    return AssignmentController.get_assignment_by_id(assignment_id)
+
+
+@assignment_bp.route('/<assignment_id>', methods=['DELETE'])
+def delete_assignment(assignment_id):
+    return AssignmentController.delete_assignment(assignment_id)
+
+
+from flask import Blueprint
+from controllers.course.module_controller import ModuleController, ModuleMaterialController
+from middleware.course_middleware import require_admin_or_instructor_or_uploader
+
+module_routes = Blueprint('module', __name__)
+
+
+@module_routes.route('', methods=['GET'])
+def get_modules(course_id):
+    return ModuleController.get_modules(course_id)
+
+
+@module_routes.route('/<module_id>', methods=['GET'])
+def get_module_by_id(course_id):
+    return ModuleController.get_module_by_id(course_id)
+
+
+@module_routes.route('', methods=['POST'])
+@require_admin_or_instructor_or_uploader
+def add_course_module(course_id):
+    return ModuleController.add_module(course_id)
+
+
+@module_routes.route('/<module_id>/materials', methods=['POST'])
+@require_admin_or_instructor_or_uploader
+def add_module_material(course_id, module_id):
+    return ModuleMaterialController.add_material(module_id)
+
+
+@module_routes.route('/<module_id>/materials/<material_id>', methods=['PUT'])
+@require_admin_or_instructor_or_uploader
+def update_module_material(course_id, module_id, material_id):
+    return ModuleMaterialController.update_material(module_id, material_id)
+
+
+@module_routes.route('/<module_id>/materials/<material_id>', methods=['DELETE'])
+@require_admin_or_instructor_or_uploader
+def delete_module_material(course_id, module_id, material_id):
+    return ModuleMaterialController.delete_material(module_id, material_id)
+
+
+@module_routes.route('/<module_id>/materials/<material_id>', methods=['GET'])
+def get_module_material(course_id, module_id, material_id):
+    return ModuleMaterialController.get_material(module_id, material_id)
+
+def register_routes(app):
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(student_bp, url_prefix='/students')
+    app.register_blueprint(course_bp, url_prefix='/courses')
+    app.register_blueprint(assignment_bp, url_prefix='/courses/<course_id>/assignments')
+    app.register_blueprint(submission_bp, url_prefix='/assignments/<assignment_id>')
+    app.register_blueprint(payment_bp, url_prefix='/payment')
+    app.register_blueprint(user_bp, url_prefix='/user')
+    app.register_blueprint(module_routes, url_prefix='/courses/<course_id>/modules')
+

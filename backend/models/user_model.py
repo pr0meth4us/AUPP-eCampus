@@ -35,6 +35,9 @@ class User:
     def is_email_taken(email: str) -> bool:
         return db.users.find_one({'email': email}) is not None
 
+    def get_user_email(self):
+        return self.email
+
     @staticmethod
     def find_by_email(email):
         return db.users.find_one({'email': email})
@@ -49,6 +52,7 @@ class User:
 
     @staticmethod
     def verify_password(stored_password: str, provided_password: str) -> bool:
+        """Verify password hash."""
         return check_password_hash(stored_password, provided_password)
 
     def save_to_db(self) -> None:
@@ -75,13 +79,18 @@ class User:
         if new_profile_image is not None:
             update_data['profile_image'] = new_profile_image
 
-        db.users.update_one(
+        if not update_data:
+            raise ValueError("No fields to update.")
+
+        result = db.users.update_one(
             {'email': self.email},
             {'$set': update_data}
         )
+        if result.modified_count == 0:
+            raise ValueError("User not found or no changes made.")
 
     @staticmethod
-    def add_course_to_user(user_id, course_id, add=True):
+    def update_courses(user_id, course_id, add=True):
         user = db.users.find_one({'_id': ObjectId(user_id)})
 
         if not user:
@@ -104,11 +113,12 @@ class User:
     @staticmethod
     def get_profile(user_id):
         user = db.users.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            raise ValueError("User not found.")
 
         return {
-            "name": user.get('name'),
-            "profile_image": user.get('profile_image', ''),
-            "bio": user.get('bio', '')
+            "name": user.get('name', ''),
+            "profile_image": user.get('profile_image', '')
         }
 
 
