@@ -28,7 +28,13 @@ def create_app():
     @flask_app.route('/set_cookie')
     def set_cookie():
         resp = make_response("Setting cookie")
-        resp.set_cookie('__vercel_live_token', 'value', samesite='None', secure=True)
+        resp.set_cookie(
+            '__vercel_live_token',
+            value='your_token',
+            samesite='None',  # Allows cross-site cookies
+            secure=True,      # Cookie only sent over HTTPS
+            httponly=True     # Optional, for additional security
+        )
         return resp
 
 
