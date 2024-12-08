@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardBody, Progress } from "@nextui-org/react";
-import { BookOpen, TrendingUp, Award } from "lucide-react";
+import { Card, CardBody, Progress, Button } from "@nextui-org/react";
+import { BookOpen, TrendingUp, Award, FileText } from "lucide-react";
 
 const GradesTab = ({ assignments }) => {
     // If no assignments data is passed, show a placeholder
@@ -54,7 +54,7 @@ const GradesTab = ({ assignments }) => {
                         <BookOpen size={24} className="text-primary" />
                         <h4 className="text-lg font-semibold">Assignment Grades</h4>
                     </div>
-                    {assignments.map((assignment, index) => (
+                    {assignments.map((assignment) => (
                         <div
                             key={assignment._id}
                             className="mb-4 last:mb-0 border-b pb-4 last:border-b-0"
@@ -65,11 +65,47 @@ const GradesTab = ({ assignments }) => {
                                     Max Grade: {assignment.max_grade}
                                 </span>
                             </div>
-                            <Progress
-                                value={assignment.submissionsData?.length ? 100 : 0}
-                                color={assignment.submissionsData?.length ? "success" : "default"}
-                                label={assignment.submissionsData?.length ? "Submitted" : "Not Submitted"}
-                            />
+
+                            {assignment.submissionsData?.map((submission) => (
+                                <div
+                                    key={submission._id}
+                                    className="mb-4 last:mb-0 border-b pb-4 last:border-b-0"
+                                >
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-medium">Submitted on: {new Date(submission.submitted_at).toLocaleDateString()}</span>
+                                        <span className="text-sm text-gray-500">
+                                            {submission.is_late ? "Late" : "On Time"}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center mb-2">
+                                        <div className="text-sm text-gray-500">
+                                            <p>Grade: {submission.grade ? submission.grade : "Not Graded"}</p>
+                                            <p>Feedback: {submission.feedback || "No feedback provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    {submission.content && (
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="primary"
+                                            startContent={<FileText size={16} />}
+                                            onPress={() => window.open(submission.content, "_blank")}
+                                        >
+                                            View Submission
+                                        </Button>
+                                    )}
+
+                                    {!submission.content && (
+                                        <Progress
+                                            value={submission.grade ? 100 : 0}
+                                            color={submission.grade ? "success" : "default"}
+                                            label={submission.grade ? "Graded" : "Not Graded"}
+                                        />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     ))}
                 </CardBody>

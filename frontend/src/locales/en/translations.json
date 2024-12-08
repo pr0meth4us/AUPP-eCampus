@@ -26,6 +26,6 @@
       "phone": "(+855) 23 990 023",
       "email": "info@aupp.edu.kh"
     },
-    "copyright": "© Copyright {year} American University of Phnom Penh, All Rights Reserved."
+    "copyright": "© Copyright {{year}} American University of Phnom Penh, All Rights Reserved."
   }
 }

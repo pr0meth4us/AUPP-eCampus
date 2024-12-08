@@ -92,6 +92,11 @@ export const course = {
         return response.data;
     },
 
+    getAssignmentById: async (courseId, assignmentId) => {
+        const response = await api.get(`/${courseId}/assignments/${assignmentId}`);
+        return response.data;
+    },
+
     addAssignment: async (courseId, assignmentData) => {
         const response = await api.post(`/${courseId}/assignments`, assignmentData);
         return response.data;
@@ -118,5 +123,15 @@ export const course = {
         const response = await api.get(`/${courseId}/preview`);
         return response.data;
     },
+
+    getModuleById: async (courseId, moduleId) =>{
+        const response = await api.get(`/${courseId}/modules/${moduleId}`);
+        return response.data;
+    },
+
+    getMaterialById: async (courseId,moduleId, materialId) => {
+        const response = await api.get(`/${courseId}/modules/${moduleId}/materials/${materialId}`);
+        return response.data;
+    }
 
 };

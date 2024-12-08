@@ -82,9 +82,9 @@ class Module:
         print(course_id, "cors")
         return list(db.modules.find({'course_id': ObjectId(course_id)}))
     @staticmethod
-    def find_by_id(module_id):
+    def find_by_id(course_id, module_id):
         try:
-            return db.modules.find_one({'_id': ObjectId(module_id)})
+            return db.modules.find_one({"course_id": ObjectId(course_id), '_id': ObjectId(module_id)})
         except Exception as e:
             logging.error(f"Error finding module by ID: {e}")
             raise
@@ -152,10 +152,10 @@ class Module:
             raise
 
     @staticmethod
-    def find_material_in_module(module_id, material_id):
+    def find_material_in_module(course_id, module_id, material_id):
         try:
             module = db.modules.find_one(
-                {'_id': ObjectId(module_id), 'materials._id': material_id},
+                {'_id': ObjectId(module_id), 'course_id': ObjectId(course_id), 'materials._id': material_id},
                 {'materials.$': 1}
             )
             return module['materials'][0] if module else None

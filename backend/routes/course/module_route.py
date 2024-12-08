@@ -6,23 +6,23 @@ from middleware.course_middleware import require_admin_or_instructor_or_uploader
 module_routes = Blueprint('module', __name__)
 
 
-@module_routes.route('/<course_id>/modules', methods=['GET'])
+@module_routes.route('', methods=['GET'])
 def get_modules(course_id):
     return ModuleController.get_modules(course_id)
 
 
-@module_routes.route('/<course_id>/<module_id>', methods=['GET'])
-def get_module_by_id(module_id, course_id):
-    return ModuleController.get_module_by_id(module_id)
+@module_routes.route('/<module_id>', methods=['GET'])
+def get_module_by_id(course_id, module_id):
+    return ModuleController.get_module_by_id(course_id, module_id)
 
 
-@module_routes.route('/<course_id>/modules', methods=['POST'])
+@module_routes.route('', methods=['POST'])
 @require_admin_or_instructor_or_uploader
 def add_course_module(course_id):
     return ModuleController.add_module(course_id)
 
 
-@module_routes.route('/<course_id>/<module_id>/materials', methods=['POST'])
+@module_routes.route('/<module_id>/materials', methods=['POST'])
 @require_admin_or_instructor_or_uploader
 def add_module_material(module_id, course_id):
     return ModuleMaterialController.add_material(module_id)
@@ -41,5 +41,5 @@ def delete_module_material(module_id, material_id):
 
 
 @module_routes.route('/<module_id>/materials/<material_id>', methods=['GET'])
-def get_module_material(module_id, material_id):
-    return ModuleMaterialController.get_material(module_id, material_id)
+def get_module_material(course_id, module_id, material_id):
+    return ModuleMaterialController.get_material(course_id, module_id, material_id)

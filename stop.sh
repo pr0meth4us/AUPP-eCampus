@@ -2,7 +2,7 @@
 
 # Function to kill processes on macOS and Linux
 kill_processes_unix() {
-  pids=$(lsof -t -i:5000 -i:3000)
+  pids=$(lsof -t -i:5001 -i:3000)
   if [ -z "$pids" ]; then
     echo "No process is running on port 5000 or port 3000."
   else
