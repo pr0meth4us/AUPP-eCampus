@@ -18,4 +18,4 @@ def register_routes(app):
     app.register_blueprint(submission_bp, url_prefix='/assignments/<assignment_id>')
     app.register_blueprint(payment_bp, url_prefix='/payment')
     app.register_blueprint(user_bp, url_prefix='/user')
-    app.register_blueprint(module_routes, url_prefix='/courses')
+    app.register_blueprint(module_routes, url_prefix='/courses/<course_id>/modules')

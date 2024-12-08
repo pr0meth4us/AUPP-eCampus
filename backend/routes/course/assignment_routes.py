@@ -28,8 +28,8 @@ def get_assignments(course_id):
 
 
 @assignment_bp.route('/<assignment_id>', methods=['GET'])
-def get_assignment(assignment_id):
-    return AssignmentController.get_assignment_by_id(assignment_id)
+def get_assignment(course_id, assignment_id):
+    return AssignmentController.get_assignment_by_id(course_id, assignment_id)
 
 
 @assignment_bp.route('/<assignment_id>', methods=['DELETE'])
