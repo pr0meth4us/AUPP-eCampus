@@ -4,8 +4,9 @@ import { API_BASE_URL } from "../config";
 const endpoint = (path = "") => axios.create({
     baseURL: `${API_BASE_URL}/${path}`,
     withCredentials: true,
-    headers: {
-        'Access-Control-Allow-Origin': 'https://ecampusauppedu.vercel.app'
-    }
+});
+endpoint.interceptors.request.use(config => {
+    config.url = config.url.replace('//', '/');
+    return config;
 });
 export default endpoint;
