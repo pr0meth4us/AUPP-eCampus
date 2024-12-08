@@ -6,7 +6,7 @@ const CourseHeader = ({ course }) => (
             <img
                 alt={`Cover for ${course.title}`}
                 className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
-                src={course.cover_image || "/Course-Placeholder.jpg"}
+                src={course.cover_image_url || "/Course-Placeholder.jpg"}
                 onError={(e) => {
                     e.target.src = "/Course-Placeholder.jpg";
                     e.target.classList.add("opacity-50");

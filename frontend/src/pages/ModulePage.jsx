@@ -104,7 +104,7 @@ export const ModuleDetailPage = () => {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {material.content && (
+                                                {material.content_url && (
                                                     <Button
                                                         size="sm"
                                                         variant="flat"

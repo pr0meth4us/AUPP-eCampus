@@ -49,7 +49,7 @@ class CourseController:
             return jsonify({'message': 'An error occurred while creating the course.', 'details': str(e)}), 500
 
     @staticmethod
-    def update_course(course_id, title, description, instructor_id, tag_names, major_ids, video_file):
+    def update_course(course_id, title, description, instructor_id, tag_names, major_ids):
         try:
             course = Course.find_by_id(course_id)
             if not course:
@@ -57,13 +57,6 @@ class CourseController:
 
             created_tags = CourseController._find_or_create_tags(tag_names)
             tag_ids = [ObjectId(tag['tag_id']) for tag in created_tags]
-
-            if video_file:
-                new_video_url, new_thumbnail_url = CourseController._upload_video(video_file, title, description)
-                if course.get('video_url'):
-                    CourseController._delete_video(course['video_url'])
-                course.video_url = new_video_url
-                course.thumbnail_url = new_thumbnail_url
 
             course.update(
                 title=title,

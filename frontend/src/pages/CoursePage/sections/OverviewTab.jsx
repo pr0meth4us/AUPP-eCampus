@@ -43,25 +43,7 @@ const OverviewTab = ({ course }) => {
             </Card>
 
             <div className="grid md:grid-cols-2 gap-6">
-                {/* Course Details Section */}
-                <Card className="shadow-md">
-                    <CardBody>
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <User size={20} className="text-blue-500" /> Course Details
-                        </h3>
-                        <div className="space-y-3">
-                            {courseDetails.map((detail, index) => (
-                                <div key={index} className="flex items-center gap-3">
-                                    {detail.icon}
-                                    <div>
-                                        <p className="font-medium text-gray-700">{detail.label}</p>
-                                        <p className="text-sm text-gray-500">{detail.value}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardBody>
-                </Card>
+
 
                 {/* Tags and Majors Section */}
                 <Card className="shadow-md">

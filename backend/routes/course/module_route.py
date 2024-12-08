@@ -24,8 +24,8 @@ def add_course_module(course_id):
 
 @module_routes.route('/<module_id>/materials', methods=['POST'])
 @require_admin_or_instructor_or_uploader
-def add_module_material(module_id, course_id):
-    return ModuleMaterialController.add_material(module_id)
+def add_module_material(course_id, module_id):
+    return ModuleMaterialController.add_material(course_id, module_id)
 
 
 @module_routes.route('/<module_id>/materials/<material_id>', methods=['PUT'])

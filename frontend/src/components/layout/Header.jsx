@@ -8,6 +8,7 @@ import Signup from "../features/Signup";
 import { useAuth } from "../../context/authContext";
 import DrawerButton from "../features/ProfileDrawer";
 import LanguageSwitcher from "../features/LanguageSwitcher";
+import {SearchOutlined} from "@mui/icons-material";
 
 const Header = () => {
     const { user } = useAuth();
@@ -34,7 +35,7 @@ const Header = () => {
                                 style={{width: "300px"}}
                             />
                             <span className="input-group-text bg-white search-icon">
-                                <i className="bi bi-search"></i>
+                                <SearchOutlined />
                             </span>
                         </div>
                     </form>

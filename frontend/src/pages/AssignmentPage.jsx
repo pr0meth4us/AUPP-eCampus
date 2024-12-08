@@ -19,6 +19,7 @@ import {
     Clock,
     CheckCircle,
     XCircle,
+    Eye
 } from 'lucide-react';
 
 export const AssignmentDetailPage = () => {
@@ -125,10 +126,10 @@ export const AssignmentDetailPage = () => {
                                 <Button
                                     color="primary"
                                     variant="flat"
-                                    startContent={<Download size={16} />}
+                                    startContent={<Eye size={16} />} // Use an "eye" icon to represent "view" if available
                                     onPress={() => window.open(assignment.file, '_blank')}
                                 >
-                                    Download Assignment
+                                    View Assignment
                                 </Button>
                             )}
                         </div>
