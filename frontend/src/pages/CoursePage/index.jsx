@@ -24,6 +24,7 @@ const CoursePage = () => {
     }
 
     const course = courseDetails?.course;
+    console.log(courseDetails);
     if (!course) return <Spinner />;
 
     const isOwned = user?.courses?.includes(course._id);
@@ -86,7 +87,7 @@ const CoursePage = () => {
                 <CourseHeader course={course} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
-                        <InstructorCard instructor={course.instructor_name} />
+                        <InstructorCard instructor_name={course.instructor_name} instructor_pfp={course.instructor_pfp} />
                         <TabsContainer
                             course={course}
                             assignments={courseDetails?.assignments}

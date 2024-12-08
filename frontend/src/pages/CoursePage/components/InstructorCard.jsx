@@ -1,14 +1,14 @@
 import React from "react";
 import { Card, CardBody, Avatar } from "@nextui-org/react";
 
-const InstructorCard = ({ instructor }) => (
+const InstructorCard = ({ instructor_name, instructor_pfp }) => (
     <Card className="shadow-md">
         <CardBody className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-4">
-                {instructor?.profile_image ? (
-                    <Avatar
-                        src={instructor.profile_image}
-                        className="w-16 h-16 border-3 border-primary"
+                {instructor_pfp ? (
+                    <img
+                        src={instructor_pfp}
+                        className="w-16 h-16 object-cover rounded-full border-3 border-primary transition-opacity duration-500 "
                     />
                 ) : (
                     <Avatar
@@ -19,7 +19,7 @@ const InstructorCard = ({ instructor }) => (
                     />
                 )}
                 <div>
-                    <p className="text-lg font-semibold">{`Professor ${instructor?.name || "Instructor"}`}</p>
+                    <p className="text-lg font-semibold">{`Professor ${instructor_name || "Instructor"}`}</p>
                     <p className="text-sm text-gray-500">Course Instructor</p>
                 </div>
             </div>

@@ -311,27 +311,34 @@ const CourseStudyPage = () => {
                                             <TableCell>{formatDate(assignment.due_date)}</TableCell>
                                             <TableCell>{assignment.max_grade}</TableCell>
                                             <TableCell>
-                                                {userSubmission?.grade !== null
-                                                    ? `${userSubmission.grade}/${assignment.max_grade}`
-                                                    : 'Not Graded'}
+                                                {userSubmission
+                                                    ? (userSubmission.grade !== null
+                                                        ? `${userSubmission.grade}/${assignment.max_grade}`
+                                                        : 'Not Graded')
+                                                    : 'No Submission'}
                                             </TableCell>
                                             <TableCell>
-                                                <Chip
-                                                    size="sm"
-                                                    color={
-                                                        userSubmission?.grade !== null
-                                                            ? (userSubmission.grade >= 70 ? 'success' : 'danger')
-                                                            : 'warning'
-                                                    }
-                                                >
-                                                    {userSubmission?.grade !== null
-                                                        ? (userSubmission.grade >= 70 ? 'Passed' : 'Failed')
-                                                        : 'Pending'}
-                                                </Chip>
+                                                {userSubmission ? (
+                                                    <Chip
+                                                        size="sm"
+                                                        color={
+                                                            userSubmission.grade !== null
+                                                                ? (userSubmission.grade >= 70 ? 'success' : 'danger')
+                                                                : 'warning'
+                                                        }
+                                                    >
+                                                        {userSubmission.grade !== null
+                                                            ? (userSubmission.grade >= 70 ? 'Passed' : 'Failed')
+                                                            : 'Pending'}
+                                                    </Chip>
+                                                ) : (
+                                                    <Chip size="sm" color="neutral">No Submission</Chip>
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
+
                             </TableBody>
                         </Table>
                         <div className="mt-4 text-sm text-gray-500">

@@ -39,17 +39,17 @@ export const MaterialDetailPage = () => {
                 <CardBody className="space-y-6">
                     <h1 className="text-2xl font-bold">{material.title}</h1>
                     <p className="text-gray-600">{material.description}</p>
-                    {material.content.startsWith('http') ? (
+                    {material.content_url.startsWith('http') ? (
                         <Button
                             color="primary"
                             variant="flat"
                             startContent={<LinkIcon size={16} />}
-                            onPress={() => window.open(material.content, '_blank')}
+                            onPress={() => window.open(material.content_url, '_blank')}
                         >
                             View File
                         </Button>
                     ) : (
-                        <Textarea aria-label="Material content" value={material.content} readOnly minRows={4} fullWidth />
+                        <Textarea aria-label="Material content" value={material.content_url} readOnly minRows={4} fullWidth />
                     )}
                 </CardBody>
             </Card>
