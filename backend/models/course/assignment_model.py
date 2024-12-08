@@ -19,7 +19,8 @@ class Assignment:
 
     def to_dict(self):
         return {
-            "course_id": self.course_id,
+            "_id": str(self._id) if self._id else None,
+            "course_id": str(self.course_id),
             "title": self.title,
             "description": self.description,
             "due_date": self.due_date,
@@ -36,8 +37,10 @@ class Assignment:
         return result.inserted_id
 
     @staticmethod
-    def get_by_id(assignment_id):
-        return db.assigments.find_one({"_id": assignment_id})
+    def get_by_id(course_id, assignment_id):
+        course_obj_id = ObjectId(course_id) if not isinstance(course_id, ObjectId) else course_id
+        assignment_obj_id = ObjectId(assignment_id) if not isinstance(assignment_id, ObjectId) else assignment_id
+        return db.assignments.find_one({"course_id": course_obj_id, "_id": assignment_obj_id})
 
     @staticmethod
     def delete_from_db(assignment_id):

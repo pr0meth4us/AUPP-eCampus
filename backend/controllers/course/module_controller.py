@@ -94,7 +94,6 @@ class ModuleController:
                 'error': str(e)
             }), 500
 
-    # Other methods remain the same as in the previous implementation
 
 
     @staticmethod
@@ -106,13 +105,12 @@ class ModuleController:
             return jsonify({'message': str(e)}), 400
 
     @staticmethod
-    def get_module_by_id(module_id):
+    def get_module_by_id(course_id, module_id):
         try:
-            module = Module.find_by_id(module_id)
+            module = Module.find_by_id(course_id, module_id)
             if not module:
                 return jsonify({'message': 'Module not found'}), 404
 
-            # Serialize the module document for JSON compatibility
             serialized_module = serialize_document(module)
             return jsonify(serialized_module), 200
         except Exception as e:
@@ -276,10 +274,10 @@ class ModuleMaterialController:
             }), 500
 
     @staticmethod
-    def get_material(module_id, material_id):
+    def get_material(course_id, module_id, material_id):
         try:
             # Find material in module
-            material = Module.find_material_in_module(module_id, material_id)
+            material = Module.find_material_in_module(course_id, module_id, material_id)
 
             if not material:
                 return jsonify({'message': 'Material not found'}), 404

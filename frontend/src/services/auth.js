@@ -12,7 +12,7 @@ export const auth = {
     },
 
     sendOtp: async (email) => {
-        await api.post('/auth/send-otp', { email });
+        await api.post('/send-otp', { email });
     },
 
     register: async (name, email, password, role, otp, token = null, captchaValue) => {

@@ -2,6 +2,7 @@ from flask import jsonify
 from models.course.assignment_model import Assignment
 from models.course import Course
 from bson import ObjectId
+from utils.helpers import serialize_document
 
 class AssignmentController:
     @staticmethod
@@ -36,14 +37,15 @@ class AssignmentController:
             return jsonify({"error": "Course not found"}), 404
 
         assignments = course.get_assignments()
+        return assignments
 
     @staticmethod
-    def get_assignment_by_id(assignment_id):
+    def get_assignment_by_id(course_id, assignment_id):
         try:
-            assignment = Assignment.get_by_id(assignment_id)
+            assignment = Assignment.get_by_id(course_id, assignment_id)
             if not assignment:
                 return jsonify({"error": "Assignment not found"}), 404
-            return jsonify(assignment), 200
+            return jsonify(serialize_document(assignment)), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
