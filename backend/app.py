@@ -30,13 +30,12 @@ def create_app():
         resp = make_response("Setting cookie")
         resp.set_cookie(
             '__vercel_live_token',
-            value='your_token',
-            samesite='None',  # Allows cross-site cookies
-            secure=True,      # Cookie only sent over HTTPS
-            httponly=True     # Optional, for additional security
+            value='auth_token',
+            samesite='None',
+            secure=True,
+            httponly=True
         )
         return resp
-
 
     @flask_app.after_request
     def add_csp_headers(response):
@@ -51,14 +50,15 @@ def create_app():
 
     @flask_app.after_request
     def add_cors_headers(response):
-        response.headers['Access-Control-Allow-Origin'] = 'https://ecampusauppedu.vercel.app/'
+        response.headers['Access-Control-Allow-Origin'] = 'https://ecampusauppedu.vercel.app'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Set-Cookie'] = response.headers.get('Set-Cookie', '').replace('SameSite=Lax',
+                                                                                        'SameSite=None; Secure')
         return response
 
     return flask_app
-
 
 
 app = create_app()
