@@ -125,10 +125,10 @@ import logging
 
 class ModuleMaterialController:
     @staticmethod
-    def add_material(module_id):
+    def add_material(course_id, module_id):
         try:
             # Find existing module
-            existing_module = Module.find_by_id(module_id)
+            existing_module = Module.find_by_id(course_id, module_id)
             if not existing_module:
                 return jsonify({'message': 'Module not found.'}), 404
 

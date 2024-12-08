@@ -54,6 +54,7 @@ class Course:
             return None
 
         instructor_name = User.get_name_by_id(course['instructor_id'])
+        instructor_pfp = User.get_pfp_by_id(course['instructor_id'])
         major_names = [Major.find_by_id(mid)['name'] for mid in course['major_ids']]
         tag_names = [Tag.find_by_id(tid)['name'] for tid in course['tag_ids']]
 
@@ -68,7 +69,8 @@ class Course:
             "student_count": len(course['enrolled_students']) if isinstance(course['enrolled_students'], list) else 0,
             "created_at": course['created_at'],
             "updated_at": course['updated_at'],
-            "price": course['price']
+            "price": course['price'],
+            "instructor_pfp": instructor_pfp,
         }
 
         return course_preview
@@ -159,13 +161,36 @@ class Course:
     @staticmethod
     def get_people(course_id):
         course = db.courses.find_one({"_id": ObjectId(course_id)})
-        instructor = db.users.find_one({"_id": ObjectId(course["instructor_id"])}, {"_id": 1, "name": 1})
-        instructor_data = {"id": str(instructor["_id"]), "name": instructor.get("name", "Unknown")}
+
+        # Retrieve instructor data, including profile_image
+        instructor = db.users.find_one(
+            {"_id": ObjectId(course["instructor_id"])},
+            {"_id": 1, "name": 1, "profile_image": 1}  # Add profile_image field here
+        )
+        instructor_data = {
+            "id": str(instructor["_id"]),
+            "name": instructor.get("name", "Unknown"),
+            "profile_image": instructor.get("profile_image", None)  # Add profile_image to the response
+        }
+
         student_ids = course.get("enrolled_students", [])
-        students = list(db.users.find({"_id": {"$in": [ObjectId(sid) for sid in student_ids]}}, {"_id": 1, "name": 1}))
-        student_data = [{"id": str(student["_id"]), "name": student.get("name", "Unknown")} for student in students]
+
+        # Retrieve students data, including profile_image
+        students = list(db.users.find(
+            {"_id": {"$in": [ObjectId(sid) for sid in student_ids]}},
+            {"_id": 1, "name": 1, "profile_image": 1}  # Add profile_image field here
+        ))
+
+        student_data = [
+            {
+                "id": str(student["_id"]),
+                "name": student.get("name", "Unknown"),
+                "profile_image": student.get("profile_image", None)  # Add profile_image to the response
+            }
+            for student in students
+        ]
+
         return {
             "instructor": instructor_data,
             "students": student_data
         }
-
