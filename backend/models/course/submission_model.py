@@ -51,6 +51,7 @@ class Submission:
     def get_by_course(assignment_id, student_id):
         assignment_id = ObjectId(assignment_id) if isinstance(assignment_id, str) else assignment_id
         student_id = ObjectId(student_id) if isinstance(student_id, str) else student_id
+        print(assignment_id, student_id, "kdmv nis")
         submissions = db.submissions.find({
             'assignment_id': ObjectId(assignment_id),
             'student_id': ObjectId(student_id)

@@ -2,15 +2,14 @@ import React, { useState } from "react";
 import { Tabs, Tab } from "@nextui-org/react";
 import { Lock } from "lucide-react";
 import OverviewTab from "./OverviewTab";
-import AssignmentsTab from "./AssignmentsTab";
-import ModulesTab from "./ModulesTab";
+import {AssignmentsTab} from "./AssignmentsTab";
+import {ModulesTab} from "./ModulesTab";
 import GradesTab from "./GradesTab";
 import PeopleTab from "./PeopleTab";
 
 const TabsContainer = ({ course, assignments, modules, people }) => {
     const [selectedTab, setSelectedTab] = useState("overview");
 
-    // Check if each section has data
     const hasOverview = course?.description || course?.major_names?.length || course?.tag_names?.length;
     const hasAssignments = assignments?.length > 0;
     const hasModules = modules?.length > 0;
@@ -50,9 +49,9 @@ const TabsContainer = ({ course, assignments, modules, people }) => {
             className="mb-4"
         >
             {renderTabContent('overview', <OverviewTab course={course} />)}
-            {renderTabContent('assignments', <AssignmentsTab assignments={assignments} />)}
-            {renderTabContent('modules', <ModulesTab modules={modules} />)}
-            {renderTabContent('grades', <GradesTab />)}
+            {renderTabContent('assignments', <AssignmentsTab assignments={assignments}   courseId={course._id} />)}
+            {renderTabContent('modules', <ModulesTab modules={modules}  courseId={course._id} />)}
+            {renderTabContent('grades', <GradesTab assignments={assignments}/>)}
             {renderTabContent('people', <PeopleTab course={people} />)}
         </Tabs>
     );

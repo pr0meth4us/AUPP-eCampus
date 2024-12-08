@@ -136,7 +136,9 @@ def delete_major(major_id):
 def get_course_details_with_names(course_id, has_access):
     student_id = None
     if hasattr(g, 'current_user') and g.current_user:
-        student_id = getattr(g.current_user, "_id", None)
+        student_id = g.current_user.get('_id', None)
+        print(g.current_user, "jkj")
+
     return CourseController.get_course_details(course_id, student_id, has_access)
 
 
