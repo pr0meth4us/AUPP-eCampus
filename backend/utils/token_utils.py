@@ -8,6 +8,7 @@ def create_token(user):
         '_id': str(user['_id']),
         'role': user['role'],
         'courses': [str(course_id) for course_id in user['courses']],
+        'name': user['name'],
         'exp': datetime.now(UTC) + timedelta(hours=1)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')

@@ -59,4 +59,7 @@ header {
     content: none !important;
 }
 
-
+a[target="_blank"].no-external-icon::after {
+    content: none !important;
+    display: none !important;
+}

@@ -49,8 +49,7 @@ def update_course(course_id):
         description=description,
         instructor_id=instructor_id,
         tag_names=tag_names,
-        major_ids=major_ids,
-        video_file=video_file
+        major_ids=major_ids
     )
 
 
