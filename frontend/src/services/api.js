@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const endpoint = (path = "") => {
     const instance = axios.create({
-        baseURL: `https://aupp-ecampus-production.up.railway.app/${path}`,
+        baseURL: `https://aupp-ecampus-production.up.railway.app/${path}/`,
         withCredentials: true,
     });
 
