@@ -1,13 +1,11 @@
 import axios from 'axios';
-import { API_BASE_URL } from "../config";
 
 const endpoint = (path = "") => {
     const instance = axios.create({
-        baseURL: `${API_BASE_URL}/${path}`,
+        baseURL: `https://long-benedetta-aupp-f2be75c3.koyeb.app/${path}`,
         withCredentials: true,
     });
 
-    // Add a request interceptor
     instance.interceptors.request.use(
         config => {
             if (config.url) {
