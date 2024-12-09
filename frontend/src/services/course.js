@@ -9,7 +9,7 @@ export const course = {
     },
 
     getAllCourses: async () => {
-        const response = await api.get('');
+        const response = await api.get();
         return response.data;
     },
 
