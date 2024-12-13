@@ -1,1 +1,96 @@
 backend/venv
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Frontend
+
+# dependencies
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.js
+
+# testing
+/frontend/coverage
+
+# production
+/frontend/build
+
+# misc
+/frontend/.DS_Store
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Backend
+
+# Python Bytecode
+/backend/__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables
+/backend/.env
+/backend/*.env
+
+# Virtual Environment
+/backend/venv/
+backend/env/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+
+# Flask-specific
+/backend/instance/
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm
+/backend/.idea/
+
+# VS Code
+/backend/.vscode/
+
+# Jupyter Notebook
+/backend/.ipynb_checkpoints/
+
+# macOS
+/backend/.DS_Store
+
+# Windows
+/backend/Thumbs.db
+/backend/Desktop.ini
+
+# Logs
+/backend/*.log
+
+# Database
+/backend/*.sqlite3
+/backend/*.db
+
+# Configuration files
+/backend/config.py
+
+# Python Egg and Distribution
+/backend/*.egg
+/backend/*.egg-info/
+backend/dist/
+backend/build/
+
+# Backup files
+/backend/*~
+/backend/*.bak
+/backend/*.tmp
+
+# IDE settings
+/backend/*.swp
+
+# Security
+/backend/*.pem
+/backend/*.key
+/backend/*.crt
+/backend/youtube-credentials.json.DS_Store

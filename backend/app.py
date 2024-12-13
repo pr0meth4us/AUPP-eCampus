@@ -1,49 +1,57 @@
-from flask import Flask, request, jsonify
-from pymongo import MongoClient
-from minio import Minio
-from minio.error import S3Error
-import os
+from flask import Flask, jsonify, make_response
+from services.mongo_service import init_mongo
+from config import Config
+import traceback
 
-app = Flask(__name__)
 
-# MongoDB configuration
-mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/mydb')
-mongo_client = MongoClient(mongo_uri)
-db = mongo_client.mydb
+def create_app():
+    flask_app = Flask(__name__)
 
-# MinIO configuration
-minio_client = Minio(
-    os.getenv('MINIO_ENDPOINT', 'localhost:9000'),  # Just the hostname and port
-    access_key=os.getenv('MINIO_ACCESS_KEY', 'minio'),
-    secret_key=os.getenv('MINIO_SECRET_KEY', 'minio123'),
-    secure=False  # Secure=False means using HTTP
-)
+    flask_app.config.from_object(Config)
+    init_mongo()
+    from services.cors_service import init_cors
+    init_cors(flask_app)
 
-@app.route('/data', methods=['POST'])
-def add_data():
-    data = request.json
-    result = db.collection.insert_one(data)
-    return jsonify({'_id': str(result.inserted_id)})
+    from routes import register_routes
+    register_routes(flask_app)
 
-@app.route('/files/upload', methods=['POST'])
-def upload_file():
-    file = request.files['file']
-    filename = file.filename
-    try:
-        minio_client.put_object(
-            'mybucket', filename, file.stream, file.content_length
+    @flask_app.errorhandler(500)
+    def internal_error(error):
+        return jsonify(
+            {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
+        ), 500
+
+    @flask_app.route('/health')
+    def health_check():
+        return jsonify(status="healthy"), 200
+
+    @flask_app.route('/set_cookie')
+    def set_cookie():
+        resp = make_response("Setting cookie")
+        resp.set_cookie(
+            '__vercel_live_token',
+            value='auth_token',
+            samesite='None',
+            secure=True,
+            httponly=True
         )
-        return jsonify({'message': 'File uploaded successfully'}), 201
-    except S3Error as e:
-        return jsonify({'error': str(e)}), 500
+        return resp
 
-@app.route('/files/<filename>', methods=['GET'])
-def get_file(filename):
-    try:
-        response = minio_client.get_object('mybucket', filename)
-        return response.read(), 200
-    except S3Error as e:
-        return jsonify({'error': str(e)}), 500
+    @flask_app.after_request
+    def add_csp_headers(response):
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' https://www.google.com https://www.gstatic.com; "
+            "frame-src 'self' https://www.google.com; "
+            "style-src 'self' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com;"
+        )
+        return response
+
+    return flask_app
+
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
