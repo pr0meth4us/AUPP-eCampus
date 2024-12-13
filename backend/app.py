@@ -25,7 +25,7 @@ def create_app():
     def health_check():
         return jsonify(status="healthy"), 200
 
-    @flask_app.route('')
+    @flask_app.route('/')
     def home():
         return "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
