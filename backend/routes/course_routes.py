@@ -38,13 +38,11 @@ def get_my_courses():
     return CourseController.get_my_courses()
 
 
-# Public preview
 @course_bp.route('/<course_id>/preview', methods=['GET'])
 def preview_course(course_id):
     return CourseController.preview_course(course_id)
 
 
-# Student-only detail (enrollment/payment guard)
 @course_bp.route('/<course_id>/detail', methods=['GET'])
 @login_required
 @payment_required
@@ -52,7 +50,6 @@ def detail_course(course_id, has_access=False):
     return CourseController.detail_course(course_id, has_access=has_access)
 
 
-# Instructor/admin full info
 @course_bp.route('/<course_id>/full', methods=['GET'])
 @login_required
 @require_admin_or_instructor_or_uploader

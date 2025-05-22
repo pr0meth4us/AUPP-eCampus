@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }) => {
         await login(email, password, role);
     };
 
-    const login = async (email, password, role) => {
-        const data = await auth.login(email, password, role);
+    const login = async (email, password, role, recaptchaResponse) => {
+        const data = await auth.login(email, password, role, recaptchaResponse);
         if (data.user) {
             setUser(data.user);
             localStorage.setItem('user', JSON.stringify(data.user));

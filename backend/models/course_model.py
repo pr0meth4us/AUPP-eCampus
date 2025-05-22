@@ -14,7 +14,9 @@ class Course:
         self.description = data.get('description')
         self.instructor_id = data.get('instructor_id')
         self.uploader_id = data.get('uploader_id')
-        self.cover_image_url = data.get('cover_image_url', "https://res.cloudinary.com/dktzt7yn1/image/upload/v1747893932/ChatGPT_Image_May_22_2025_01_04_59_PM_mwtgo9.png")
+        self.cover_image_url = data.get('cover_image_url', "https://res.cloudinary.com/dktzt7yn1/image/upload"
+                                                           "/v1747893932/ChatGPT_Image_May_22_2025_01_04_59_PM_mwtgo9"
+                                                           ".png")
         self.major_ids = data.get('major_ids', [])
         self.tag_ids = data.get('tag_ids', [])
         self.price = data.get('price')

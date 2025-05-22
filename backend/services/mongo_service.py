@@ -12,15 +12,13 @@ def init_mongo():
         print(f"Connecting to MongoDB using URI: {mongo_uri}")
 
         mongo_client = MongoClient(mongo_uri)
-        db = mongo_client.get_database('auppEcampus')  # You can change the database name here
+        db = mongo_client.get_database('auppEcampus')
 
         if db is not None:
             print('MongoDB connected successfully!')
         else:
             print('Failed to connect to MongoDB')
 
-    except errors.ConnectionError as e:
-        print(f"Error connecting to MongoDB: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
 

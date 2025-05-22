@@ -1,8 +1,9 @@
 from functools import wraps
+
 from flask import g, jsonify
+
 from models.course_model import Course
 from .auth_middleware import login_required
-from models.payment_model import Payment
 
 
 def require_admin_or_instructor(f):
@@ -42,7 +43,7 @@ def require_admin_or_instructor_or_uploader(f):
                 user_id != str(course['instructor_id']) and
                 user_id != str(course['uploader_id'])
         ):
-            return jsonify({'message': 'UnauthorizedPage. Only admins, the instructor, or the uploader can perform this '
+            return jsonify({'message': 'UnauthorizedPage. Only admins, the instructor, or the uploader can perform this'
                                        'action.'}), 403
 
         g.course = course

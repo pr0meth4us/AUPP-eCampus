@@ -2,7 +2,6 @@ from functools import wraps
 from flask import jsonify, g, request
 from models.payment_model import Payment
 from models.course_model import Course
-from .auth_middleware import login_required
 from utils.token_utils import get_token_from_request, decode_token
 
 
@@ -15,7 +14,7 @@ def payment_required(f):
             g.current_user = payload
             request.user = payload
             user_id = g.current_user["_id"]
-        except Exception as e:
+        except Exception:
             return f(*args, **kwargs, has_access=False)
 
         course_id = kwargs.get("course_id")

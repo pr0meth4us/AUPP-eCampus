@@ -1,79 +1,81 @@
-from flask import jsonify, make_response, request
-import jwt
-from config import Config
-from models.user_model import User, Student, Admin, Instructor
+from flask import jsonify, request, make_response
+from models.user_model import User
 from services.mail_service import send_mail
-from utils.token_utils import create_token
 from models.otp_model import OTP
-
+from utils.token_utils import create_token, decode_token
+from config import Config
 
 class AuthController:
     @staticmethod
-    def check_email(data):
+    def send_otp():
+        data = request.get_json()
         email = data.get('email')
-        try:
-            User.is_email_taken(email)
-        except ValueError as e:
-            return jsonify({'message': str(e)}), 400
-
+        if not email:
+            return jsonify({'message': 'Email is required'}), 400
+        if User.find_by_email(email):
+            return jsonify({'message': 'Email already registered'}), 409
         otp = OTP.create_otp(email)
         send_mail(email, otp)
-        return jsonify({'message': 'OTP sent to your email.'}), 200
+        return jsonify({'message': 'OTP sent to your email'}), 200
 
     @staticmethod
-    def register(name, email, role, password, received_otp, token=None):
-        if User.find_by_email(email):
-            return jsonify({'message': 'Email already exists.'}), 409
-        if OTP.verify_otp(email, int(received_otp)):
-            user_classes = {'student': Student, 'instructor': Instructor, 'admin': Admin}
-            user_class = user_classes.get(role)
+    def register():
+        data = request.get_json()
+        required = ['email', 'otp', 'role', 'name', 'password']
+        if not all(data.get(k) for k in required):
+            return jsonify({'message': 'Missing required fields'}), 400
 
-            if role == 'admin' and token != Config.ADMIN_TOKEN:
-                return jsonify({'message': 'Invalid admin token.'}), 403
+        email, received_otp, role = data['email'], data['otp'], data['role']
+        name, password = data['name'], data['password']
+        token = data.get('token') if role == 'admin' else None
 
-            user = user_class(name, email, password)
-            user.save_to_db()
-            return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+        if not OTP.verify_otp(email, received_otp):
+            return jsonify({'message': 'Invalid OTP'}), 400
+        if role not in ['student', 'instructor', 'admin']:
+            return jsonify({'message': 'Invalid role'}), 400
+        if role == 'admin' and token != Config.ADMIN_TOKEN:
+            return jsonify({'message': 'Invalid admin token'}), 403
+
+        user = User(name=name, email=email, password=password, role=role)
+        user.save()
+        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
 
     @staticmethod
-    def login_user(email, role, password):
-        if not role or role not in ['student', 'instructor', 'admin']:
-            return jsonify(
-                {'message': 'You must specify whether you are logging in as student, instructor, or admin.'}), 400
+    def login():
+        data = request.get_json()
+        print("RAW BODY:", request.data)
+        print("PARSED JSON:", data)
+        required = ['email', 'password', 'role']
+        if not all(data.get(k) for k in required):
+            return jsonify({'message': 'Missing required fields'}), 400
+
+        email, password, role = data['email'], data['password'], data['role']
+        if role not in ['student', 'instructor', 'admin']:
+            return jsonify({'message': 'Invalid role'}), 400
 
         user = User.find_by_email(email)
-        print(user)
-        if user and User.verify_password(user['password_hash'], password):
-            token = create_token(user)
-
+        if user and User.verify_password(user.password_hash, password) and user.role == role:
+            token = create_token(user.to_dict())
             response = make_response(jsonify({
                 'message': 'Login successful',
-                'user': {'_id': str(user['_id']), 'email': user['email'], 'role': role, 'name': user['name']}
+                'user': {'_id': str(user._id), 'email': user.email, 'role': user.role, 'name': user.name}
             }), 200)
-            response.set_cookie('auth_token', token, httponly=True, secure=True)
-
+            response.set_cookie('auth_token', token, httponly=True, secure=True, samesite='Strict')
             return response
-
         return jsonify({'message': 'Invalid credentials'}), 401
 
     @staticmethod
-    def check_auth(token):
-
+    def check_auth():
+        token = request.cookies.get('auth_token')
         if not token:
-            return jsonify({"authenticated": False}), 401
-
-        try:
-            decoded_token = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-            return jsonify({"authenticated": False, "message": "Invalid or expired token"}), 401
-
-        return jsonify({
-            "authenticated": True,
-            "user": decoded_token
-        }), 200
+            return jsonify({"authenticated": False, "message": "No token provided"}), 401
+        user_data = decode_token(token)
+        if user_data:
+            return jsonify({"authenticated": True, "user": user_data}), 200
+        return jsonify({"authenticated": False, "message": "Invalid or expired token"}), 401
 
     @staticmethod
     def logout():
-        response = make_response(jsonify({"message": "Successfully logged out"}), 200)
+        response = make_response(jsonify({"message": "Logged out successfully"}), 200)
         response.set_cookie('auth_token', '', expires=0, httponly=True, secure=True, samesite='Strict')
         return response

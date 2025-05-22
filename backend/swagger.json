@@ -45,6 +45,14 @@
       }
     },
     "/auth/login": {
+      "get": {
+        "description": "New endpoint",
+        "responses": {
+          "200": {
+            "description": "New response"
+          }
+        }
+      },
       "post": {
         "summary": "Authenticate a user",
         "consumes": [

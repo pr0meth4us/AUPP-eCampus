@@ -1,219 +1,141 @@
 from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 from services.mongo_service import db
-from config import Config
 from typing import List, Optional, Dict, Any
 
 
 class User:
-    required_fields = {'name', 'email', 'password', 'role'}
-    optional_fields = {'bio', 'profile_image', 'courses'}
+    COLLECTION = db.users
 
-    def __init__(self, name, email, password, role,
-                 bio=None, profile_image=None,
-                 courses=None):
+    def __init__(self, name: str, email: str, password: str, role: str,
+                 bio: Optional[str] = None, profile_image: Optional[str] = None,
+                 courses: Optional[List[str]] = None, expertise: Optional[List[str]] = None):
+        self._id = None
         self.name = name
         self.email = email
         self.password_hash = generate_password_hash(password)
         self.role = role
-        self.bio = bio if bio is not None else ""
-        self.profile_image = profile_image if profile_image is not None else ""
-        self.courses = courses if courses is not None else []
+        self.bio = bio or ""
+        self.profile_image = profile_image or ""
+        self.courses = [ObjectId(cid) for cid in (courses or [])]
+        self.expertise = expertise or []  # Only for instructors
 
-    def to_dict(self):
-        return {
+    def to_dict(self) -> Dict[str, Any]:
+        data = {
+            '_id': str(self._id) if self._id else None,
             'name': self.name,
             'email': self.email,
             'password_hash': self.password_hash,
             'role': self.role,
             'bio': self.bio,
             'profile_image': self.profile_image,
-            'courses': self.courses
+            'courses': [str(cid) for cid in self.courses]
         }
+        if self.role == 'instructor':
+            data['expertise'] = self.expertise
+        return data
 
-    @staticmethod
-    def is_email_taken(email: str) -> bool:
-        return db.users.find_one({'email': email}) is not None
-
-    @staticmethod
-    def find_by_email(email):
-        return db.users.find_one({'email': email})
-
-    @staticmethod
-    def get_name_by_id(id):
-        return db.users.find_one({'_id': ObjectId(id)})['name']
-
-    @staticmethod
-    def get_pfp_by_id(id):
-        return db.users.find_one({'_id': ObjectId(id)})['profile_image']
-
-    @staticmethod
-    def find_by_id(user_id):
-        return db.users.find_one({'_id': ObjectId(user_id)})
-
-    @staticmethod
-    def verify_password(stored_password: str, provided_password: str) -> bool:
-        return check_password_hash(stored_password, provided_password)
-
-    def save_to_db(self) -> None:
-        if self.is_email_taken(self.email):
-            raise ValueError(f"Email '{self.email}' is already in use.")
-        db.users.insert_one(self.to_dict())
-
-    def update_self(self, new_name: Optional[str] = None,
-                    new_email: Optional[str] = None,
-                    new_password: Optional[str] = None,
-                    new_bio: Optional[str] = None,
-                    new_profile_image: Optional[str] = None) -> None:
-        update_data = {}
-        if new_name:
-            update_data['name'] = new_name
-        if new_email:
-            if self.is_email_taken(new_email):
-                raise ValueError(f"Email '{new_email}' is already in use.")
-            update_data['email'] = new_email
-        if new_password:
-            update_data['password_hash'] = generate_password_hash(new_password)
-        if new_bio is not None:
-            update_data['bio'] = new_bio
-        if new_profile_image is not None:
-            update_data['profile_image'] = new_profile_image
-
-        db.users.update_one(
-            {'email': self.email},
-            {'$set': update_data}
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'User':
+        user = cls(
+            name=data['name'],
+            email=data['email'],
+            password='',  # Password not stored plain
+            role=data['role'],
+            bio=data.get('bio'),
+            profile_image=data.get('profile_image'),
+            courses=data.get('courses', []),
+            expertise=data.get('expertise', [])
         )
+        user._id = data.get('_id')
+        user.password_hash = data['password_hash']
+        return user
 
-    @staticmethod
-    def add_course_to_user(user_id, course_id, add=True):
-        user = db.users.find_one({'_id': ObjectId(user_id)})
+    def save(self) -> str:
+        if self.COLLECTION.find_one({'email': self.email}):
+            raise ValueError(f"Email '{self.email}' is already in use.")
+        data = self.to_dict()
+        data.pop('_id', None)
+        result = self.COLLECTION.insert_one(data)
+        self._id = result.inserted_id
+        return str(self._id)
 
-        if not user:
-            raise ValueError("User not found.")
+    @classmethod
+    def find_by_id(cls, user_id: str) -> Optional['User']:
+        data = cls.COLLECTION.find_one({'_id': ObjectId(user_id)})
+        return cls.from_dict(data) if data else None
 
-        if 'courses' not in user or not isinstance(user['courses'], list):
-            user['courses'] = []
+    @classmethod
+    def find_by_email(cls, email: str) -> Optional['User']:
+        data = cls.COLLECTION.find_one({'email': email})
+        return cls.from_dict(data) if data else None
 
-        course_id = ObjectId(course_id)
-
-        if add:
-            if course_id not in user['courses']:
-                user['courses'].append(course_id)
-        else:
-            if course_id in user['courses']:
-                user['courses'].remove(course_id)
-
-        db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'courses': user['courses']}})
-
-    @staticmethod
-    def get_profile(user_id):
-        user = db.users.find_one({'_id': ObjectId(user_id)})
-
-        return {
-            "name": user.get('name'),
-            "profile_image": user.get('profile_image', ''),
-            "bio": user.get('bio', '')
+    @classmethod
+    def search_users(cls, query: str, role: Optional[str] = None) -> List['User']:
+        """Search users by name or email with optional role filter."""
+        search_filter = {
+            '$or': [
+                {'name': {'$regex': query, '$options': 'i'}},  # Case-insensitive
+                {'email': {'$regex': query, '$options': 'i'}}
+            ]
         }
+        if role:
+            search_filter['role'] = role
+        data = cls.COLLECTION.find(search_filter).limit(50)  # Limit for performance
+        return [cls.from_dict(user) for user in data]
 
+    def update(self, **kwargs) -> None:
+        update_data = {}
+        for key, value in kwargs.items():
+            if key == 'password':
+                update_data['password_hash'] = generate_password_hash(value)
+            elif key == 'courses':
+                update_data[key] = [ObjectId(cid) for cid in value]
+            elif key in ['name', 'email', 'bio', 'profile_image', 'expertise']:
+                update_data[key] = value
+        if 'email' in update_data and update_data['email'] != self.email:
+            if self.COLLECTION.find_one({'email': update_data['email'], '_id': {'$ne': self._id}}):
+                raise ValueError(f"Email '{update_data['email']}' is already in use.")
+        result = self.COLLECTION.update_one({'_id': self._id}, {'$set': update_data})
+        if result.modified_count == 0:
+            raise ValueError("No changes made or user not found.")
 
-class Student(User):
-    """Student user model."""
-
-    def __init__(self, name: str, email: str, password: str,
-                 bio: Optional[str] = None,
-                 courses: Optional[List[str]] = None,
-                 profile_image: Optional[str] = None):
-        super().__init__(name, email, password, role='student',
-                         bio=bio, profile_image=profile_image,
-                         courses=courses)
-
-
-class Instructor(User):
-    """Instructor user model with expertise."""
-
-    def __init__(self, name: str, email: str, password: str,
-                 bio: Optional[str] = None,
-                 courses: Optional[List[str]] = None,
-                 expertise: Optional[List[str]] = None,
-                 profile_image: Optional[str] = None):
-        super().__init__(name, email, password, role='instructor',
-                         bio=bio, profile_image=profile_image,
-                         courses=courses)
-        self.expertise = expertise or []
-
-    def to_dict(self) -> Dict[str, Any]:
-        data = super().to_dict()
-        data['expertise'] = self.expertise
-        return data
-
-    def add_expertise(self, expertise_area: str) -> None:
-        """Add an area of expertise."""
-        if expertise_area not in self.expertise:
-            self.expertise.append(expertise_area)
-            db.users.update_one(
-                {'email': self.email},
-                {'$set': {'expertise': self.expertise}}
-            )
-
-
-class Admin(User):
-
-    def __init__(self, name: str, email: str, password: str,
-                 bio: Optional[str] = None,
-                 profile_image: Optional[str] = None):
-        super().__init__(name, email, password, role='admin',
-                         bio=bio, profile_image=profile_image)
-        self.token = Config.ADMIN_TOKEN
-
-    def to_dict(self) -> Dict[str, Any]:
-        data = super().to_dict()
-        data.pop('courses', None)
-        return data
-
-    @staticmethod
-    def delete_user(user_id: str) -> None:
-        """Delete a user from the database."""
-        result = db.users.delete_one({'_id': ObjectId(user_id)})
+    def delete(self) -> None:
+        result = self.COLLECTION.delete_one({'_id': self._id})
         if result.deleted_count == 0:
             raise ValueError("User not found.")
 
-    @staticmethod
-    def get_all_users() -> List[Dict[str, Any]]:
-        return [{
-            'id': str(user['_id']),
-            'name': user['name'],
-            'email': user['email'],
-            'role': user['role']
-        } for user in db.users.find()]
+    @classmethod
+    def get_all(cls, role: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get all users, optionally filtered by role."""
+        query = {'role': role} if role else {}
+        pipeline = [
+            {'$match': query},
+            {'$project': {
+                '_id': {'$toString': '$_id'},
+                'name': 1,
+                'email': 1,
+                'role': 1
+            }}
+        ]
+        return list(cls.COLLECTION.aggregate(pipeline))
 
     @staticmethod
-    def update_user(user_id: str, new_name: Optional[str] = None,
-                    new_email: Optional[str] = None,
-                    new_password: Optional[str] = None) -> None:
-        update_data = {}
+    def verify_password(stored_hash: str, provided_password: str) -> bool:
+        return check_password_hash(stored_hash, provided_password)
 
-        if new_name:
-            update_data['name'] = new_name
+    def add_course(self, course_id: str) -> None:
+        if ObjectId(course_id) not in self.courses:
+            self.COLLECTION.update_one(
+                {'_id': self._id},
+                {'$addToSet': {'courses': ObjectId(course_id)}}
+            )
+            self.courses.append(ObjectId(course_id))
 
-        if new_email:
-            current_user = User.find_by_id(user_id)
-            if current_user['email'] == new_email:
-                pass
-            elif User.is_email_taken(new_email):
-                raise ValueError(f"Email '{new_email}' is already in use.")
-            else:
-                update_data['email'] = new_email
-
-        if new_password:
-            update_data['password_hash'] = generate_password_hash(new_password)
-
-        if not update_data:
-            return
-
-        result = db.users.update_one(
-            {'_id': ObjectId(user_id)},
-            {'$set': update_data}
-        )
-
-        if result.modified_count == 0:
-            raise ValueError("User not found or no changes made.")
+    def remove_course(self, course_id: str) -> None:
+        if ObjectId(course_id) in self.courses:
+            self.COLLECTION.update_one(
+                {'_id': self._id},
+                {'$pull': {'courses': ObjectId(course_id)}}
+            )
+            self.courses.remove(ObjectId(course_id))
