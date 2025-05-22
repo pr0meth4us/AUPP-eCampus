@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import jsonify, g, request
 from models.payment_model import Payment
-from models.course.course_model import Course
+from models.course_model import Course
 from .auth_middleware import login_required
 from utils.token_utils import get_token_from_request, decode_token
 

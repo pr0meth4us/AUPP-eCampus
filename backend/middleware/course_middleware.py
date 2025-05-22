@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import g, jsonify
-from models.course import Assignment, Course
+from models.course_model import Course
 from .auth_middleware import login_required
 from models.payment_model import Payment
 
@@ -22,13 +22,13 @@ def require_admin_or_instructor_or_uploader(f):
     def decorated(*args, **kwargs):
         assignment_id = kwargs.get('assignment_id', None)
 
-        if assignment_id:
-            try:
-                course_id = Assignment.get_course_id(assignment_id)
-            except ValueError as e:
-                return jsonify({'message': str(e)}), 400
-        else:
-            course_id = kwargs.get('course_id')
+        # if assignment_id:
+        #     try:
+        #         course_id = Assignment.get_course_id(assignment_id)
+        #     except ValueError as e:
+        #         return jsonify({'message': str(e)}), 400
+        # else:
+        course_id = kwargs.get('course_id')
 
         course = Course.find_by_id(course_id)
         if not course:

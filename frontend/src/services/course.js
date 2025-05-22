@@ -1,5 +1,5 @@
 import endpoint from "./api";
-const api = endpoint("courses");
+const api = endpoint("course");
 export const course = {
     createCourse: async (formData) => {
         const response = await api.post('', formData, {
@@ -29,7 +29,23 @@ export const course = {
         const response = await api.delete(`/${courseId}`);
         return response.data;
     },
+    getMyCourses: async () => {
+        try {
+            const response = await api.get('/my');
+            console.log('API Response:', response); // Log the entire response
 
+            // Check if response.data exists and is an array
+            if (response.data && Array.isArray(response.data)) {
+                return response.data;
+            } else {
+                console.error('Unexpected response format:', response.data);
+                return []; // Return empty array as fallback
+            }
+        } catch (error) {
+            console.error('Error in getMyCourses:', error);
+            throw error; // Rethrow for component to handle
+        }
+    },
     enrollStudent: async (courseId) => {
         const response = await api.post(`/${courseId}/enroll`);
         return response.data;
@@ -119,11 +135,6 @@ export const course = {
         return response.data;
     },
 
-    getPreviewById: async (courseId) => {
-        const response = await api.get(`/${courseId}/preview`);
-        return response.data;
-    },
-
     getModuleById: async (courseId, moduleId) =>{
         const response = await api.get(`/${courseId}/modules/${moduleId}`);
         return response.data;
@@ -132,6 +143,23 @@ export const course = {
     getMaterialById: async (courseId,moduleId, materialId) => {
         const response = await api.get(`/${courseId}/modules/${moduleId}/materials/${materialId}`);
         return response.data;
-    }
+    },
+
+    getPreviewById: async (courseId) => {
+        const { data } = await api.get(`/${courseId}/preview`);
+        return data;
+    },
+
+    // 2. Student detail (requires auth & payment)
+    getDetailById: async (courseId) => {
+        const { data } = await api.get(`/${courseId}/detail`);
+        return data;
+    },
+
+    // 3. Full info (instructor / admin)
+    getFullById: async (courseId) => {
+        const { data } = await api.get(`/${courseId}/full`);
+        return data;
+    },
 
 };

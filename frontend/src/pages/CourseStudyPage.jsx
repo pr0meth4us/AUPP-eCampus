@@ -53,7 +53,9 @@ const getDaysUntilDue = (dateString) => {
 const CourseStudyPage = () => {
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState('overview');
-    const { course: courseData, loading, error } = useCourseDetails();
+    const { course: courseData, loading, error } = useCourseDetails("detail");
+
+    console.log('Course Data:', courseData); // Debug log
 
     if (loading) {
         return (
@@ -71,12 +73,20 @@ const CourseStudyPage = () => {
         );
     }
 
+    if (!courseData) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <p>No course data available</p>
+            </div>
+        );
+    }
+
     const renderOverviewSection = () => (
         <div className="space-y-4">
             <div className="bg-white p-6 rounded-lg shadow">
                 <h2 className="text-xl font-bold mb-3">Course Description</h2>
                 <p className="text-gray-600">
-                    {courseData.course.description || 'No description available'}
+                    {courseData.description || 'No description available'}
                 </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
@@ -86,22 +96,22 @@ const CourseStudyPage = () => {
                         {
                             icon: Tag,
                             label: 'Tags',
-                            value: courseData.course.tag_names?.join(', ') || 'N/A'
+                            value: courseData.tag_names?.join(', ') || 'N/A'
                         },
                         {
                             icon: BookOpen,
                             label: 'Major',
-                            value: courseData.course.major_names?.join(', ') || 'N/A'
+                            value: courseData.major_names?.join(', ') || 'N/A'
                         },
                         {
                             icon: Clock,
                             label: 'Price',
-                            value: courseData.course.price === '0' ? 'Free' : `$${courseData.course.price}`
+                            value: courseData.price === '0' ? 'Free' : `$${courseData.price}`
                         },
                         {
                             icon: Users,
                             label: 'Students',
-                            value: courseData.course.student_count || 0
+                            value: courseData.student_count || 0
                         }
                     ].map((item, index) => (
                         <div key={index} className="flex items-center">
@@ -116,7 +126,7 @@ const CourseStudyPage = () => {
 
     const renderModulesSection = () => (
         <div className="space-y-4">
-            {courseData.modules.length === 0 ? (
+            {(!courseData.modules || courseData.modules.length === 0) ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
                     <p className="text-gray-600">No modules available</p>
@@ -149,7 +159,7 @@ const CourseStudyPage = () => {
                             variant="light"
                             color="primary"
                             startContent={<ExternalLink size={16} />}
-                            onClick={() => navigate(`/courses/${courseData.course._id}/modules/${module._id}`)}
+                            onClick={() => navigate(`/courses/${courseData._id}/modules/${module._id}`)}
                         >
                             View Module Details
                         </Button>
@@ -161,7 +171,7 @@ const CourseStudyPage = () => {
 
     const renderAssignmentsSection = () => (
         <div className="space-y-4">
-            {courseData.assignments.length === 0 ? (
+            {(!courseData.assignments || courseData.assignments.length === 0) ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <Clipboard className="mx-auto mb-4 text-gray-400" size={48} />
                     <p className="text-gray-600">No assignments available</p>
@@ -211,7 +221,7 @@ const CourseStudyPage = () => {
                                     variant="light"
                                     color="primary"
                                     startContent={<ExternalLink size={16} />}
-                                    onClick={() => navigate(`/courses/${courseData.course._id}/assignments/${assignment._id}`)}
+                                    onClick={() => navigate(`/courses/${courseData._id}/assignments/${assignment._id}`)}
                                 >
                                     View Details
                                 </Button>
@@ -243,7 +253,7 @@ const CourseStudyPage = () => {
                     </div>
                     <div>
                         <h3 className="text-lg font-semibold">
-                            {courseData.people.instructor.name || 'No Instructor'}
+                            {courseData.people?.instructor?.name || 'No Instructor'}
                         </h3>
                         <p className="text-gray-500 text-sm">Course Instructor</p>
                     </div>
@@ -255,7 +265,7 @@ const CourseStudyPage = () => {
                     Students
                 </h2>
                 <div className="space-y-2">
-                    {courseData.people.students.length === 0 ? (
+                    {(!courseData.people?.students || courseData.people.students.length === 0) ? (
                         <p className="text-gray-500">No students enrolled</p>
                     ) : (
                         courseData.people.students.map((student) => (
@@ -276,11 +286,11 @@ const CourseStudyPage = () => {
     );
 
     const renderGradesSection = () => {
-        const currentUser = courseData.people.students.find(s => s.name === 'test');
+        const currentUser = courseData.people?.students?.find(s => s.name === 'test');
 
         return (
             <div className="space-y-4">
-                {courseData.assignments.length === 0 ? (
+                {(!courseData.assignments || courseData.assignments.length === 0) ? (
                     <div className="text-center py-8 bg-gray-50 rounded-lg">
                         <Star className="mx-auto mb-4 text-gray-400" size={48} />
                         <p className="text-gray-600">No grades available</p>
@@ -301,7 +311,7 @@ const CourseStudyPage = () => {
                             </TableHeader>
                             <TableBody>
                                 {courseData.assignments.map((assignment) => {
-                                    const userSubmission = assignment.submissionsData.find(
+                                    const userSubmission = assignment.submissionsData?.find(
                                         submission => submission.student_id === currentUser?.id
                                     );
 
@@ -338,7 +348,6 @@ const CourseStudyPage = () => {
                                         </TableRow>
                                     );
                                 })}
-
                             </TableBody>
                         </Table>
                         <div className="mt-4 text-sm text-gray-500">
@@ -367,9 +376,9 @@ const CourseStudyPage = () => {
             <div className="w-64 bg-white shadow-md p-6 space-y-4">
                 <div className="text-center">
                     <div className="w-full h-48 bg-gray-200 rounded-xl mb-4 flex items-center justify-center">
-                        {courseData.course.cover_image_url ? (
+                        {courseData.cover_image_url ? (
                             <img
-                                src={courseData.course.cover_image_url}
+                                src={courseData.cover_image_url}
                                 alt="Course Cover"
                                 className="w-full h-full object-cover rounded-xl"
                             />
@@ -377,9 +386,9 @@ const CourseStudyPage = () => {
                             <BookOpen className="text-gray-500" size={48} />
                         )}
                     </div>
-                    <h1 className="text-xl font-bold">{courseData.course.title || 'Untitled Course'}</h1>
+                    <h1 className="text-xl font-bold">{courseData.title || 'Untitled Course'}</h1>
                     <p className="text-gray-500 text-sm mt-1">
-                        Created: {formatDate(courseData.course.created_at)}
+                        Created: {formatDate(courseData.created_at)}
                     </p>
                 </div>
 
@@ -393,7 +402,7 @@ const CourseStudyPage = () => {
                         { key: 'assignments', icon: Clipboard, label: 'Assignments' },
                         { key: 'grades', icon: Star, label: 'Grades' }
                     ].map((item) => (
-                        <button
+                        <Button
                             key={item.key}
                             onClick={() => setActiveSection(item.key)}
                             className={`w-full text-left p-2 rounded flex items-center transition-colors ${
@@ -404,7 +413,7 @@ const CourseStudyPage = () => {
                         >
                             <item.icon className="mr-2" size={20} />
                             {item.label}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </div>

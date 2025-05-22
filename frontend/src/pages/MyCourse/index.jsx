@@ -10,31 +10,50 @@ const MyCourses = ({ role }) => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [debugInfo, setDebugInfo] = useState(null);
+
 
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                if (role === "student" && currentUser?.courses) {
-                    const fetchedCourses = await Promise.all(
-                        currentUser.courses.map(async (courseId) => {
-                            const courseData = await course.getCourseById(courseId);
+                console.log('Current user:', currentUser); // Debug: Check current user object
+
+                // Use our API endpoint to fetch courses
+                console.log('Fetching courses...');
+                const fetchedCourses = await course.getMyCourses();
+                console.log('Fetched courses raw:', fetchedCourses);
+
+                // Store debug info to help troubleshoot
+                setDebugInfo({
+                    fetchedCount: Array.isArray(fetchedCourses) ? fetchedCourses.length : 'not an array',
+                    fetchedType: typeof fetchedCourses,
+                    firstItem: Array.isArray(fetchedCourses) && fetchedCourses.length > 0 ?
+                        JSON.stringify(fetchedCourses[0]).substring(0, 100) + '...' : 'none'
+                });
+
+                // Ensure fetchedCourses is an array
+                const coursesArray = Array.isArray(fetchedCourses) ? fetchedCourses : [];
+
+                // Don't filter on the client side - our backend already did the filtering
+                // The backend endpoint already returns only courses relevant to the current user
+                // based on their role (student or instructor)
+
+                // Get instructor names for all courses
+                console.log('Getting instructor names...');
+                const coursesWithInstructors = await Promise.all(
+                    coursesArray.map(async (courseData) => {
+                        try {
                             const instructorName = await user.getName(courseData.instructor_id);
                             return { ...courseData, instructorName };
-                        })
-                    );
-                    setCourses(fetchedCourses);
-                } else if (role === "instructor" && currentUser?.role === "instructor") {
-                    const fetchedCourses = await Promise.all(
-                        currentUser.courses.map(async (courseId) => {
-                            const courseData = await course.getCourseById(courseId);
-                            const instructorName = await user.getName(courseData.instructor_id);
-                            return { ...courseData, instructorName };
-                        })
-                    );
-                    setCourses(fetchedCourses);
-                } else {
-                    setCourses([]);
-                }
+                        } catch (err) {
+                            console.error(`Error getting instructor name for course ${courseData._id}:`, err);
+                            return { ...courseData, instructorName: 'Unknown Instructor' };
+                        }
+                    })
+                );
+
+                console.log('Final courses with instructors:', coursesWithInstructors);
+                setCourses(coursesWithInstructors);
             } catch (err) {
                 console.error("Error fetching courses:", err);
                 setError("Failed to load courses. Please try again later.");
@@ -43,7 +62,11 @@ const MyCourses = ({ role }) => {
             }
         };
 
-        fetchCourses();
+        if (currentUser) {
+            fetchCourses();
+        } else {
+            setLoading(false);
+        }
     }, [currentUser, role]);
 
     if (loading) {

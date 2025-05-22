@@ -1,0 +1,469 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Backend API",
+    "version": "1.0.0",
+    "description": "Auto-generated swagger spec for testing"
+  },
+  "host": "localhost:5001",
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Home",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/set_cookie": {
+      "get": {
+        "summary": "Set Cookie",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/auth/send-otp": {
+      "post": {
+        "summary": "Send OTP",
+        "parameters": [
+          { "in": "body", "name": "body", "required": true, "schema": { "type": "object" } }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate a user",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "email",
+                "password"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/auth/signout": {
+      "post": {
+        "summary": "Sign Out",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/admin/register": {
+      "post": {
+        "summary": "Register Admin",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Admin registration payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "email",
+                "password",
+                "password",
+                "role"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "name": "Admin",
+                "email": "admin@example.com",
+                "password": "password",
+                "role": "admin"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Admin registered"
+          }
+        }
+      }
+    },
+    "/admin/getall": {
+      "get": {
+        "summary": "Get All Users",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/admin/delete-video/{video_id}": {
+      "delete": {
+        "summary": "Delete Video",
+        "parameters": [
+          { "name": "video_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/admin/courses": {
+      "get": {
+        "summary": "Get All Courses",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/students/{student_id}": {
+      "get": {
+        "summary": "Get Student Profile",
+        "parameters": [
+          { "name": "student_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "put": {
+        "summary": "Update Student Profile",
+        "parameters": [
+          { "name": "student_id", "in": "path", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "type": "object" } }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Student Profile",
+        "parameters": [
+          { "name": "student_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/students/{student_id}/upload-image": {
+      "post": {
+        "summary": "Upload Student Image",
+        "parameters": [
+          { "name": "student_id", "in": "path", "required": true, "type": "string" },
+          { "name": "image", "in": "formData", "required": true, "type": "file" }
+        ],
+        "consumes": ["multipart/form-data"],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/payment/create": {
+      "post": {
+        "summary": "Create Payment",
+        "parameters": [
+          { "in": "body", "name": "body", "required": true, "schema": { "type": "object" } }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/payment/{payment_id}": {
+      "get": {
+        "summary": "Get Payment",
+        "parameters": [
+          { "name": "payment_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/payment/{course_id}": {
+      "get": {
+        "summary": "Get Course Payment",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "summary": "Get User Name",
+        "parameters": [
+          { "name": "user_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/user/{user_id}/profile": {
+      "get": {
+        "summary": "Get User Profile",
+        "parameters": [
+          { "name": "user_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/": {
+      "post": {
+        "summary": "Create a new course",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Cookie",
+            "description": "auth_token cookie (e.g. `auth_token=<your JWT here>`)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "title",
+            "description": "Course title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "description",
+            "description": "Course description",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "instructor_id",
+            "description": "MongoDB ObjectId of the instructor",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "price",
+            "description": "Course price (e.g. “25$”)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Course created successfully."
+          },
+          "400": {
+            "description": "Missing or invalid input."
+          },
+          "401": {
+            "description": "Invalid or expired token."
+          },
+          "403": {
+            "description": "Unauthorized: Admins or Instructors only."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/courses/{course_id}/details": {
+      "get": {
+        "summary": "Get Course Details",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/preview": {
+      "get": {
+        "summary": "Get Course Preview",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/assignments": {
+      "post": {
+        "summary": "Add Assignment",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" },
+          { "in": "formData", "name": "file", "type": "file", "required": false }
+        ],
+        "consumes": ["multipart/form-data"],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "get": {
+        "summary": "Get Assignments",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/assignments/{assignment_id}": {
+      "get": {
+        "summary": "Get Assignment",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" },
+          { "name": "assignment_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Assignment",
+        "parameters": [
+          { "name": "assignment_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/assignments/{assignment_id}/submissions": {
+      "post": {
+        "summary": "Add Submission",
+        "parameters": [
+          { "name": "assignment_id", "in": "path", "required": true, "type": "string" },
+          { "name": "content", "in": "formData", "type": "file", "required": false }
+        ],
+        "consumes": ["multipart/form-data"],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/assignments/{assignment_id}/{submission_id}/grade": {
+      "post": {
+        "summary": "Grade Submission",
+        "parameters": [
+          { "name": "submission_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/modules": {
+      "get": {
+        "summary": "Get Modules",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/modules/{module_id}": {
+      "get": {
+        "summary": "Get Module",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" },
+          { "name": "module_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/courses/{course_id}/modules/{module_id}/materials/{material_id}": {
+      "get": {
+        "summary": "Get Module Material",
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "type": "string" },
+          { "name": "module_id", "in": "path", "required": true, "type": "string" },
+          { "name": "material_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Module Material",
+        "parameters": [
+          { "name": "module_id", "in": "path", "required": true, "type": "string" },
+          { "name": "material_id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    }
+  }
+}

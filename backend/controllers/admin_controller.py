@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from models.course import Course
+from models.course_model import Course
 from models.user_model import Admin, Instructor, User, Student
 
 

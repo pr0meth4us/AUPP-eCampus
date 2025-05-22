@@ -1,6 +1,6 @@
 from bson import ObjectId
 from flask import jsonify, g
-from models.course.course_model import Course
+from models.course_model import Course
 from models.payment_model import Payment, PaymentException
 
 

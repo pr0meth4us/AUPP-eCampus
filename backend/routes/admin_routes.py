@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from controllers.admin_controller import AdminController
-from controllers.course import CourseController
+from controllers.course_controller import CourseController
 from middleware.admin_middleware import require_admin
 from services.cloudinary_service import retrieve_all_video_from_cloudinary, delete_from_cloudinary
 
