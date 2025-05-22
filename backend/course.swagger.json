@@ -1,0 +1,661 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Course API",
+    "version": "1.0.0",
+    "description": "Swagger JSON for testing the Course Blueprint endpoints"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/course": {
+      "post": {
+        "tags": ["Course"],
+        "summary": "Create a new course",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "cover_image": { "type": "string", "format": "binary" }
+                },
+                "required": ["title", "description"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get all courses",
+        "responses": {
+          "200": {
+            "description": "List of courses",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/my": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get user's courses",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User's enrolled/teaching courses",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}": {
+      "parameters": [
+        {
+          "name": "course_id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get basic course info",
+        "responses": {
+          "200": {
+            "description": "Course details",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Course"],
+        "summary": "Update a course",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "cover_image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Course"],
+        "summary": "Delete a course",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Deleted successfully",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/preview": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get course preview",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course preview",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/detail": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get detailed course content",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed course content",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/full": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get full course management view",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full course data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/enroll": {
+      "post": {
+        "tags": ["Enrollment"],
+        "summary": "Enroll in course",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enrolled successfully",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules": {
+      "post": {
+        "tags": ["Module"],
+        "summary": "Create module",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Module created",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Module"],
+        "summary": "Get course modules",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of modules",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}/content": {
+      "post": {
+        "tags": ["Module"],
+        "summary": "Add module content",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                },
+                "required": ["files"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Content added",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments": {
+      "post": {
+        "tags": ["Assignment"],
+        "summary": "Create assignment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "attachments": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment created",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Assignment"],
+        "summary": "Get all assignments (instructor view)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of assignments",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/student": {
+      "get": {
+        "tags": ["Assignment"],
+        "summary": "Get student assignments with status",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignments with submission status",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/submit": {
+      "post": {
+        "tags": ["Submission"],
+        "summary": "Submit assignment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submission": { "type": "string", "format": "binary" }
+                },
+                "required": ["submission"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Submitted successfully",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/grade/{student_id}": {
+      "post": {
+        "tags": ["Submission"],
+        "summary": "Grade a submission",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "student_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grade": { "type": "number" },
+                  "feedback": { "type": "string" }
+                },
+                "required": ["grade"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Graded successfully",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/students": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get enrolled students",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of students",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/submissions": {
+      "get": {
+        "tags": ["Submission"],
+        "summary": "Get all submissions for assignment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Submission list",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "type": "object" } } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}": {
+      "get": {
+        "tags": ["Assignment"],
+        "summary": "Get assignment details",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment details",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Assignment"],
+        "summary": "Update assignment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "attachments": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment updated",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Assignment"],
+        "summary": "Delete an assignment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment deleted",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}": {
+      "put": {
+        "tags": ["Module"],
+        "summary": "Update module",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "module_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Module updated",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Module"],
+        "summary": "Delete module",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "module_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Module deleted",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/analytics": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get course analytics",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/progress": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get course progress for user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Progress data",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/publish": {
+      "post": {
+        "tags": ["Course"],
+        "summary": "Publish or unpublish a course",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "course_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course published/unpublished",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    }
+  }
+}
