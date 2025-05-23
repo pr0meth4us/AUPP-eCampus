@@ -1,0 +1,207 @@
+from flask import jsonify, request, g
+from models.assignment_model import Assignment
+from models.course_model import Course
+from services.file_upload_service import upload_assignment_file, upload_student_submission
+from bson import ObjectId
+
+class AssignmentController:
+    @staticmethod
+    def create_assignment(course_id):
+        """Create a new assignment for the course"""
+        try:
+            course = Course.find_instance_by_id(course_id)
+            if not course:
+                return jsonify({'error': 'Course not found'}), 404
+            data = request.form.to_dict()
+            required_fields = ['title', 'description']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} is required'}), 400
+            data['course_id'] = course_id
+            if 'allowed_file_types' in data:
+                data['allowed_file_types'] = data['allowed_file_types'].split(',') if data['allowed_file_types'] else []
+            for field in ['max_file_size', 'max_files', 'points', 'late_penalty']:
+                if field in data and data[field]:
+                    try:
+                        if field == 'late_penalty':
+                            data[field] = float(data[field])
+                        else:
+                            data[field] = int(data[field])
+                    except ValueError:
+                        return jsonify({'error': f'Invalid {field} format'}), 400
+            attachment_urls = []
+            attachment_names = []
+            for key in request.files:
+                if key.startswith('attachment_'):
+                    file = request.files[key]
+                    if file and file.filename:
+                        upload_result = upload_assignment_file(file, course_id, "temp", "instructor")
+                        if upload_result['success']:
+                            attachment_urls.append(upload_result['file_url'])
+                            attachment_names.append(upload_result['original_filename'])
+            data['attachment_urls'] = attachment_urls
+            data['attachment_names'] = attachment_names
+            assignment_id = Assignment.save(data)
+            return jsonify({'message': 'Assignment created successfully', 'assignment_id': assignment_id}), 201
+        except Exception as e:
+            return jsonify({'error': f'Failed to create assignment: {str(e)}'}), 500
+
+    @staticmethod
+    def get_course_assignments(course_id):
+        """Get all assignments for a course"""
+        try:
+            course = Course.find_instance_by_id(course_id)
+            if not course:
+                return jsonify({'error': 'Course not found'}), 404
+            assignments = Assignment.find_by_course(course_id)
+            return jsonify(assignments), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to get assignments: {str(e)}'}), 500
+
+    @staticmethod
+    def get_student_assignments(course_id):
+        """Get assignments with student's submission status"""
+        try:
+            student_id = str(g.current_user['_id'])
+            assignments = Assignment.find_by_student(student_id, course_id)
+            return jsonify(assignments), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to get student assignments: {str(e)}'}), 500
+
+    @staticmethod
+    def submit_assignment(course_id, assignment_id):
+        """Submit assignment as a student"""
+        try:
+            assignment_doc = Assignment._coll().find_one({'_id': ObjectId(assignment_id)})
+            if not assignment_doc:
+                return jsonify({'error': 'Assignment not found'}), 404
+            student_id = str(g.current_user['_id'])
+            data = request.form.to_dict()
+            uploaded_files = []
+            file_names = []
+            files = request.files.getlist('files')
+            if files:
+                assignment = Assignment(assignment_doc)
+                upload_result = upload_student_submission(
+                    files, course_id, assignment_id, student_id,
+                    assignment.allowed_file_types
+                )
+                if upload_result['success']:
+                    for file_info in upload_result['uploaded_files']:
+                        uploaded_files.append(file_info['file_url'])
+                        file_names.append(file_info['original_filename'])
+                else:
+                    return jsonify({'error': 'File upload failed', 'details': upload_result['errors']}), 400
+            submission_data = {
+                'content': data.get('content', ''),
+                'file_urls': uploaded_files,
+                'file_names': file_names
+            }
+            submission_id = Assignment.submit_assignment(assignment_id, student_id, submission_data)
+            return jsonify({'message': 'Assignment submitted successfully', 'submission_id': submission_id}), 201
+        except Exception as e:
+            return jsonify({'error': f'Failed to submit assignment: {str(e)}'}), 500
+
+    @staticmethod
+    def grade_assignment(course_id, assignment_id, student_id):
+        """Grade a student's assignment submission"""
+        try:
+            data = request.get_json()
+            required_fields = ['grade', 'feedback']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} is required'}), 400
+            try:
+                grade = float(data['grade'])
+            except ValueError:
+                return jsonify({'error': 'Invalid grade format'}), 400
+            grader_id = str(g.current_user['_id'])
+            Assignment.grade_submission(assignment_id, student_id, grade, data['feedback'], grader_id)
+            return jsonify({'message': 'Assignment graded successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to grade assignment: {str(e)}'}), 500
+
+    @staticmethod
+    def get_assignment_details(course_id, assignment_id):
+        """Get detailed assignment information"""
+        try:
+            assignment_doc = Assignment._coll().find_one({'_id': ObjectId(assignment_id)})
+            if not assignment_doc:
+                return jsonify({'error': 'Assignment not found'}), 404
+            assignment = Assignment(assignment_doc)
+            user_role = g.current_user.get('role')
+            course = Course.find_instance_by_id(course_id)
+            user_id = str(g.current_user['_id'])
+            if (user_role == 'admin' or
+                    str(course.instructor_id) == user_id or
+                    str(course.uploader_id) == user_id):
+                return jsonify(assignment.to_dict()), 200
+            else:
+                return jsonify(assignment.to_student_dict(user_id)), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to get assignment details: {str(e)}'}), 500
+
+    @staticmethod
+    def update_assignment(course_id, assignment_id):
+        """Update assignment details"""
+        try:
+            from datetime import datetime, timezone
+            data = request.form.to_dict()
+            if 'allowed_file_types' in data:
+                data['allowed_file_types'] = data['allowed_file_types'].split(',') if data['allowed_file_types'] else []
+            for field in ['max_file_size', 'max_files', 'points', 'late_penalty']:
+                if field in data and data[field]:
+                    try:
+                        if field == 'late_penalty':
+                            data['field'] = float(data[field])
+                        else:
+                            data[field] = int(data[field])
+                    except ValueError:
+                        return jsonify({'error': f'Invalid {field} format'}), 400
+            attachment_urls = []
+            attachment_names = []
+            for key in request.files:
+                if key.startswith('attachment_'):
+                    file = request.files[key]
+                    if file and file.filename:
+                        upload_result = upload_assignment_file(file, course_id, assignment_id, "instructor")
+                        if upload_result['success']:
+                            attachment_urls.append(upload_result['file_url'])
+                            attachment_names.append(upload_result['original_filename'])
+            if attachment_urls:
+                data['attachment_urls'] = attachment_urls
+                data['attachment_names'] = attachment_names
+            data['updated_at'] = datetime.now(timezone.utc)
+            Assignment._coll().update_one(
+                {'_id': ObjectId(assignment_id)},
+                {'$set': data}
+            )
+            return jsonify({'message': 'Assignment updated successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to update assignment: {str(e)}'}), 500
+
+    @staticmethod
+    def delete_assignment(course_id, assignment_id):
+        """Delete an assignment"""
+        try:
+            Course._coll().update_one(
+                {'_id': ObjectId(course_id)},
+                {'$pull': {'assignments': ObjectId(assignment_id)}}
+            )
+            Assignment._coll().delete_one({'_id': ObjectId(assignment_id)})
+            return jsonify({'message': 'Assignment deleted successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to delete assignment: {str(e)}'}), 500
+
+    @staticmethod
+    def get_assignment_submissions(course_id, assignment_id):
+        """Get all submissions for an assignment"""
+        try:
+            assignment_doc = Assignment._coll().find_one({'_id': ObjectId(assignment_id)})
+            if not assignment_doc:
+                return jsonify({'error': 'Assignment not found'}), 404
+            assignment = Assignment(assignment_doc)
+            submissions = [s.to_dict() for s in assignment.submissions]
+            return jsonify(submissions), 200
+        except Exception as e:
+            return jsonify({'error': f'Failed to get submissions: {str(e)}'}), 500
