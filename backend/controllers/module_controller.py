@@ -3,6 +3,7 @@ from flask import jsonify, request
 from models.course_model import Course
 from models.module_model import Module
 from services.file_upload_service import upload_course_material
+from datetime import datetime, timezone
 
 
 class ModuleController:
@@ -85,3 +86,50 @@ class ModuleController:
             return jsonify({'message': 'Module deleted successfully'}), 200
         except Exception as e:
             return jsonify({'error': f'Failed to delete module: {str(e)}'}), 500
+
+    @staticmethod
+    def get_module(course_id, module_id):
+        course = Course.find_instance_by_id(course_id)
+        if not course:
+            return jsonify({'error': 'Course not found'}), 404
+        module = Module.find_by_id(module_id)
+        if not module:
+            return jsonify({'error': 'Module not found'}), 404
+        return jsonify(module.to_dict()), 200
+
+    @staticmethod
+    def update_module_content(course_id, module_id, content_id):
+        data = request.get_json()
+        # validate fields...
+        success = Module.update_content(module_id, content_id, data)
+        return jsonify({'message': 'Content updated'}), 200 if success else (jsonify({'error':'Failed'}),500)
+
+    @staticmethod
+    def delete_module_content(course_id, module_id, content_id):
+        Module._coll().update_one(
+            {'_id': ObjectId(module_id)},
+            {'$pull': {'contents': {'_id': content_id}}}
+        )
+        return jsonify({'message': 'Content deleted'}), 200
+
+    @staticmethod
+    def reorder_module_contents(course_id, module_id):
+        order = request.get_json().get('order', [])
+        for idx, cid in enumerate(order):
+            Module._coll().update_one(
+                {'_id': ObjectId(module_id), 'contents._id': cid},
+                {'$set': {'contents.$.order': idx}}
+            )
+        Module._coll().update_one({'_id': ObjectId(module_id)},
+                                  {'$set': {'updated_at': datetime.now(timezone.utc)}})
+        return jsonify({'message': 'Reordered successfully'}), 200
+
+    @staticmethod
+    def publish_module(course_id, module_id):
+        published = request.get_json().get('published', True)
+        Module._coll().update_one(
+            {'_id': ObjectId(module_id)},
+            {'$set': {'is_published': bool(published), 'updated_at': datetime.now(timezone.utc)}}
+        )
+        status = 'published' if published else 'unpublished'
+        return jsonify({'message': f'Module {status}'}), 200

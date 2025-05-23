@@ -149,13 +149,6 @@ def grade_assignment(course_id, assignment_id, student_id):
 
 # Additional Enhanced Routes
 
-@course_bp.route('/<course_id>/students', methods=['GET'])
-@login_required
-@require_course_access('instructor')
-def get_enrolled_students(course_id):
-    """Get list of enrolled students with basic info"""
-    return CourseController.get_enrolled_students(course_id)
-
 @course_bp.route('/<course_id>/assignments/<assignment_id>/submissions', methods=['GET'])
 @login_required
 @require_assignment_access('grade')
@@ -203,12 +196,12 @@ def delete_module(course_id, module_id):
     """Delete a module and its contents"""
     return CourseController.delete_module(course_id, module_id)
 
-# @course_bp.route('/<course_id>/modules/<module_id>/content/<content_id>', methods=['DELETE'])
-# @login_required
-# @require_module_access
-# def delete_module_content(course_id, module_id, content_id):
-#     """Delete specific module content"""
-#     return CourseController.delete_module_content(course_id, module_id, content_id)
+@course_bp.route('/<course_id>/modules/<module_id>/content/<content_id>', methods=['DELETE'])
+@login_required
+@require_module_access
+def delete_module_content(course_id, module_id, content_id):
+    """Delete specific module content"""
+    return CourseController.delete_module_content(course_id, module_id, content_id)
 
 @course_bp.route('/<course_id>/analytics', methods=['GET'])
 @login_required
@@ -224,12 +217,12 @@ def get_course_progress(course_id):
     """Get student's progress in the course"""
     return CourseController.get_course_progress(course_id)
 
-# @course_bp.route('/<course_id>/duplicate', methods=['POST'])
-# @login_required
-# @require_course_access('instructor')
-# def duplicate_course(course_id):
-#     """Create a copy of existing course"""
-#     return CourseController.duplicate_course(course_id)
+@course_bp.route('/<course_id>/duplicate', methods=['POST'])
+@login_required
+@require_course_access('instructor')
+def duplicate_course(course_id):
+    """Create a copy of existing course"""
+    return CourseController.duplicate_course(course_id)
 
 @course_bp.route('/<course_id>/publish', methods=['POST'])
 @login_required
@@ -238,25 +231,25 @@ def publish_course(course_id):
     """Publish/unpublish course"""
     return CourseController.publish_course(course_id)
 
-# Bulk operations
-# @course_bp.route('/<course_id>/assignments/<assignment_id>/submissions/download', methods=['GET'])
-# @login_required
-# @require_assignment_access('grade')
-# def download_all_submissions(course_id, assignment_id):
-#     """Download all submissions as a ZIP file"""
-#     return CourseController.download_all_submissions(course_id, assignment_id)
-#
-# @course_bp.route('/<course_id>/assignments/<assignment_id>/grades/export', methods=['GET'])
-# @login_required
-# @require_assignment_access('grade')
-# def export_grades(course_id, assignment_id):
-#     """Export grades as CSV"""
-#     return CourseController.export_grades(course_id, assignment_id)
-#
-# @course_bp.route('/<course_id>/assignments/<assignment_id>/grades/import', methods=['POST'])
-# @login_required
-# @require_assignment_access('grade')
-# @validate_file_upload(allowed_types=['csv'], max_size=1*1024*1024, max_count=1)
-# def import_grades(course_id, assignment_id):
-#     """Import grades from CSV"""
-#     return CourseController.import_grades(course_id, assignment_id)
+Bulk operations
+@course_bp.route('/<course_id>/assignments/<assignment_id>/submissions/download', methods=['GET'])
+@login_required
+@require_assignment_access('grade')
+def download_all_submissions(course_id, assignment_id):
+    """Download all submissions as a ZIP file"""
+    return CourseController.download_all_submissions(course_id, assignment_id)
+
+@course_bp.route('/<course_id>/assignments/<assignment_id>/grades/export', methods=['GET'])
+@login_required
+@require_assignment_access('grade')
+def export_grades(course_id, assignment_id):
+    """Export grades as CSV"""
+    return CourseController.export_grades(course_id, assignment_id)
+
+@course_bp.route('/<course_id>/assignments/<assignment_id>/grades/import', methods=['POST'])
+@login_required
+@require_assignment_access('grade')
+@validate_file_upload(allowed_types=['csv'], max_size=1*1024*1024, max_count=1)
+def import_grades(course_id, assignment_id):
+    """Import grades from CSV"""
+    return CourseController.import_grades(course_id, assignment_id)

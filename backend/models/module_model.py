@@ -98,3 +98,27 @@ class Module:
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+    @classmethod
+    def find_by_id(cls, module_id: str):
+        doc = cls._coll().find_one({'_id': ObjectId(module_id)})
+        return cls(doc) if doc else None
+
+    @classmethod
+    def update_content(cls, module_id: str, content_id: str, payload: dict) -> bool:
+        """
+        Update fields of a single content item inside a module.
+        payload can include keys like 'title', 'content', 'file_url', etc.
+        """
+        # build the $set document, prefixing each field with the positional operator
+        set_doc = {}
+        for key, value in payload.items():
+            set_doc[f"contents.$.{key}"] = value
+
+        # always bump module.updated_at
+        set_doc['updated_at'] = datetime.now(timezone.utc)
+
+        result = cls._coll().update_one(
+            { "_id": ObjectId(module_id), "contents._id": content_id },
+            { "$set": set_doc }
+        )
+        return result.modified_count > 0
