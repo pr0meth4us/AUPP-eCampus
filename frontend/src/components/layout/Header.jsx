@@ -20,7 +20,12 @@ const Header = () => {
                 <div className="container d-flex justify-content-between align-items-center">
                     <div className="logo">
                         <a href="/">
-                            <img src="/AUPP-Main-Logo.svg" alt="Logo" className="img-fluid" />
+<img
+  src="/aupp_ecampus_logo.png"
+  alt="Logo"
+  className="img-fluid"
+  style={{ width: '50px', height: '50px' }}
+/>
                         </a>
                     </div>
 

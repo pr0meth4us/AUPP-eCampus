@@ -104,21 +104,33 @@ class Module:
         return cls(doc) if doc else None
 
     @classmethod
+    def patch_module(cls, module_id: str, fields: dict) -> bool:
+        """
+        Partially update a module’s allowed fields.
+        `fields` already includes updated_at.
+        """
+        result = cls._coll().update_one(
+            {'_id': ObjectId(module_id)},
+            {'$set': fields}
+        )
+        return result.modified_count > 0
+
+    @classmethod
     def update_content(cls, module_id: str, content_id: str, payload: dict) -> bool:
         """
-        Update fields of a single content item inside a module.
-        payload can include keys like 'title', 'content', 'file_url', etc.
+        Update fields (e.g., title, content, file_url, order, etc.) of a single content item.
+        Payload keys must match ModuleContent.to_dict() keys, except _id.
         """
-        # build the $set document, prefixing each field with the positional operator
+        # Build a $set with the correct “contents.$.<field>” path
         set_doc = {}
         for key, value in payload.items():
             set_doc[f"contents.$.{key}"] = value
 
-        # always bump module.updated_at
+        # Always bump module.updated_at
         set_doc['updated_at'] = datetime.now(timezone.utc)
 
         result = cls._coll().update_one(
-            { "_id": ObjectId(module_id), "contents._id": content_id },
-            { "$set": set_doc }
+            {"_id": ObjectId(module_id), "contents._id": content_id},
+            {"$set": set_doc}
         )
         return result.modified_count > 0
