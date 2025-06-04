@@ -33,7 +33,7 @@ const CourseCatalogPage = () => {
     };
 
     const handleCourseOverview = (courseId) => {
-        navigate(`/courseoverview/${courseId}`);
+        navigate(`/course/${courseId}`);
     };
 
     const indexOfLastCourse = currentPage * coursesPerPage;

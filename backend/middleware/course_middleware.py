@@ -1,9 +1,12 @@
-from .auth_middleware import login_required
 from functools import wraps
-from flask import g, jsonify, request
-from bson import ObjectId
-from models.course_model import Course
 import logging
+from functools import wraps
+
+from bson import ObjectId
+from flask import g, jsonify, request
+
+from models.course_model import Course
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -267,7 +270,7 @@ def check_assignment_deadline(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from datetime import datetime, timezone
-        from models.course_model import Assignment
+        from models.assignment_model import Assignment
 
         assignment_id = kwargs.get('assignment_id')
         if not assignment_id:

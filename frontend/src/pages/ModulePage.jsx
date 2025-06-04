@@ -33,6 +33,7 @@ export const ModuleDetailPage = () => {
         };
         fetchModule();
     }, [courseId, moduleId]);
+    console.log(module)
 
     // If the module is still loading
     if (module === null) {
@@ -85,32 +86,34 @@ export const ModuleDetailPage = () => {
                         </p>
                     </div>
 
-                    {module.materials && module.materials.length > 0 && (
+                    {module.contents && module.contents.length > 0 && (
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Learning Materials</h3>
                             <div className="space-y-3">
-                                {module.materials.map((material, index) => (
-                                    <Card key={index} isPressable>
+                                {module.contents.map((content, index) => (
+                                    <Card key={content._id || index} isPressable>
                                         <CardBody className="flex flex-row items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <FileText size={24} className="text-primary" />
                                                 <div>
                                                     <h4 className="font-semibold">
-                                                        {material.title || `Material ${index + 1}`}
+                                                        {content.title || `Material ${index + 1}`}
                                                     </h4>
                                                     <p className="text-sm text-gray-500">
-                                                        {material.description || 'No description'}
+                                                        {/* You might add description here if available */}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {material.content_url && (
+                                                {content.file_url && (
                                                     <Button
                                                         size="sm"
                                                         variant="flat"
                                                         color="primary"
                                                         startContent={<LinkIcon size={16} />}
-                                                        onPress={() => navigate(`/courses/${courseId}/modules/${moduleId}/materials/${material._id}`)}
+                                                        onPress={() =>
+                                                            navigate(`/courses/${courseId}/modules/${moduleId}/contents/${content._id}`)
+                                                        }
                                                     >
                                                         View Material
                                                     </Button>

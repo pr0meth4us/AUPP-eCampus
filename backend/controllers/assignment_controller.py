@@ -205,3 +205,41 @@ class AssignmentController:
             return jsonify(submissions), 200
         except Exception as e:
             return jsonify({'error': f'Failed to get submissions: {str(e)}'}), 500
+
+    @staticmethod
+    def publish_assignment(course_id, assignment_id):
+        """Publish or unpublish an assignment"""
+        try:
+            from datetime import datetime, timezone
+
+            # Check for query parameter first, then JSON body
+            action = request.args.get('action')
+            if action:
+                is_published = action.lower() == 'publish'
+            else:
+                data = request.get_json()
+                if not data:
+                    return jsonify({'error': 'No data provided'}), 400
+                is_published = data.get('is_published', True)
+
+            # Validate assignment exists
+            assignment_doc = Assignment._coll().find_one({'_id': ObjectId(assignment_id)})
+            if not assignment_doc:
+                return jsonify({'error': 'Assignment not found'}), 404
+
+            # Update the assignment
+            Assignment._coll().update_one(
+                {'_id': ObjectId(assignment_id)},
+                {
+                    '$set': {
+                        'is_published': is_published,
+                        'updated_at': datetime.now(timezone.utc)
+                    }
+                }
+            )
+
+            status = 'published' if is_published else 'unpublished'
+            return jsonify({'message': f'Assignment {status} successfully'}), 200
+
+        except Exception as e:
+            return jsonify({'error': f'Failed to publish assignment: {str(e)}'}), 500

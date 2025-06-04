@@ -21,6 +21,7 @@ import CourseStudyPage from "./pages/CourseStudyPage";
 import {AssignmentDetailPage} from "./pages/AssignmentPage";
 import {ModuleDetailPage} from "./pages/ModulePage";
 import {MaterialDetailPage} from "./pages/MaterialPage";
+import {ContentDetailPage} from "./pages/ContentPage"; // Add this import
 
 const App = () => {
     return (
@@ -56,7 +57,7 @@ const App = () => {
                            element={<PrivateRoute element={<CourseCreate />} allowedRoles={['instructor', 'admin']} />}
                     />
 
-                     Public Routes
+                    {/* Public Routes */}
                     <Route path="/course-catalog" element={<CourseCatalogPage />} />
                     <Route path="/course/success" element={<CourseSuccessPage />} />
                     <Route path="/course/confirmation" element={<CourseConfirmationPage />} />
@@ -66,15 +67,21 @@ const App = () => {
                     />
                     <Route
                         path="/courses/:courseId/assignments/:assignmentId"
-                        element={<AssignmentDetailPage
-                        />}
+                        element={<AssignmentDetailPage />}
                     />
                     <Route
                         path="/courses/:courseId/modules/:moduleId"
-                        element={<ModuleDetailPage
-                        />}
+                        element={<ModuleDetailPage />}
                     />
-                    <Route path="/courses/:courseId/modules/:moduleId/materials/:materialId" element={<MaterialDetailPage />} />
+                    <Route
+                        path="/courses/:courseId/modules/:moduleId/materials/:materialId"
+                        element={<MaterialDetailPage />}
+                    />
+                    {/* Add the missing content route */}
+                    <Route
+                        path="/courses/:courseId/modules/:moduleId/contents/:contentId"
+                        element={<PrivateRoute element={<ContentDetailPage />} allowedRoles={['student', 'instructor', 'admin']} />}
+                    />
                 </Routes>
             </Layout>
         </Router>

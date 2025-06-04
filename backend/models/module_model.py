@@ -49,7 +49,6 @@ class Module:
 
     @classmethod
     def save(cls, payload: dict) -> str:
-        # Import inside method to avoid circular import
         from .course_model import Course
         now = datetime.now(timezone.utc)
         doc = {
@@ -71,6 +70,7 @@ class Module:
 
     @classmethod
     def add_content(cls, module_id: str, content_data: dict) -> str:
+        content_data['created_at'] = datetime.now(timezone.utc)
         content = ModuleContent(content_data)
         cls._coll().update_one(
             {'_id': ObjectId(module_id)},
@@ -86,18 +86,6 @@ class Module:
         docs = cls._coll().find({'course_id': ObjectId(course_id)}).sort('order', 1)
         return [cls(d).to_dict() for d in docs]
 
-    def to_dict(self) -> dict:
-        return {
-            '_id': str(self._id),
-            'course_id': str(self.course_id),
-            'title': self.title,
-            'description': self.description,
-            'order': self.order,
-            'contents': [c.to_dict() for c in self.contents],
-            'is_published': self.is_published,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
-        }
     @classmethod
     def find_by_id(cls, module_id: str):
         doc = cls._coll().find_one({'_id': ObjectId(module_id)})
@@ -106,7 +94,7 @@ class Module:
     @classmethod
     def patch_module(cls, module_id: str, fields: dict) -> bool:
         """
-        Partially update a module’s allowed fields.
+        Partially update a module's allowed fields.
         `fields` already includes updated_at.
         """
         result = cls._coll().update_one(
@@ -121,12 +109,10 @@ class Module:
         Update fields (e.g., title, content, file_url, order, etc.) of a single content item.
         Payload keys must match ModuleContent.to_dict() keys, except _id.
         """
-        # Build a $set with the correct “contents.$.<field>” path
         set_doc = {}
         for key, value in payload.items():
             set_doc[f"contents.$.{key}"] = value
 
-        # Always bump module.updated_at
         set_doc['updated_at'] = datetime.now(timezone.utc)
 
         result = cls._coll().update_one(
@@ -134,3 +120,16 @@ class Module:
             {"$set": set_doc}
         )
         return result.modified_count > 0
+
+    def to_dict(self) -> dict:
+        return {
+            '_id': str(self._id),
+            'course_id': str(self.course_id),
+            'title': self.title,
+            'description': self.description,
+            'order': self.order,
+            'contents': [c.to_dict() for c in self.contents],
+            'is_published': self.is_published,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }

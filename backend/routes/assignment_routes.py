@@ -80,3 +80,10 @@ def grade_assignment(course_id, assignment_id, student_id):
 def get_assignment_submissions(course_id, assignment_id):
     """Get all submissions for an assignment (instructor only)"""
     return AssignmentController.get_assignment_submissions(course_id, assignment_id)
+
+@assignment_bp.route('/<assignment_id>/publish', methods=['POST'])
+@login_required
+@require_assignment_access('grade')
+def publish_assignment(course_id, assignment_id):
+    """Publish or unpublish an assignment"""
+    return AssignmentController.publish_assignment(course_id, assignment_id)

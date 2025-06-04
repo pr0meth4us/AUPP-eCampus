@@ -38,11 +38,11 @@ class AssignmentSubmission:
             'content': self.content,
             'file_urls': self.file_urls,
             'file_names': self.file_names,
-            'submitted_at': self.submitted_at.isoformat() if self.submitted_at else None,
+            'submitted_at': self.submitted_at.isoformat() if self.submitted_at and hasattr(self.submitted_at, 'isoformat') else self.submitted_at,
             'grade': self.grade,
             'feedback': self.feedback,
             'status': self.status,
-            'graded_at': self.graded_at.isoformat() if self.graded_at else None,
+            'graded_at': self.graded_at.isoformat() if self.graded_at and hasattr(self.graded_at, 'isoformat') else self.graded_at,
             'graded_by': str(self.graded_by) if self.graded_by else None
         }
 
@@ -197,15 +197,15 @@ class Assignment:
             'max_file_size': self.max_file_size,
             'max_files': self.max_files,
             'points': self.points,
-            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'due_date': self.due_date.isoformat() if self.due_date and hasattr(self.due_date, 'isoformat') else self.due_date,
             'allow_late_submission': self.allow_late_submission,
             'late_penalty': self.late_penalty,
             'attachment_urls': self.attachment_urls,
             'attachment_names': self.attachment_names,
             'submissions': [s.to_dict() for s in self.submissions],
             'is_published': self.is_published,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'created_at': self.created_at.isoformat() if self.created_at and hasattr(self.created_at, 'isoformat') else self.created_at,
+            'updated_at': self.updated_at.isoformat() if self.updated_at and hasattr(self.updated_at, 'isoformat') else self.updated_at
         }
 
     def to_student_dict(self, student_id: str = None) -> dict:

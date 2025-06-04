@@ -30,35 +30,11 @@ Content-Type: application/pdf
 @C:/Users/phear/Downloads/andreopoulos2012.pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
-
-### Create Module Content (PyCharm HTTP Client Syntax)
-POST http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules/682f4e98293ab1d6fee28d55/content
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkODM0ZDZkMzIzNjkwNDlhYTg1MjgiLCJyb2xlIjoiaW5zdHJ1Y3RvciIsImNvdXJzZXMiOlsiNjgyZTBmMGI1MzU3YmUyZmI2NzE4MmM5Il0sIm5hbWUiOiJSb2JlcnQgT3BwZW5oZWltZXIiLCJleHAiOjE3NDg4NTk5ODR9.GgbxWfc3nwh7Ky-nkT9ObMixh-6EGsjsQZIbauUry8c
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="title"
-
-New Lecture PDF
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="content_type"
-
-file
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="file"; filename="andreopoulos2012.pdf"
-Content-Type: application/pdf
-
-@C:/Users/phear/Downloads/andreopoulos2012.pdf
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-
 ### Get Module Content (list all contents for a module)
-GET http://localhost:5001/course/{{course_id}}/modules/{{module_id}}
-Authorization: Bearer {{your_jwt_token}}
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules/682f4e98293ab1d6fee28d55
 
 ### Update Content
-PUT http://localhost:5001/course/{{course_id}}/modules/{{module_id}}/content/{{content_id}}
-Authorization: Bearer {{your_jwt_token}}
+PUT http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules/682f4e98293ab1d6fee28d55/content/683de16150a64c7d370442d5
 Content-Type: application/json
 
 {
