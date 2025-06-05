@@ -1,0 +1,187 @@
+###
+GET http://localhost:5328/health
+
+<> 2025-05-17T134707.200.json
+<> 2025-05-16T230639.200.json
+<> 2025-05-16T225423.200.json
+<> 2025-05-16T225231.200.json
+<> 2025-05-16T225218.404.html
+<> 2025-05-16T225131.404.html
+
+###
+GET http://localhost:5328/memory
+
+<> 2025-05-17T134711.200.json
+<> 2025-05-16T230635.404.html
+<> 2025-05-16T225427.404.html
+<> 2025-05-16T225306.404.html
+
+###
+POST http://localhost:5001/admin/register?
+    body={"name": "Admin","email": "admin@example.com","password": "password","role": "admin"}
+    Content-Type: application/json
+
+###
+POST /admin/register HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+Content-Length:  ninety-odd
+
+{
+  "name": "Robert Oppenheimer",
+  "email": "r.oppenheimer@aupp.com",
+  "password": "password",
+  "role": "instructor"
+}
+
+<> 2025-06-04T145048.409.json
+<> 2025-05-23T133102.409.json
+<> 2025-05-23T133041.409.json
+<> 2025-05-23T133035.409.json
+
+###
+POST /auth/login HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+Content-Length:  ninety-odd
+
+{
+  "name": "Robert Oppenheimer",
+  "email": "r.oppenheimer@aupp.com",
+  "password": "password",
+  "role": "instructor"
+}
+
+<> 2025-06-04T145055.200.json
+<> 2025-05-23T133108.200.json
+<> 2025-05-23T131615.200.json
+<> 2025-05-23T130439.200.json
+<> 2025-05-23T130324.200.json
+<> 2025-05-22T003531.200.json
+<> 2025-05-22T002355.200.json
+
+###
+### Create a new course (requires a valid Bearer token)
+POST http://localhost:5001/courses/ HTTP/1.1
+Host: localhost:5001
+Cookie: auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkODM0ZDZkMzIzNjkwNDlhYTg1MjgiLCJyb2xlIjoiaW5zdHJ1Y3RvciIsImNvdXJzZXMiOltdLCJuYW1lIjoiUm9iZXJ0IE9wcGVuaGVpbWVyIiwiZXhwIjoxNzQ3ODUyNTMxfQ.yTCgR3OE_1YuIHjZW5TnCX00Js_u6h45_kinIjF1cGo
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="title"
+
+Introduction to Nuclear Creation
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+Nuclear weapons should be normalized to ensure a long lasting global peace. Because nuclear comes with a phenomenon called "if I nuke them, they nuke me so we all gonna die" dilemma.
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="instructor_id"
+
+682d834d6d32369049aa8528
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+25$
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+<> 2025-05-22T003523.401.json
+<> 2025-05-22T002750.401.json
+<> 2025-05-22T002538.401.json
+
+###
+POST http://localhost:5001/courses/?
+    title={{$placeholder}}&
+    description={{$placeholder}}&
+    instructor_id={{$placeholder}}&
+    price={{$placeholder}}
+    Content-Type: multipart/form-data
+
+###
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/full
+
+<> 2025-05-22T121002.404.json
+
+###
+GET http://localhost:5001/auth/login
+
+###
+POST http://localhost:5000/course/{{course_id}}/modules
+Content-Type: application/json
+
+{
+  "title": "",
+  "description": ""
+}
+
+###
+POST http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules
+Content-Type: application/json
+
+{
+  "title": "Radioactive element",
+  "description": "Identifying which elements are radioactive"
+}
+
+###
+GET http://localhost:5000/course/my
+
+###
+GET http://localhost:5001/course/my
+
+###
+POST http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules/682f4e98293ab1d6fee28d55/content HTTP/1.1
+Host: localhost:5001
+Authorization: Bearer <your_jwt_token>
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryABC123
+
+------WebKitFormBoundaryABC123
+Content-Disposition: form-data; name="title"
+
+Lecture 1: Radioactivity Basics
+------WebKitFormBoundaryABC123
+Content-Disposition: form-data; name="content_type"
+
+file
+------WebKitFormBoundaryABC123
+Content-Disposition: form-data; name="file"; filename="lecture1.pdf"
+Content-Type: application/pdf
+
+###
+###
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/full
+
+<> 2025-06-04T145130.200.json
+<> 2025-05-23T131922.200.json
+<> 2025-05-23T131622.200.json
+
+###
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules
+
+<> 2025-05-23T131852.401.json
+<> 2025-05-23T131619.401.json
+<> 2025-05-23T131608.401.json
+<> 2025-05-23T130900.401.json
+<> 2025-05-23T130534.401.json
+<> 2025-05-23T130330.401.json
+
+###
+
+# curl -X GET
+#  "http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules"
+#  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkODM0ZDZkMzIzNjkwNDlhYTg1MjgiLCJyb2xlIjoiaW5zdHJ1Y3RvciIsImNvdXJzZXMiOlsiNjgyZTBmMGI1MzU3YmUyZmI2NzE4MmM5Il0sIm5hbWUiOiJSb2JlcnQgT3BwZW5oZWltZXIiLCJleHAiOjE3NDc5ODU0Njh9.t2fFWftXGUXzGZIVD_KlVTzbqzTdSL-EGz8sDmCpS8c"
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/modules
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkODM0ZDZkMzIzNjkwNDlhYTg1MjgiLCJyb2xlIjoiaW5zdHJ1Y3RvciIsImNvdXJzZXMiOlsiNjgyZTBmMGI1MzU3YmUyZmI2NzE4MmM5Il0sIm5hbWUiOiJSb2JlcnQgT3BwZW5oZWltZXIiLCJleHAiOjE3NDc5ODU0Njh9.t2fFWftXGUXzGZIVD_KlVTzbqzTdSL-EGz8sDmCpS8c
+
+###
+POST http://localhost:5001/course/{{course_id}}/assignments/{{assignment_id}}/submit
+Content-Type: multipart/form-data
+
+###
+GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/assignments
+
+<> 2025-06-04T145059.401.json
+<> 2025-06-04T145039.401.json
+
+###
+GET http://localhost:5001/course
