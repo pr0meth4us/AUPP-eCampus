@@ -14,13 +14,12 @@ import {
     BookOpenIcon,
     AcademicCapIcon,
     ChartBarIcon,
-    CogIcon, // CogIcon is imported but not used.
     CheckCircleIcon,
-    XCircleIcon, // XCircleIcon is imported but not used.
     CalendarIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
-import { course as CourseApi } from "services"; // Assuming this imports the 'course' object from your services/course.js
+import { course as CourseApi } from "services";
+import { assignment as assignmentApi } from "services";
 import { useCourseDetails } from "../hooks/useCourseFetch";
 import { useParams } from "react-router-dom";
 import {ExternalLinkIcon, UploadIcon} from "lucide-react";
@@ -35,7 +34,7 @@ const EditCourse = () => {
     // Course basic info
     const [updatedTitle, setUpdatedTitle] = useState("");
     const [updatedDescription, setUpdatedDescription] = useState("");
-    const [newCoverImage, setNewCoverImage] = useState(null);
+    const [newCoverImage, setNewCoverImage] = useState(null); // File object
 
     // Module management
     const [newModuleTitle, setNewModuleTitle] = useState("");
@@ -44,7 +43,7 @@ const EditCourse = () => {
     // Assignment management
     const [newAssignmentTitle, setNewAssignmentTitle] = useState("");
     const [newAssignmentDescription, setNewAssignmentDescription] = useState("");
-    const [newAssignmentType, setNewAssignmentType] = useState("text");
+    const [newAssignmentType, setNewAssignmentType] = useState("text"); // e.g., "text", "file_upload"
     const [newAssignmentPoints, setNewAssignmentPoints] = useState("100");
     const [newAssignmentDueDate, setNewAssignmentDueDate] = useState("");
 
@@ -52,12 +51,12 @@ const EditCourse = () => {
     const [studentIdToEnroll, setStudentIdToEnroll] = useState("");
 
     // Course-level Material management
-    const [newMaterialFile, setNewMaterialFile] = useState(null);
+    const [newMaterialFile, setNewMaterialFile] = useState(null); // File object
 
     // View/Grade Submissions
-    const [viewingAssignment, setViewingAssignment] = useState(null);
-    const [assignmentSubmissions, setAssignmentSubmissions] = useState([]);
-    const [currentGradingSubmission, setCurrentGradingSubmission] = useState(null);
+    const [viewingAssignment, setViewingAssignment] = useState(null); // Stores the whole assignment object
+    const [assignmentSubmissions, setAssignmentSubmissions] = useState([]); // Stores submissions for viewingAssignment
+    const [currentGradingSubmission, setCurrentGradingSubmission] = useState(null); // { submissionId, studentId, studentName }
     const [gradeInput, setGradeInput] = useState("");
     const [feedbackInput, setFeedbackInput] = useState("");
     const [submissionsLoading, setSubmissionsLoading] = useState(false);
@@ -88,9 +87,10 @@ const EditCourse = () => {
         }
     };
 
-    const handleError = (error, action = "perform action") => {
-        console.error(`Failed to ${action}:`, error.response?.data?.error || error.message || error);
-        alert(`Error: ${error.response?.data?.error || error.message || "An unexpected error occurred."}`);
+    const handleError = (err, action = "perform action") => {
+        const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
+        console.error(`Failed to ${action}:`, errorMessage, err);
+        alert(`Error performing ${action}: ${errorMessage}`);
     };
 
     const saveChanges = async () => {
@@ -101,7 +101,7 @@ const EditCourse = () => {
             if (newCoverImage) formData.append('cover_image', newCoverImage);
 
             await CourseApi.updateCourse(courseId, formData);
-            setNewCoverImage(null);
+            setNewCoverImage(null); // Clear after upload attempt
             setEditing(false);
             handleDataMutationSuccess("Course details updated.");
         } catch (err) {
@@ -110,6 +110,10 @@ const EditCourse = () => {
     };
 
     const handleAddModule = async () => {
+        if (!newModuleTitle.trim()) {
+            alert("Module title cannot be empty.");
+            return;
+        }
         try {
             await CourseApi.createModule(courseId, { title: newModuleTitle, description: newModuleDescription });
             setNewModuleTitle("");
@@ -142,6 +146,10 @@ const EditCourse = () => {
     };
 
     const handleAddAssignment = async () => {
+        if (!newAssignmentTitle.trim()) {
+            alert("Assignment title cannot be empty.");
+            return;
+        }
         try {
             const assignmentFormData = new FormData();
             assignmentFormData.append('title', newAssignmentTitle);
@@ -163,7 +171,7 @@ const EditCourse = () => {
 
     const handlePublishAssignment = async (assignmentId, newIsPublishedState) => {
         try {
-            await CourseApi.publishAssignment(courseId, assignmentId, { is_published: newIsPublishedState });
+            await assignmentApi.publishAssignment(courseId, assignmentId, { is_published: newIsPublishedState });
             handleDataMutationSuccess(`Assignment ${newIsPublishedState ? 'published' : 'unpublished'}.`);
         } catch (err) {
             handleError(err, "publish assignment");
@@ -196,7 +204,7 @@ const EditCourse = () => {
     };
 
     const handleUnenrollStudent = async (studentIdToUnenroll) => {
-        if (!window.confirm("Are you sure you want to unenroll this student?")) return;
+         if (!window.confirm("Are you sure you want to unenroll this student?")) return;
         try {
             await CourseApi.unenrollStudent(courseId, studentIdToUnenroll);
             handleDataMutationSuccess("Student unenrolled.");
@@ -248,8 +256,8 @@ const EditCourse = () => {
     const handleViewSubmissions = async (assignment) => {
         if (!assignment) return;
         setSubmissionsLoading(true);
+        setViewingAssignment(assignment); // Set which assignment we are viewing
         try {
-            setViewingAssignment(assignment);
             const submissionsData = await CourseApi.getAssignmentSubmissions(courseId, assignment.id || assignment._id);
             setAssignmentSubmissions(submissionsData || []);
             onSubmissionsModalOpen();
@@ -283,20 +291,26 @@ const EditCourse = () => {
                 alert("Grade must be a valid number.");
                 return;
             }
+            console.log(currentGradingSubmission, "sir yes sir")
 
-            await CourseApi.gradeSubmission(
+            await assignmentApi.gradeSubmission(
                 courseId,
                 viewingAssignment.id || viewingAssignment._id,
                 currentGradingSubmission.studentId,
                 gradeData
             );
-            onGradingFormClose();
-            // Refresh submissions in the main submissions modal
-            setSubmissionsLoading(true);
-            const updatedSubmissionsData = await CourseApi.getAssignmentSubmissions(courseId, viewingAssignment.id || viewingAssignment._id);
-            setAssignmentSubmissions(updatedSubmissionsData || []);
-            setSubmissionsLoading(false);
 
+            // Optimistically update local state for the submissions modal
+             const updatedSubmissions = assignmentSubmissions.map(sub => {
+                if ((sub.id || sub._id) === currentGradingSubmission.submissionId) {
+                    return { ...sub, grade: gradeData.grade, feedback: gradeData.feedback, status: 'graded' };
+                }
+                return sub;
+            });
+            setAssignmentSubmissions(updatedSubmissions);
+
+            onGradingFormClose();
+            // Also trigger a full course refetch if grades might affect overall course stats displayed elsewhere
             handleDataMutationSuccess("Submission graded.");
         } catch (err) {
             handleError(err, "grade submission");
@@ -305,12 +319,14 @@ const EditCourse = () => {
 
 
     const getSubmissionStats = () => {
-        if (!course || !course.assignments) return { total: 0, submittedCount: 0, gradedCount: 0 };
+        if (!course || !course.assignments) return { totalAssignments: 0, submittedCount: 0, gradedCount: 0 };
         let submittedCount = 0;
         let gradedCount = 0;
         course.assignments.forEach(assignment => {
-            assignment.submissions?.forEach(sub => {
-                if (sub.status === 'submitted' || sub.status === 'graded') {
+            // Use the submissions array directly from the assignment object in the mock
+            const assignmentSpecificSubmissions = assignment.submissions || [];
+            assignmentSpecificSubmissions.forEach(sub => {
+                 if (sub.status === 'submitted' || sub.status === 'graded') {
                     submittedCount++;
                 }
                 if (sub.status === 'graded') {
@@ -318,7 +334,7 @@ const EditCourse = () => {
                 }
             });
         });
-        return { total: course.assignments.length, submittedCount, gradedCount };
+        return { totalAssignments: course.assignments.length, submittedCount, gradedCount };
     };
 
 
@@ -346,9 +362,9 @@ const EditCourse = () => {
                                         onChange={(e) => setNewCoverImage(e.target.files[0])}
                                         className="hidden"
                                     />
-                                    {newCoverImage && <span className="text-xs mt-1 truncate w-full block">{newCoverImage.name}</span>}
-                                    {!newCoverImage && course.cover_image && <Image src={course.cover_image} alt="Current Cover" className="w-10 h-10 mt-1 rounded object-cover mx-auto"/>}
-                                    {!newCoverImage && !course.cover_image && <BookOpenIcon className="w-8 h-8 mt-1 mx-auto" />}
+                                     {newCoverImage && <span className="text-xs mt-1 truncate w-full block">{newCoverImage.name}</span>}
+                                     {!newCoverImage && course.cover_image && <Image src={course.cover_image} alt="Current Cover" className="w-10 h-10 mt-1 rounded object-cover mx-auto"/>}
+                                     {!newCoverImage && !course.cover_image && <BookOpenIcon className="w-8 h-8 mt-1 mx-auto" />}
                                 </div>
                             ) : course.cover_image ? (
                                 <Image src={course.cover_image} alt="Course cover" className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shadow-md" />
@@ -395,7 +411,7 @@ const EditCourse = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card><CardBody className="p-4 text-center"><UsersIcon className="w-8 h-8 mx-auto mb-2 text-blue-500"/><p className="text-xs text-gray-500">Students</p><p className="text-xl font-bold">{course.enrolled_students?.length || 0}</p></CardBody></Card>
                 <Card><CardBody className="p-4 text-center"><BookOpenIcon className="w-8 h-8 mx-auto mb-2 text-green-500"/><p className="text-xs text-gray-500">Modules</p><p className="text-xl font-bold">{course.modules?.length || 0}</p></CardBody></Card>
-                <Card><CardBody className="p-4 text-center"><AcademicCapIcon className="w-8 h-8 mx-auto mb-2 text-purple-500"/><p className="text-xs text-gray-500">Assignments</p><p className="text-xl font-bold">{course.assignments?.length || 0}</p></CardBody></Card>
+                <Card><CardBody className="p-4 text-center"><AcademicCapIcon className="w-8 h-8 mx-auto mb-2 text-purple-500"/><p className="text-xs text-gray-500">Assignments</p><p className="text-xl font-bold">{stats.totalAssignments || 0}</p></CardBody></Card>
                 <Card><CardBody className="p-4 text-center"><ChartBarIcon className="w-8 h-8 mx-auto mb-2 text-orange-500"/><p className="text-xs text-gray-500">Total Submissions</p><p className="text-xl font-bold">{stats.submittedCount}</p></CardBody></Card>
             </div>
 
@@ -521,12 +537,12 @@ const EditCourse = () => {
                                                             </span>
                                                             )}
                                                             <span>Type: <Chip size="sm" variant="bordered" className="capitalize">{assignment.assignment_type?.replace("_", " ")}</Chip></span>
-                                                            <span>Submissions: {assignment.submissions?.length || 0}</span>
+                                                            <span>Submissions: {assignment.submissions?.length || 0}</span> {/* This might need to be calculated from getAssignmentSubmissions if not directly on assignment object */}
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center space-x-1 mt-2 sm:mt-0">
                                                         <Tooltip content={assignment.is_published ? "Unpublish" : "Publish"}>
-                                                            <Switch isSelected={assignment.is_published} onValueChange={(isSelected) => handlePublishAssignment(assignment.id || assignment._id, isSelected)} size="sm"/>
+                                                            <Switch isSelected={!!assignment.is_published} onValueChange={(isSelected) => handlePublishAssignment(assignment.id || assignment._id, isSelected)} size="sm"/>
                                                         </Tooltip>
                                                         <Tooltip content="View Submissions">
                                                             <Button isLoading={submissionsLoading && viewingAssignment?.id === (assignment.id || assignment._id)} color="default" variant="light" size="sm" isIconOnly onPress={() => handleViewSubmissions(assignment)}> <EyeIcon className="w-5 h-5" /> </Button>
@@ -625,7 +641,7 @@ const EditCourse = () => {
                 </ModalContent>
             </Modal>
 
-            <Modal isOpen={isStudentModalOpen} onOpenChange={onStudentModalOpenChange} placement="top-center">
+             <Modal isOpen={isStudentModalOpen} onOpenChange={onStudentModalOpenChange} placement="top-center">
                 <ModalContent>
                     {(onClose) => (<>
                         <ModalHeader className="flex flex-col gap-1">Enroll Student</ModalHeader>

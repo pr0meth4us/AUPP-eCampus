@@ -4,6 +4,7 @@ import {course} from './course';
 import {admin} from './admin';
 import {payment} from './payment';
 import {user} from './user';
+import {assignment} from './assignment';
 
 export {
     auth,
@@ -11,5 +12,6 @@ export {
     student,
     course,
     payment,
-    user
+    user,
+    assignment
 };
