@@ -122,15 +122,17 @@ class CourseController:
 
     @staticmethod
     def detail_course(course_id):
-        """Get detailed course content for enrolled students"""
+        """Get detailed course content for enrolled students."""
         try:
             student_id = str(g.current_user['_id'])
+            # Pass the student’s ID into get_full_details(...)
             course_details = Course.get_full_details(course_id, student_id_str=student_id)
             if not course_details:
                 return jsonify({'error': 'Course not found or access denied'}), 404
             return jsonify(course_details), 200
         except Exception as e:
             return jsonify({'error': f'Failed to get course details: {str(e)}'}), 500
+
 
     @staticmethod
     def full_course(course_id):

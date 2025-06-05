@@ -2,13 +2,26 @@
 
 import React from 'react';
 import { Star } from 'lucide-react';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip } from '@nextui-org/react';
-import {formatDate} from "../../../utils/dateUtils";
+import {
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    Chip,
+} from '@nextui-org/react';
+import { formatDate } from '../../../utils/dateUtils';
 
+/**
+ * Expects `courseData.assignments` to each have:
+ *   - title, due_date, max_grade
+ *   - my_submissions: [ ... ]  (array of this student’s submissions)
+ *
+ * For grading status, we look at the **latest** submission in `my_submissions`.
+ */
 const GradesSection = ({ courseData }) => {
-    // Temporarily find current user as “test” (adjust your logic as needed)
-    const currentUser = courseData.people?.students?.find((s) => s.name === 'test');
-
+    // If no assignments at all:
     if (!courseData.assignments || courseData.assignments.length === 0) {
         return (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
@@ -35,46 +48,48 @@ const GradesSection = ({ courseData }) => {
                 </TableHeader>
                 <TableBody>
                     {courseData.assignments.map((assignment) => {
-                        const userSubmission = assignment.submissionsData?.find(
-                            (submission) => submission.student_id === currentUser?.id
+                        // Pull this student's submissions array:
+                        const submissions = assignment.my_submissions || [];
+                        let latest = null;
+                        if (submissions.length > 0) {
+                            // assume sorted; take last element
+                            latest = submissions[submissions.length - 1];
+                        }
+
+                        // Determine what to show in “Your Grade” and “Status”:
+                        let yourGradeText = 'No Submission';
+                        let statusChip = (
+                            <Chip size="sm" color="neutral">
+                                No Submission
+                            </Chip>
                         );
+
+                        if (latest) {
+                            if (latest.grade !== null && latest.grade !== undefined) {
+                                yourGradeText = `${latest.grade}/${assignment.max_grade}`;
+                                const passed = latest.grade >= 70; // or whatever pass threshold
+                                statusChip = (
+                                    <Chip size="sm" color={passed ? 'success' : 'danger'}>
+                                        {passed ? 'Passed' : 'Failed'}
+                                    </Chip>
+                                );
+                            } else {
+                                yourGradeText = 'Pending';
+                                statusChip = (
+                                    <Chip size="sm" color="warning">
+                                        Pending
+                                    </Chip>
+                                );
+                            }
+                        }
 
                         return (
                             <TableRow key={assignment._id}>
                                 <TableCell>{assignment.title}</TableCell>
                                 <TableCell>{formatDate(assignment.due_date)}</TableCell>
                                 <TableCell>{assignment.max_grade}</TableCell>
-                                <TableCell>
-                                    {userSubmission
-                                        ? userSubmission.grade !== null
-                                            ? `${userSubmission.grade}/${assignment.max_grade}`
-                                            : 'Not Graded'
-                                        : 'No Submission'}
-                                </TableCell>
-                                <TableCell>
-                                    {userSubmission ? (
-                                        <Chip
-                                            size="sm"
-                                            color={
-                                                userSubmission.grade !== null
-                                                    ? userSubmission.grade >= 70
-                                                        ? 'success'
-                                                        : 'danger'
-                                                    : 'warning'
-                                            }
-                                        >
-                                            {userSubmission.grade !== null
-                                                ? userSubmission.grade >= 70
-                                                    ? 'Passed'
-                                                    : 'Failed'
-                                                : 'Pending'}
-                                        </Chip>
-                                    ) : (
-                                        <Chip size="sm" color="neutral">
-                                            No Submission
-                                        </Chip>
-                                    )}
-                                </TableCell>
+                                <TableCell>{yourGradeText}</TableCell>
+                                <TableCell>{statusChip}</TableCell>
                             </TableRow>
                         );
                     })}

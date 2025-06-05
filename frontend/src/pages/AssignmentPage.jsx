@@ -34,7 +34,7 @@ export const AssignmentDetailPage = () => {
     const [submitError, setSubmitError] = useState('');
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-    // Fetch assignment details on mount or when courseId/assignmentId changes
+    // Fetch the assignment details (which now includes my_submissions array)
     useEffect(() => {
         const fetchAssignment = async () => {
             setLoadingAssignment(true);
@@ -52,7 +52,7 @@ export const AssignmentDetailPage = () => {
         fetchAssignment();
     }, [courseId, assignmentId]);
 
-    // Format the date for display
+    // Format date‐string into a human‐readable format
     const formatDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -65,13 +65,13 @@ export const AssignmentDetailPage = () => {
         });
     };
 
-    // Handler for file input
+    // Handle file input change
     const handleFileUpload = (event) => {
         const file = event.target.files[0] || null;
         setSubmissionFile(file);
     };
 
-    // Modified Submission Logic with success message
+    // Submission logic
     const handleSubmitAssignment = async () => {
         if (!submissionFile) {
             setSubmitError('Please select a file before submitting.');
@@ -87,14 +87,16 @@ export const AssignmentDetailPage = () => {
 
             await assignmentApi.submitAssignment(courseId, assignmentId, formData);
 
+            // Show success banner briefly
             setShowSuccessMessage(true);
             setTimeout(() => setShowSuccessMessage(false), 3000);
 
+            // Close modal and reset fields
             setIsSubmitModalOpen(false);
             setSubmissionFile(null);
             setSubmissionNote('');
 
-            // Re-fetch assignment details so submission status updates
+            // Re‐fetch the latest assignment data (with my_submissions updated)
             const updated = await course.getAssignmentById(courseId, assignmentId);
             setAssignment(updated);
         } catch (error) {
@@ -108,18 +110,18 @@ export const AssignmentDetailPage = () => {
         }
     };
 
-    // Get submission status color and text
-    const getSubmissionStatusDisplay = (submission) => {
-        if (!submission) return { color: 'warning', text: 'Not Submitted' };
-
-        if (submission.grade !== null && submission.grade !== undefined) {
+    // Determine overall status color/text based on the most recent attempt (if any)
+    const getOverallStatus = () => {
+        if (!assignment.my_submissions || assignment.my_submissions.length === 0) {
+            return { color: 'warning', text: 'Not Submitted' };
+        }
+        const latest = assignment.my_submissions[assignment.my_submissions.length - 1];
+        if (latest.grade != null && latest.grade !== undefined) {
             return { color: 'success', text: 'Graded' };
         }
-
         return { color: 'primary', text: 'Submitted' };
     };
 
-    // Loading state
     if (loadingAssignment) {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
@@ -129,14 +131,11 @@ export const AssignmentDetailPage = () => {
         );
     }
 
-    // Fetch error state
     if (fetchError) {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
                 <XCircle className="mx-auto mb-4 text-red-400" size={64} />
-                <h1 className="text-2xl font-bold text-red-600">
-                    Error loading assignment
-                </h1>
+                <h1 className="text-2xl font-bold text-red-600">Error loading assignment</h1>
                 <p className="text-gray-500 mt-2">{fetchError.message}</p>
                 <Button
                     color="primary"
@@ -150,15 +149,12 @@ export const AssignmentDetailPage = () => {
         );
     }
 
-    // If assignment object is null or undefined
     if (!assignment) {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
                 <XCircle className="mx-auto mb-4 text-gray-400" size={64} />
                 <h1 className="text-2xl font-bold text-gray-600">Assignment Not Found</h1>
-                <p className="text-gray-500 mt-2">
-                    The requested assignment does not exist.
-                </p>
+                <p className="text-gray-500 mt-2">The requested assignment does not exist.</p>
                 <Button
                     color="primary"
                     variant="flat"
@@ -171,11 +167,11 @@ export const AssignmentDetailPage = () => {
         );
     }
 
-    const submissionStatus = getSubmissionStatusDisplay(assignment.my_submission);
+    const overallStatus = getOverallStatus();
 
     return (
         <div className="container mx-auto px-4 py-8 space-y-6">
-            {/* Show a temporary success message right after submission */}
+            {/* Temporary “success” banner once you’ve submitted */}
             {showSuccessMessage && (
                 <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-lg">
                     <p>Assignment submitted successfully!</p>
@@ -184,12 +180,12 @@ export const AssignmentDetailPage = () => {
 
             <Card className="max-w-4xl mx-auto">
                 <CardBody className="space-y-6">
-                    {/* Header: Title + Lock/Active status */}
+                    {/* Header: Title + Status + Locked/Active */}
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-bold">{assignment.title}</h1>
                         <div className="flex gap-2">
-                            <Chip color={submissionStatus.color} variant="flat">
-                                {submissionStatus.text}
+                            <Chip color={overallStatus.color} variant="flat">
+                                {overallStatus.text}
                             </Chip>
                             <Chip color={assignment.is_locked ? 'danger' : 'success'} variant="flat">
                                 {assignment.is_locked ? 'Locked' : 'Active'}
@@ -197,7 +193,7 @@ export const AssignmentDetailPage = () => {
                         </div>
                     </div>
 
-                    {/* Details: Due date, max grade, view link */}
+                    {/* Details: Due date, max grade, view-link */}
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
@@ -231,79 +227,90 @@ export const AssignmentDetailPage = () => {
                         <p className="text-gray-600">{assignment.description}</p>
                     </div>
 
-                    {/* SECTION: "Your Submission" or "Not yet submitted" */}
-                    {assignment.my_submission ? (
+                    {/* SECTION: “All Your Submissions” (or “Not yet submitted”) */}
+                    {assignment.my_submissions && assignment.my_submissions.length > 0 ? (
                         <div className="my-4 p-4 bg-gray-100 rounded-lg border">
-                            <h3 className="text-lg font-semibold mb-2">Your Submission</h3>
+                            <h3 className="text-lg font-semibold mb-2">All Your Submissions</h3>
 
-                            {/* Status */}
-                            <p>
-                                <span className="font-medium">Status:</span>{' '}
-                                <Chip size="sm" color={submissionStatus.color} variant="flat">
-                                    {submissionStatus.text}
-                                </Chip>
-                            </p>
+                            {assignment.my_submissions.map((sub, idx) => {
+                                // Status chip for this attempt
+                                const statusColor =
+                                    sub.grade != null && sub.grade !== undefined ? 'success' : 'primary';
+                                const statusText =
+                                    sub.grade != null && sub.grade !== undefined ? 'Graded' : 'Submitted';
 
-                            {/* Download links for ALL submitted files */}
-                            {assignment.my_submission.file_urls &&
-                                assignment.my_submission.file_urls.length > 0 && (
-                                    <div className="mt-2">
-                                        <span className="font-medium">Submitted Files:</span>
-                                        <div className="mt-1 space-y-1">
-                                            {assignment.my_submission.file_urls.map((fileUrl, index) => (
-                                                <div key={index} className="flex items-center gap-2">
-                                                    <Download size={16} className="text-blue-600" />
-                                                    <a
-                                                        href={fileUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 underline hover:text-blue-800"
-                                                    >
-                                                        {assignment.my_submission.file_names?.[index] ||
-                                                            `Submitted file ${index + 1}`}
-                                                    </a>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                            {/* Submission content/notes */}
-                            {assignment.my_submission.content && (
-                                <div className="mt-2">
-                                    <span className="font-medium">Notes:</span>
-                                    <p className="text-gray-700 mt-1 p-2 bg-white rounded border">
-                                        {assignment.my_submission.content}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Submitted at */}
-                            <p className="mt-2">
-                                <span className="font-medium">Submitted at:</span>{' '}
-                                {formatDate(assignment.my_submission.submitted_at)}
-                            </p>
-
-                            {/* Grade & Feedback (if present) */}
-                            {assignment.my_submission.grade !== null &&
-                                assignment.my_submission.grade !== undefined && (
-                                    <div className="mt-4 p-3 bg-green-50 rounded border border-green-200">
-                                        <h4 className="font-semibold text-green-800 mb-2">Grading Results</h4>
-                                        <p className="mb-2">
-                                            <span className="font-medium">Grade:</span>{' '}
-                                            <span className="text-green-700 font-bold">
-                                                {assignment.my_submission.grade} / {assignment.max_grade}
-                                            </span>
+                                return (
+                                    <div
+                                        key={sub._id}
+                                        className="mb-6 p-4 bg-white rounded-lg border hover:shadow-sm transition-shadow"
+                                    >
+                                        <h4 className="font-semibold mb-1">
+                                            Attempt {idx + 1} -{' '}
+                                            <Chip size="xs" color={statusColor} variant="flat">
+                                                {statusText}
+                                            </Chip>
+                                        </h4>
+                                        <p className="text-xs text-gray-600 mb-2">
+                                            Submitted at: {formatDate(sub.submitted_at)}
                                         </p>
-                                        <div>
-                                            <span className="font-medium">Feedback:</span>
-                                            <p className="text-gray-700 mt-1 p-2 bg-white rounded border">
-                                                {assignment.my_submission.feedback ||
-                                                    'No feedback provided yet.'}
-                                            </p>
-                                        </div>
+
+                                        {/* Download any files from this attempt */}
+                                        {sub.file_urls && sub.file_urls.length > 0 && (
+                                            <div className="mt-2 mb-2">
+                                                <span className="font-medium">Files:</span>
+                                                <div className="mt-1 space-y-1">
+                                                    {sub.file_urls.map((fileUrl, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-center gap-2 text-sm"
+                                                        >
+                                                            <Download size={16} className="text-blue-600" />
+                                                            <a
+                                                                href={fileUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 underline hover:text-blue-800"
+                                                            >
+                                                                {sub.file_names?.[index] ||
+                                                                    `File ${index + 1}`}
+                                                            </a>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Notes/content (if any) */}
+                                        {sub.content && (
+                                            <div className="mt-2">
+                                                <span className="font-medium">Notes:</span>
+                                                <p className="text-gray-700 mt-1 p-2 bg-gray-50 rounded border">
+                                                    {sub.content}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* If graded, show grade + feedback */}
+                                        {sub.grade != null && sub.grade !== undefined && (
+                                            <div className="mt-4 p-3 bg-green-50 rounded border border-green-200">
+                                                <h5 className="font-semibold text-green-800 mb-1">Grading Results</h5>
+                                                <p className="mb-1">
+                                                    <span className="font-medium">Grade:</span>{' '}
+                                                    <span className="text-green-700 font-bold">
+                            {sub.grade} / {assignment.max_grade}
+                          </span>
+                                                </p>
+                                                <div>
+                                                    <span className="font-medium">Feedback:</span>
+                                                    <p className="text-gray-700 mt-1 p-2 bg-white rounded border">
+                                                        {sub.feedback || 'No feedback provided.'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="my-4 p-4 bg-yellow-100 rounded-lg border border-yellow-300">
@@ -311,7 +318,7 @@ export const AssignmentDetailPage = () => {
                         </div>
                     )}
 
-                    {/* Submit Button (allow resubmit if assignment not locked) */}
+                    {/* Submit Button (allow resubmit if assignment.is_locked === false) */}
                     <div>
                         <Button
                             color="primary"
@@ -319,13 +326,15 @@ export const AssignmentDetailPage = () => {
                             onPress={() => setIsSubmitModalOpen(true)}
                             isDisabled={assignment.is_locked}
                         >
-                            {assignment.my_submission ? 'Resubmit Assignment' : 'Submit Assignment'}
+                            {assignment.my_submissions && assignment.my_submissions.length > 0
+                                ? 'Resubmit Assignment'
+                                : 'Submit Assignment'}
                         </Button>
                     </div>
                 </CardBody>
             </Card>
 
-            {/* Submit Modal */}
+            {/* Submit / Resubmit Modal */}
             <Modal
                 isOpen={isSubmitModalOpen}
                 onClose={() => {
@@ -338,7 +347,9 @@ export const AssignmentDetailPage = () => {
             >
                 <ModalContent>
                     <ModalHeader>
-                        {assignment.my_submission ? 'Resubmit Assignment' : 'Submit Assignment'}
+                        {assignment.my_submissions && assignment.my_submissions.length > 0
+                            ? 'Resubmit Assignment'
+                            : 'Submit Assignment'}
                     </ModalHeader>
                     <ModalBody>
                         <div className="space-y-4">
@@ -365,8 +376,8 @@ export const AssignmentDetailPage = () => {
                                 onChange={(e) => setSubmissionNote(e.target.value)}
                             />
 
-                            {/* Warning for resubmission */}
-                            {assignment.my_submission && (
+                            {/* Warning if this is a resubmit */}
+                            {assignment.my_submissions && assignment.my_submissions.length > 0 && (
                                 <div className="p-3 bg-orange-100 border border-orange-300 rounded">
                                     <p className="text-orange-700 text-sm">
                                         <strong>Note:</strong> This will replace your previous submission.
@@ -399,7 +410,10 @@ export const AssignmentDetailPage = () => {
                             onPress={handleSubmitAssignment}
                             isDisabled={!submissionFile || submitting}
                         >
-                            {submitting ? <Spinner size="sm" /> : (assignment.my_submission ? 'Resubmit' : 'Submit')}
+                            {submitting ? <Spinner size="sm" /> :
+                                assignment.my_submissions && assignment.my_submissions.length > 0
+                                    ? 'Resubmit'
+                                    : 'Submit'}
                         </Button>
                     </ModalFooter>
                 </ModalContent>

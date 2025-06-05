@@ -170,12 +170,14 @@ class Course:
         from .module_model import Module
         from .assignment_model import Assignment
 
-
-    # Step 1: Run aggregation to get the main course document and instructor details
+        # Step 1: Lookup the course + instructor info
         pipeline = [
             {'$match': {'_id': ObjectId(course_id)}},
             {'$lookup': {
-                'from': 'users', 'localField': 'instructor_id', 'foreignField': '_id', 'as': 'instructor_info'
+                'from': 'users',
+                'localField': 'instructor_id',
+                'foreignField': '_id',
+                'as': 'instructor_info'
             }},
             {'$unwind': {'path': '$instructor_info', 'preserveNullAndEmptyArrays': True}},
             {'$project': {
@@ -192,34 +194,37 @@ class Course:
         if not result:
             return None
 
+        # "data" is the raw course doc
         data = result[0]['course']
         data['instructor'] = result[0]['instructor']
 
-        # Step 2: Hydrate with fully serialized Module and Assignment data
+        # Step 2: Fetch and serialize modules + assignments
         modules_data = Module.find_by_course(str(data['_id']))
         assignments_data = Assignment.find_by_course(str(data['_id']))
 
-        # Ensure modules are serialized
+        # Serialize modules normally
         data['modules'] = [Module(m).to_dict() for m in modules_data]
 
-        # Ensure assignments are serialized based on the viewer (student vs instructor)
+        # Serialize assignments differently for a student vs. instructor
         if student_id_str:
-            data['assignments'] = [Assignment(a).to_student_dict(student_id_str) for a in assignments_data]
+            data['assignments'] = [
+                Assignment(a).to_student_dict(student_id_str)
+                for a in assignments_data
+            ]
         else:
-            # FIX: Explicitly call to_dict() for the instructor/full view
-            data['assignments'] = [Assignment(a).to_dict() for a in assignments_data]
+            data['assignments'] = [
+                Assignment(a).to_dict() for a in assignments_data
+            ]
 
-        # Step 3: Clean up all ObjectId fields from the main 'data' document
+        # Step 3: Convert top-level ObjectIds → strings
         data['_id'] = str(data['_id'])
         data['instructor_id'] = str(data['instructor_id'])
         if data.get('uploader_id'):
             data['uploader_id'] = str(data['uploader_id'])
-        if data.get('major_ids'):
-            data['major_ids'] = [str(mid) for mid in data['major_ids']]
-        if data.get('tag_ids'):
-            data['tag_ids'] = [str(tid) for tid in data['tag_ids']]
+        data['major_ids'] = [str(mid) for mid in data.get('major_ids', [])]
+        data['tag_ids'] = [str(tid) for tid in data.get('tag_ids', [])]
 
-        # Step 4: Remove raw/temporary fields before returning
+        # Step 4: Clean up “enrolled_students” and other raw fields
         data.pop('instructor_info', None)
         data.pop('enrolled_students', None)
 

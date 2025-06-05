@@ -216,21 +216,22 @@ class Assignment:
             'max_file_size': self.max_file_size,
             'max_files': self.max_files,
             'points': self.points,
-            'due_date': to_iso_string(self.due_date),
+            'due_date': self.due_date.isoformat() if self.due_date else None,
             'allow_late_submission': self.allow_late_submission,
             'late_penalty': self.late_penalty,
             'attachment_urls': self.attachment_urls,
             'attachment_names': self.attachment_names,
             'submissions': [s.to_dict() for s in self.submissions],
             'is_published': self.is_published,
-            'created_at': to_iso_string(self.created_at),
-            'updated_at': to_iso_string(self.updated_at)
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
-    def to_student_dict(self, student_id: str = None) -> dict:
+    def to_student_dict(self, student_id: str) -> dict:
         """
-        Returns a lighter version of the assignment, plus the student’s own submission if provided.
+        Return assignment info plus ALL of this student's submissions (sorted by submitted_at).
         """
+        # 1) Base assignment fields (preview + common properties)
         data = {
             '_id': str(self._id),
             'title': self.title,
@@ -241,18 +242,26 @@ class Assignment:
             'max_file_size': self.max_file_size,
             'max_files': self.max_files,
             'points': self.points,
-            'due_date': to_iso_string(self.due_date),
+            'due_date': self.due_date.isoformat() if self.due_date else None,
             'allow_late_submission': self.allow_late_submission,
             'attachment_urls': self.attachment_urls,
             'attachment_names': self.attachment_names,
+            'is_published': self.is_published,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
-        if student_id:
-            # Look for a submission whose student_id matches (string compare)
-            student_submission = next(
-                (s for s in self.submissions if str(s.student_id) == student_id),
-                None
-            )
-            data['my_submission'] = student_submission.to_dict() if student_submission else None
+        # 2) Filter submissions to only those by this student
+        submissions_for_student = [
+            s for s in self.submissions if str(s.student_id) == student_id
+        ]
+
+        # 3) Sort them by submitted_at (oldest first → newest last)
+        submissions_for_student.sort(
+            key=lambda s: s.submitted_at or datetime.min.replace(tzinfo=timezone.utc)
+        )
+
+        # 4) Serialize each one
+        data['my_submissions'] = [s.to_dict() for s in submissions_for_student]
 
         return data
