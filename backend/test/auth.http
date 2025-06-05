@@ -1,0 +1,10 @@
+### Login Request
+POST http://localhost:5001/auth/login
+Content-Type: application/json
+
+{
+  "name": "Robert Oppenheimer",
+  "email": "r.oppenheimer@aupp.com",
+  "password": "password",
+  "role": "instructor"
+}
