@@ -69,15 +69,20 @@ export const assignment = {
 
     // ===== SUBMISSION OPERATIONS =====
 
-    // Submit assignment (student only)
-    submitAssignment: async (courseId, assignmentId, submissionData) => { // submissionData is expected to be FormData
+    submitAssignment: async (courseId, assignmentId, submissionData) => {
+        // submissionData is a FormData containing:
+        //   - formData.append('content', …)
+        //   - formData.append('files', …)
         const api = createAssignmentApi(courseId);
-        const response = await api.post(`/${assignmentId}/submit`, submissionData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await api.post(
+            `/${assignmentId}/submit`,
+            submissionData,
+            {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }
+        );
         return response.data;
     },
-
     // Grade assignment submission (instructor only)
     // gradeData is an object like { grade: 90, feedback: "Good job" }
     gradeSubmission: async (courseId, assignmentId, studentId, gradeData) => {

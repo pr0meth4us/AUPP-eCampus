@@ -11,15 +11,15 @@ import ProfilePage from './pages/ProfilePage';
 import EditProfile from './pages/EditProfilePage';
 import Layout from './context/Layout';
 import CourseCreate from './pages/CourseCreatePage';
-import AdminSignup from './pages/AdminSignup';
-import AdminLogin from './pages/AdminLogin';
+import AdminSignup from './pages/AuthPages/AdminSignup';
+import AdminLogin from './pages/AuthPages/AdminLogin';
 import MyCourse from './pages/MyCourse';
 import EditCourse from './pages/InstructorCourseDashboardPage';
 import CoursePage from './pages/CoursePreviewPage';
 import CourseCatalogPage from './pages/CourseCatalogPage';
 import CourseSuccessPage from './pages/CourseSuccessPage';
 import CourseConfirmationPage from './pages/CourseConfirmationPage';
-import CourseStudyPage from './pages/CourseStudyPage';
+import CourseDashboardPage from './pages/CourseDashboardPage';
 import { AssignmentDetailPage } from './pages/AssignmentPage';
 import { ModuleDetailPage } from './pages/ModulePage';
 import { MaterialDetailPage } from './pages/MaterialPage';
@@ -119,7 +119,7 @@ const App = () => {
                         path="/course/:id"
                         element={
                             <PrivateRoute
-                                element={<CourseStudyPage />}
+                                element={<CourseDashboardPage />}
                                 allowedRoles={['student', 'instructor', 'admin']}
                             />
                         }

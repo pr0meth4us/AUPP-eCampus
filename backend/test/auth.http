@@ -8,3 +8,13 @@ Content-Type: application/json
   "password": "password",
   "role": "instructor"
 }
+
+###
+POST http://localhost:5001/auth/login
+Content-Type: application/json
+
+{
+  "email": "phearaneron.soeung@gmail.com",
+  "password": "?VRb%j'2E5Eu8]~",
+  "role": "student"
+}

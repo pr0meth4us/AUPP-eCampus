@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from bson import ObjectId
 import enum
 from services.mongo_service import db
@@ -18,12 +19,16 @@ class SubmissionStatus(enum.Enum):
 
 class AssignmentSubmission:
     def __init__(self, data: dict):
+        # _id
         self._id = data.get('_id', ObjectId())
+        # student_id and assignment_id (store as ObjectId or string depending on context)
         self.student_id = data.get('student_id')
         self.assignment_id = data.get('assignment_id')
+        # content, files
         self.content = data.get('content')
         self.file_urls = data.get('file_urls', [])
         self.file_names = data.get('file_names', [])
+        # Convert submitted_at and graded_at to UTC‐aware datetime
         self.submitted_at = ensure_datetime(data.get('submitted_at'))
         self.grade = data.get('grade')
         self.feedback = data.get('feedback')
@@ -64,13 +69,16 @@ class Assignment:
         self.max_file_size = data.get('max_file_size', 10)
         self.max_files = data.get('max_files', 1)
         self.points = data.get('points', 100)
+        # Ensure due_date is UTC-aware
         self.due_date = ensure_datetime(data.get('due_date'))
         self.allow_late_submission = data.get('allow_late_submission', False)
         self.late_penalty = data.get('late_penalty', 0)
         self.attachment_urls = data.get('attachment_urls', [])
         self.attachment_names = data.get('attachment_names', [])
+        # Build AssignmentSubmission objects
         self.submissions = [AssignmentSubmission(s) for s in data.get('submissions', [])]
         self.is_published = data.get('is_published', False)
+        # created_at / updated_at as UTC-aware
         self.created_at = ensure_datetime(data.get('created_at')) or utc_now()
         self.updated_at = ensure_datetime(data.get('updated_at')) or utc_now()
 
@@ -104,6 +112,7 @@ class Assignment:
         }
         result = cls._coll().insert_one(doc)
 
+        # Also push this assignment ID into the Course document
         Course._coll().update_one(
             {'_id': ObjectId(payload['course_id'])},
             {'$push': {'assignments': result.inserted_id}}
@@ -113,17 +122,27 @@ class Assignment:
 
     @classmethod
     def submit_assignment(cls, assignment_id: str, student_id: str, submission_data: dict) -> str:
+        """
+        submission_data: {
+            'content': <string>,
+            'file_urls': [<url>, ...],
+            'file_names': [<filename>, ...]
+        }
+        """
         now = utc_now()
 
-        assignment = cls._coll().find_one({'_id': ObjectId(assignment_id)})
-        if not assignment:
+        # Fetch the raw assignment document
+        assignment_doc = cls._coll().find_one({'_id': ObjectId(assignment_id)})
+        if not assignment_doc:
             raise ValueError("Assignment not found")
 
+        # Determine submission status (on-time vs late)
         status = SubmissionStatus.SUBMITTED.value
-        due_date = ensure_datetime(assignment.get('due_date'))
+        due_date = ensure_datetime(assignment_doc.get('due_date'))
         if due_date and now > due_date:
             status = SubmissionStatus.LATE.value
 
+        # Build a new AssignmentSubmission
         submission = AssignmentSubmission({
             'student_id': ObjectId(student_id),
             'assignment_id': ObjectId(assignment_id),
@@ -134,6 +153,7 @@ class Assignment:
             'status': status
         })
 
+        # Remove any existing submission by this student, then push new one
         cls._coll().update_one(
             {'_id': ObjectId(assignment_id)},
             {
@@ -152,6 +172,7 @@ class Assignment:
     def grade_submission(cls, assignment_id: str, student_id: str, grade: float, feedback: str, grader_id: str) -> None:
         now = utc_now()
 
+        # Match on student_id as string (because AssignmentSubmission stored student_id as string in to_dict())
         cls._coll().update_one(
             {
                 '_id': ObjectId(assignment_id),
@@ -169,7 +190,6 @@ class Assignment:
             }
         )
 
-
     @classmethod
     def find_by_course(cls, course_id: str) -> list:
         docs = cls._coll().find({'course_id': ObjectId(course_id)})
@@ -177,10 +197,9 @@ class Assignment:
 
     @classmethod
     def find_by_student(cls, student_id: str, course_id: str = None) -> list:
-        query = {'submissions.student_id': ObjectId(student_id)}
+        query = {'submissions.student_id': ObjectId(student_id) if isinstance(student_id, str) else student_id}
         if course_id:
             query['course_id'] = ObjectId(course_id)
-
         docs = cls._coll().find(query)
         return [cls(d).to_dict() for d in docs]
 
@@ -209,6 +228,9 @@ class Assignment:
         }
 
     def to_student_dict(self, student_id: str = None) -> dict:
+        """
+        Returns a lighter version of the assignment, plus the student’s own submission if provided.
+        """
         data = {
             '_id': str(self._id),
             'title': self.title,
@@ -226,6 +248,7 @@ class Assignment:
         }
 
         if student_id:
+            # Look for a submission whose student_id matches (string compare)
             student_submission = next(
                 (s for s in self.submissions if str(s.student_id) == student_id),
                 None

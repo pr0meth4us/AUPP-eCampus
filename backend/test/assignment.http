@@ -21,17 +21,6 @@ Content-Type: application/json
   "role": "instructor"
 }
 
-
-###
-POST http://localhost:5001/auth/login
-Content-Type: application/json
-
-{
-"email": "phearaneron.soeung@gmail.com",
-"password": "?VRb%j'2E5Eu8]~",
-"role": "student"
-}
-
 ### Create Assignment (with Authorization)
 POST http://localhost:5001/course/682e0f0b5357be2fb67182c9/assignments
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
@@ -70,7 +59,7 @@ Content-Disposition: form-data; name="content"
 
 This is my submission for the assignment.
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="files"; filename="submission_file.pdf"
+Content-Disposition: form-data; name="files"; filename="submission_file.txt"
 Content-Type: application/pdf
 
 @/Users/nicksng/Desktop/AUPP-eCampus/backend/requirements.txt
