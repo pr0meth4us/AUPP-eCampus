@@ -1,33 +1,34 @@
-from datetime import datetime, timezone
 from bson import ObjectId
 import enum
 from services.mongo_service import db
 from .course_model import Course
+from utils.date_utils import ensure_datetime, to_iso_string, utc_now
+
 class AssignmentType(enum.Enum):
     TEXT = "text"
     FILE_UPLOAD = "file_upload"
     QUIZ = "quiz"
     PROJECT = "project"
 
-
 class SubmissionStatus(enum.Enum):
     NOT_SUBMITTED = "not_submitted"
     SUBMITTED = "submitted"
     GRADED = "graded"
     LATE = "late"
+
 class AssignmentSubmission:
     def __init__(self, data: dict):
         self._id = data.get('_id', ObjectId())
         self.student_id = data.get('student_id')
         self.assignment_id = data.get('assignment_id')
-        self.content = data.get('content')  # Text submission
-        self.file_urls = data.get('file_urls', [])  # List of uploaded file URLs
+        self.content = data.get('content')
+        self.file_urls = data.get('file_urls', [])
         self.file_names = data.get('file_names', [])
-        self.submitted_at = data.get('submitted_at')
+        self.submitted_at = ensure_datetime(data.get('submitted_at'))
         self.grade = data.get('grade')
         self.feedback = data.get('feedback')
         self.status = data.get('status', SubmissionStatus.NOT_SUBMITTED.value)
-        self.graded_at = data.get('graded_at')
+        self.graded_at = ensure_datetime(data.get('graded_at'))
         self.graded_by = data.get('graded_by')
 
     def to_dict(self) -> dict:
@@ -38,14 +39,13 @@ class AssignmentSubmission:
             'content': self.content,
             'file_urls': self.file_urls,
             'file_names': self.file_names,
-            'submitted_at': self.submitted_at.isoformat() if self.submitted_at and hasattr(self.submitted_at, 'isoformat') else self.submitted_at,
+            'submitted_at': to_iso_string(self.submitted_at),
             'grade': self.grade,
             'feedback': self.feedback,
             'status': self.status,
-            'graded_at': self.graded_at.isoformat() if self.graded_at and hasattr(self.graded_at, 'isoformat') else self.graded_at,
+            'graded_at': to_iso_string(self.graded_at),
             'graded_by': str(self.graded_by) if self.graded_by else None
         }
-
 
 class Assignment:
     @classmethod
@@ -55,31 +55,31 @@ class Assignment:
     def __init__(self, data: dict):
         self._id = data.get('_id')
         self.course_id = data.get('course_id')
-        self.module_id = data.get('module_id')  # Optional - can be module-specific
+        self.module_id = data.get('module_id')
         self.title = data.get('title')
         self.description = data.get('description')
         self.instructions = data.get('instructions')
         self.assignment_type = data.get('assignment_type', AssignmentType.TEXT.value)
-        self.allowed_file_types = data.get('allowed_file_types', [])  # ['pdf', 'docx', 'txt']
-        self.max_file_size = data.get('max_file_size', 10)  # MB
+        self.allowed_file_types = data.get('allowed_file_types', [])
+        self.max_file_size = data.get('max_file_size', 10)
         self.max_files = data.get('max_files', 1)
         self.points = data.get('points', 100)
-        self.due_date = data.get('due_date')
+        self.due_date = ensure_datetime(data.get('due_date'))
         self.allow_late_submission = data.get('allow_late_submission', False)
-        self.late_penalty = data.get('late_penalty', 0)  # Percentage
-        self.attachment_urls = data.get('attachment_urls', [])  # Instructor files
+        self.late_penalty = data.get('late_penalty', 0)
+        self.attachment_urls = data.get('attachment_urls', [])
         self.attachment_names = data.get('attachment_names', [])
         self.submissions = [AssignmentSubmission(s) for s in data.get('submissions', [])]
         self.is_published = data.get('is_published', False)
-        self.created_at = data.get('created_at', datetime.now(timezone.utc))
-        self.updated_at = data.get('updated_at', datetime.now(timezone.utc))
+        self.created_at = ensure_datetime(data.get('created_at')) or utc_now()
+        self.updated_at = ensure_datetime(data.get('updated_at')) or utc_now()
 
     @classmethod
     def save(cls, payload: dict) -> str:
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         due_date = None
         if payload.get('due_date'):
-            due_date = datetime.fromisoformat(payload['due_date'].replace('Z', '+00:00'))
+            due_date = ensure_datetime(payload['due_date'])
 
         doc = {
             'course_id': ObjectId(payload['course_id']),
@@ -104,7 +104,6 @@ class Assignment:
         }
         result = cls._coll().insert_one(doc)
 
-        # Update course assignments array
         Course._coll().update_one(
             {'_id': ObjectId(payload['course_id'])},
             {'$push': {'assignments': result.inserted_id}}
@@ -114,15 +113,15 @@ class Assignment:
 
     @classmethod
     def submit_assignment(cls, assignment_id: str, student_id: str, submission_data: dict) -> str:
-        now = datetime.now(timezone.utc)
+        now = utc_now()
 
-        # Check if assignment exists and get due date
         assignment = cls._coll().find_one({'_id': ObjectId(assignment_id)})
         if not assignment:
             raise ValueError("Assignment not found")
 
         status = SubmissionStatus.SUBMITTED.value
-        if assignment.get('due_date') and now > assignment['due_date']:
+        due_date = ensure_datetime(assignment.get('due_date'))
+        if due_date and now > due_date:
             status = SubmissionStatus.LATE.value
 
         submission = AssignmentSubmission({
@@ -135,7 +134,6 @@ class Assignment:
             'status': status
         })
 
-        # Update or insert submission
         cls._coll().update_one(
             {'_id': ObjectId(assignment_id)},
             {
@@ -152,7 +150,7 @@ class Assignment:
 
     @classmethod
     def grade_submission(cls, assignment_id: str, student_id: str, grade: float, feedback: str, grader_id: str) -> None:
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         cls._coll().update_one(
             {
                 '_id': ObjectId(assignment_id),
@@ -197,19 +195,18 @@ class Assignment:
             'max_file_size': self.max_file_size,
             'max_files': self.max_files,
             'points': self.points,
-            'due_date': self.due_date.isoformat() if self.due_date and hasattr(self.due_date, 'isoformat') else self.due_date,
+            'due_date': to_iso_string(self.due_date),
             'allow_late_submission': self.allow_late_submission,
             'late_penalty': self.late_penalty,
             'attachment_urls': self.attachment_urls,
             'attachment_names': self.attachment_names,
             'submissions': [s.to_dict() for s in self.submissions],
             'is_published': self.is_published,
-            'created_at': self.created_at.isoformat() if self.created_at and hasattr(self.created_at, 'isoformat') else self.created_at,
-            'updated_at': self.updated_at.isoformat() if self.updated_at and hasattr(self.updated_at, 'isoformat') else self.updated_at
+            'created_at': to_iso_string(self.created_at),
+            'updated_at': to_iso_string(self.updated_at)
         }
 
     def to_student_dict(self, student_id: str = None) -> dict:
-        """Return assignment with student's submission if provided"""
         data = {
             '_id': str(self._id),
             'title': self.title,
@@ -220,7 +217,7 @@ class Assignment:
             'max_file_size': self.max_file_size,
             'max_files': self.max_files,
             'points': self.points,
-            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'due_date': to_iso_string(self.due_date),
             'allow_late_submission': self.allow_late_submission,
             'attachment_urls': self.attachment_urls,
             'attachment_names': self.attachment_names,

@@ -1,18 +1,18 @@
-from datetime import datetime, timezone
 from bson import ObjectId
 from services.mongo_service import db
+from utils.date_utils import ensure_datetime, to_iso_string, utc_now
 
 class ModuleContent:
     def __init__(self, data: dict):
         self._id = data.get('_id', ObjectId())
         self.title = data.get('title')
-        self.content_type = data.get('content_type')  # 'text', 'file', 'video', 'link'
-        self.content = data.get('content')  # Text content or file URL
+        self.content_type = data.get('content_type')
+        self.content = data.get('content')
         self.file_url = data.get('file_url')
         self.file_name = data.get('file_name')
         self.file_type = data.get('file_type')
         self.order = data.get('order', 0)
-        self.created_at = data.get('created_at', datetime.now(timezone.utc))
+        self.created_at = ensure_datetime(data.get('created_at')) or utc_now()
 
     def to_dict(self) -> dict:
         return {
@@ -24,7 +24,7 @@ class ModuleContent:
             'file_name': self.file_name,
             'file_type': self.file_type,
             'order': self.order,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': to_iso_string(self.created_at)
         }
 
     @property
@@ -44,13 +44,13 @@ class Module:
         self.order = data.get('order', 0)
         self.contents = [ModuleContent(c) for c in data.get('contents', [])]
         self.is_published = data.get('is_published', False)
-        self.created_at = data.get('created_at', datetime.now(timezone.utc))
-        self.updated_at = data.get('updated_at', datetime.now(timezone.utc))
+        self.created_at = ensure_datetime(data.get('created_at')) or utc_now()
+        self.updated_at = ensure_datetime(data.get('updated_at')) or utc_now()
 
     @classmethod
     def save(cls, payload: dict) -> str:
         from .course_model import Course
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         doc = {
             'course_id': ObjectId(payload['course_id']),
             'title': payload['title'],
@@ -70,13 +70,13 @@ class Module:
 
     @classmethod
     def add_content(cls, module_id: str, content_data: dict) -> str:
-        content_data['created_at'] = datetime.now(timezone.utc)
+        content_data['created_at'] = utc_now()
         content = ModuleContent(content_data)
         cls._coll().update_one(
             {'_id': ObjectId(module_id)},
             {
                 '$push': {'contents': content.to_dict()},
-                '$set': {'updated_at': datetime.now(timezone.utc)}
+                '$set': {'updated_at': utc_now()}
             }
         )
         return str(content.id)
@@ -93,10 +93,7 @@ class Module:
 
     @classmethod
     def patch_module(cls, module_id: str, fields: dict) -> bool:
-        """
-        Partially update a module's allowed fields.
-        `fields` already includes updated_at.
-        """
+        fields['updated_at'] = utc_now()
         result = cls._coll().update_one(
             {'_id': ObjectId(module_id)},
             {'$set': fields}
@@ -105,15 +102,10 @@ class Module:
 
     @classmethod
     def update_content(cls, module_id: str, content_id: str, payload: dict) -> bool:
-        """
-        Update fields (e.g., title, content, file_url, order, etc.) of a single content item.
-        Payload keys must match ModuleContent.to_dict() keys, except _id.
-        """
         set_doc = {}
         for key, value in payload.items():
             set_doc[f"contents.$.{key}"] = value
-
-        set_doc['updated_at'] = datetime.now(timezone.utc)
+        set_doc['updated_at'] = utc_now()
 
         result = cls._coll().update_one(
             {"_id": ObjectId(module_id), "contents._id": content_id},
@@ -130,6 +122,6 @@ class Module:
             'order': self.order,
             'contents': [c.to_dict() for c in self.contents],
             'is_published': self.is_published,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'created_at': to_iso_string(self.created_at),
+            'updated_at': to_iso_string(self.updated_at)
         }
