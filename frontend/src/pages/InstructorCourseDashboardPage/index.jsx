@@ -1,7 +1,7 @@
 // components/EditCourse.jsx
 
-import React, { useState, useEffect } from "react";
-import {Spinner, Button, Tabs, Tab, Textarea} from "@nextui-org/react";
+import React, { useState, useEffect, useMemo } from "react";
+import {Spinner, Button, Tabs, Tab} from "@nextui-org/react";
 import { useParams } from "react-router-dom";
 
 import { course as CourseApi } from "services";
@@ -68,8 +68,19 @@ const EditCourse = () => {
     }
   }, [course]);
 
+  // Convert enrolled_students array → a map for quick lookups in SubmissionsModal
+  const allStudentsMap = useMemo(() => {
+    const map = {};
+    if (course?.enrolled_students) {
+      course.enrolled_students.forEach((stu) => {
+        map[stu._id] = stu;
+      });
+    }
+    return map;
+  }, [course]);
+
   // Utility: show alerts on success or error
-  const handleDataMutationSuccess = () => {
+  const handleDataMutationSuccess = (message = "Operation successful!") => {
     if (refetchCourse) {
       refetchCourse();
     }
@@ -89,7 +100,7 @@ const EditCourse = () => {
       await CourseApi.updateCourse(courseId, formData);
       setNewCoverImage(null);
       setEditing(false);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Course details updated.");
     } catch (err) {
       handleError(err, "save course changes");
     }
@@ -109,7 +120,7 @@ const EditCourse = () => {
       setNewModuleTitle("");
       setNewModuleDescription("");
       setIsAddModuleOpen(false);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Module added.");
     } catch (err) {
       handleError(err, "add module");
     }
@@ -120,7 +131,7 @@ const EditCourse = () => {
     if (!window.confirm("Delete this module and all its contents?")) return;
     try {
       await CourseApi.deleteModule(courseId, moduleId);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Module deleted.");
     } catch (err) {
       handleError(err, "delete module");
     }
@@ -148,7 +159,7 @@ const EditCourse = () => {
       setNewAssignmentPoints("100");
       setNewAssignmentDueDate("");
       setIsAddAssignmentOpen(false);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Assignment created.");
     } catch (err) {
       handleError(err, "add assignment");
     }
@@ -158,7 +169,7 @@ const EditCourse = () => {
   const handlePublishAssignment = async (assignmentId, newIsPublishedState) => {
     try {
       await assignmentApi.publishAssignment(courseId, assignmentId, { is_published: newIsPublishedState });
-      handleDataMutationSuccess();
+      handleDataMutationSuccess(`Assignment ${newIsPublishedState ? "published" : "unpublished"}.`);
     } catch (err) {
       handleError(err, "publish assignment");
     }
@@ -169,7 +180,7 @@ const EditCourse = () => {
     if (!window.confirm("Delete this assignment (and all its submissions)?")) return;
     try {
       await CourseApi.deleteAssignment(courseId, assignmentId);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Assignment deleted.");
     } catch (err) {
       handleError(err, "delete assignment");
     }
@@ -185,7 +196,7 @@ const EditCourse = () => {
       await CourseApi.enrollStudent(courseId, { student_id: studentIdToEnroll });
       setStudentIdToEnroll("");
       setIsEnrollStudentOpen(false);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Student enrolled.");
     } catch (err) {
       handleError(err, "enroll student");
     }
@@ -196,7 +207,7 @@ const EditCourse = () => {
     if (!window.confirm("Are you sure you want to unenroll this student?")) return;
     try {
       await CourseApi.unenrollStudent(courseId, studentIdToUnenroll);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Student unenrolled.");
     } catch (err) {
       handleError(err, "unenroll student");
     }
@@ -224,7 +235,7 @@ const EditCourse = () => {
     setCurrentGradingSubmission({
       submissionId: submission._id,
       studentId: submission.student_id,
-      studentName: submission.student_id, // or fetch actual name if you have a lookup
+      studentName: allStudentsMap[submission.student_id]?.name || submission.student_id,
     });
     setGradeInput(submission.grade != null ? String(submission.grade) : "");
     setFeedbackInput(submission.feedback || "");
@@ -244,10 +255,10 @@ const EditCourse = () => {
     }
     try {
       await assignmentApi.gradeSubmission(
-        courseId,
-        viewingAssignment._id,
-        currentGradingSubmission.studentId,
-        gradeData
+          courseId,
+          viewingAssignment._id,
+          currentGradingSubmission.studentId,
+          gradeData
       );
       const updatedSubmissions = assignmentSubmissions.map((sub) => {
         if (sub._id === currentGradingSubmission.submissionId) {
@@ -262,7 +273,7 @@ const EditCourse = () => {
       });
       setAssignmentSubmissions(updatedSubmissions);
       setIsGradingModalOpen(false);
-      handleDataMutationSuccess();
+      handleDataMutationSuccess("Submission graded.");
     } catch (err) {
       handleError(err, "grade submission");
     }
@@ -293,173 +304,174 @@ const EditCourse = () => {
     };
   };
 
-  // Early returns for loading / error / no-course
+  // Render‐guard for loading / error / no-course
   if (loading && !course) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spinner size="lg" label="Loading course details..." />
-      </div>
+        <div className="flex justify-center items-center min-h-screen">
+          <Spinner size="lg" label="Loading course details..." />
+        </div>
     );
   }
   if (error) {
     return (
-      <div className="text-center p-8">
-        <p className="text-danger text-xl">{error?.message || "Failed to load course details."}</p>
-        <Button onPress={() => refetchCourse && refetchCourse()}>Try Again</Button>
-      </div>
+        <div className="text-center p-8">
+          <p className="text-danger text-xl">{error?.message || "Failed to load course details."}</p>
+          <Button onPress={() => refetchCourse && refetchCourse()}>Try Again</Button>
+        </div>
     );
   }
   if (!course) {
     return (
-      <div className="text-center p-8">
-        <p className="text-xl">Course not found.</p>
-      </div>
+        <div className="text-center p-8">
+          <p className="text-xl">Course not found.</p>
+        </div>
     );
   }
 
   const stats = getSubmissionStats();
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* ====== COURSE HEADER ====== */}
-      <CourseHeader
-        course={course}
-        editing={editing}
-        updatedTitle={updatedTitle}
-        updatedDescription={updatedDescription}
-        newCoverImage={newCoverImage}
-        setNewCoverImage={setNewCoverImage}
-        setUpdatedTitle={setUpdatedTitle}
-        setUpdatedDescription={setUpdatedDescription}
-        onSave={saveChanges}
-        onCancel={() => {
-          setEditing(false);
-          setUpdatedTitle(course.title);
-          setUpdatedDescription(course.description);
-          setNewCoverImage(null);
-        }}
-        onEdit={() => setEditing(true)}
-        onPublish={() => handleDataMutationSuccess() || CourseApi.publishCourse(courseId, !course.is_published)}
-      />
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+        {/* ====== COURSE HEADER ====== */}
+        <CourseHeader
+            course={course}
+            editing={editing}
+            updatedTitle={updatedTitle}
+            updatedDescription={updatedDescription}
+            newCoverImage={newCoverImage}
+            setNewCoverImage={setNewCoverImage}
+            setUpdatedTitle={setUpdatedTitle}
+            setUpdatedDescription={setUpdatedDescription}
+            onSave={saveChanges}
+            onCancel={() => {
+              setEditing(false);
+              setUpdatedTitle(course.title);
+              setUpdatedDescription(course.description);
+              setNewCoverImage(null);
+            }}
+            onEdit={() => setEditing(true)}
+            onPublish={() => CourseApi.publishCourse(courseId, !course.is_published).then(handleDataMutationSuccess).catch((err) => handleError(err, "toggle publish"))}
+        />
 
-      {/* ====== DASHBOARD CARDS ====== */}
-      <DashboardCards
-        stats={{
-          enrolledStudents: course.enrolled_students?.length || 0,
-          modules: course.modules?.length || 0,
-          assignments: stats.totalAssignments,
-          totalSubmissions: stats.submittedCount,
-        }}
-      />
+        {/* ====== DASHBOARD CARDS ====== */}
+        <DashboardCards
+            stats={{
+              enrolledStudents: course.enrolled_students?.length || 0,
+              modules: course.modules?.length || 0,
+              assignments: stats.totalAssignments,
+              totalSubmissions: stats.submittedCount,
+            }}
+        />
 
-      {/* ====== TABS ====== */}
-      <Tabs
-        selectedKey={activeTab}
-        onSelectionChange={setActiveTab}
-        aria-label="Course Management Tabs"
-        color="primary"
-        variant="underlined"
-        fullWidth
-      >
-        <Tab key="overview" title="Overview">
-          <div className="p-4">
-            {editing ? (
-              <Textarea
-                value={updatedDescription}
-                onChange={(e) => setUpdatedDescription(e.target.value)}
-                placeholder="Course description…"
-                minRows={5}
-                variant="bordered"
-              />
-            ) : (
-              <p className="text-gray-700 whitespace-pre-wrap">{course.description || "No description available."}</p>
-            )}
-          </div>
-        </Tab>
+        {/* ====== TABS ====== */}
+        <Tabs
+            selectedKey={activeTab}
+            onSelectionChange={setActiveTab}
+            aria-label="Course Management Tabs"
+            color="primary"
+            variant="underlined"
+            fullWidth
+        >
+          <Tab key="overview" title="Overview">
+            <div className="p-4">
+              {editing ? (
+                  <textarea
+                      className="w-full px-3 py-2 border rounded"
+                      value={updatedDescription}
+                      onChange={(e) => setUpdatedDescription(e.target.value)}
+                      placeholder="Course description…"
+                      rows={5}
+                  />
+              ) : (
+                  <p className="text-gray-700 whitespace-pre-wrap">{course.description || "No description available."}</p>
+              )}
+            </div>
+          </Tab>
 
-        <Tab key="students" title="Students">
-          <StudentsSection
-            enrolledStudents={course.enrolled_students || []}
-            onEnroll={() => setIsEnrollStudentOpen(true)}
-            onUnenroll={handleUnenrollStudent}
-          />
-        </Tab>
+          <Tab key="students" title="Students">
+            <StudentsSection
+                enrolledStudents={course.enrolled_students || []}
+                onEnroll={() => setIsEnrollStudentOpen(true)}
+                onUnenroll={handleUnenrollStudent}
+            />
+          </Tab>
 
-        <Tab key="modules" title="Modules">
-          <ModulesSection
-            modules={course.modules || []}
-            onAddModule={() => setIsAddModuleOpen(true)}
-            onDeleteModule={handleDeleteModule}
-          />
-        </Tab>
+          <Tab key="modules" title="Modules">
+            <ModulesSection
+                modules={course.modules || []}
+                onAddModule={() => setIsAddModuleOpen(true)}
+                onDeleteModule={handleDeleteModule}
+            />
+          </Tab>
 
-        <Tab key="assignments" title="Assignments">
-          <AssignmentsSection
-            assignments={course.assignments || []}
-            onAddAssignment={() => setIsAddAssignmentOpen(true)}
-            onPublishAssignment={handlePublishAssignment}
-            onDeleteAssignment={handleDeleteAssignment}
-            onViewSubmissions={handleViewSubmissions}
-            submissionsLoading={submissionsLoading}
-            viewingAssignmentId={viewingAssignment?._id}
-          />
-        </Tab>
-      </Tabs>
+          <Tab key="assignments" title="Assignments">
+            <AssignmentsSection
+                assignments={course.assignments || []}
+                onAddAssignment={() => setIsAddAssignmentOpen(true)}
+                onPublishAssignment={handlePublishAssignment}
+                onDeleteAssignment={handleDeleteAssignment}
+                onViewSubmissions={handleViewSubmissions}
+                submissionsLoading={submissionsLoading}
+                viewingAssignmentId={viewingAssignment?._id}
+            />
+          </Tab>
+        </Tabs>
 
-      {/* ====== MODALS ====== */}
-      <AddModuleModal
-        isOpen={isAddModuleOpen}
-        onClose={() => setIsAddModuleOpen(false)}
-        newTitle={newModuleTitle}
-        setNewTitle={setNewModuleTitle}
-        newDesc={newModuleDescription}
-        setNewDesc={setNewModuleDescription}
-        onAdd={handleAddModule}
-      />
+        {/* ====== MODALS ====== */}
+        <AddModuleModal
+            isOpen={isAddModuleOpen}
+            onClose={() => setIsAddModuleOpen(false)}
+            newTitle={newModuleTitle}
+            setNewTitle={setNewModuleTitle}
+            newDesc={newModuleDescription}
+            setNewDesc={setNewModuleDescription}
+            onAdd={handleAddModule}
+        />
 
-      <AddAssignmentModal
-        isOpen={isAddAssignmentOpen}
-        onClose={() => setIsAddAssignmentOpen(false)}
-        newTitle={newAssignmentTitle}
-        setNewTitle={setNewAssignmentTitle}
-        newDesc={newAssignmentDescription}
-        setNewDesc={setNewAssignmentDescription}
-        newType={newAssignmentType}
-        setNewType={setNewAssignmentType}
-        newPoints={newAssignmentPoints}
-        setNewPoints={setNewAssignmentPoints}
-        newDueDate={newAssignmentDueDate}
-        setNewDueDate={setNewAssignmentDueDate}
-        onAdd={handleAddAssignment}
-      />
+        <AddAssignmentModal
+            isOpen={isAddAssignmentOpen}
+            onClose={() => setIsAddAssignmentOpen(false)}
+            newTitle={newAssignmentTitle}
+            setNewTitle={setNewAssignmentTitle}
+            newDesc={newAssignmentDescription}
+            setNewDesc={setNewAssignmentDescription}
+            newType={newAssignmentType}
+            setNewType={setNewAssignmentType}
+            newPoints={newAssignmentPoints}
+            setNewPoints={setNewAssignmentPoints}
+            newDueDate={newAssignmentDueDate}
+            setNewDueDate={setNewAssignmentDueDate}
+            onAdd={handleAddAssignment}
+        />
 
-      <EnrollStudentModal
-        isOpen={isEnrollStudentOpen}
-        onClose={() => setIsEnrollStudentOpen(false)}
-        studentId={studentIdToEnroll}
-        setStudentId={setStudentIdToEnroll}
-        onEnroll={handleEnrollStudent}
-      />
+        <EnrollStudentModal
+            isOpen={isEnrollStudentOpen}
+            onClose={() => setIsEnrollStudentOpen(false)}
+            studentId={studentIdToEnroll}
+            setStudentId={setStudentIdToEnroll}
+            onEnroll={handleEnrollStudent}
+        />
 
-      <SubmissionsModal
-        isOpen={isSubmissionsModalOpen}
-        onClose={() => setIsSubmissionsModalOpen(false)}
-        submissions={assignmentSubmissions}
-        loading={submissionsLoading}
-        onGradeClick={openGradingForm}
-      />
+        <SubmissionsModal
+            isOpen={isSubmissionsModalOpen}
+            onClose={() => setIsSubmissionsModalOpen(false)}
+            submissions={assignmentSubmissions}
+            loading={submissionsLoading}
+            allStudentsMap={allStudentsMap}
+            onGradeClick={openGradingForm}
+        />
 
-      <GradingModal
-        isOpen={isGradingModalOpen}
-        onClose={() => setIsGradingModalOpen(false)}
-        studentName={currentGradingSubmission?.studentName}
-        gradeInput={gradeInput}
-        setGradeInput={setGradeInput}
-        feedbackInput={feedbackInput}
-        setFeedbackInput={setFeedbackInput}
-        onSubmit={handleGradeSubmission}
-      />
-    </div>
+        <GradingModal
+            isOpen={isGradingModalOpen}
+            onClose={() => setIsGradingModalOpen(false)}
+            studentName={currentGradingSubmission?.studentName}
+            gradeInput={gradeInput}
+            setGradeInput={setGradeInput}
+            feedbackInput={feedbackInput}
+            setFeedbackInput={setFeedbackInput}
+            onSubmit={handleGradeSubmission}
+        />
+      </div>
   );
 };
 

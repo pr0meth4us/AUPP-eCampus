@@ -2,6 +2,7 @@ from flask import jsonify, request, g
 from models.course_model import Course
 from services.file_upload_service import upload_course_material
 from bson import ObjectId
+
 class CourseController:
     @staticmethod
     def create_course():
@@ -32,9 +33,6 @@ class CourseController:
                     return jsonify({'error': 'Invalid price format'}), 400
 
             course_id = Course.save(data)
-            if 'cover_image_url' in data:
-                Course.update(course_id, {'cover_image_url': data['cover_image_url']})
-
             return jsonify({'message': 'Course created successfully', 'course_id': course_id}), 201
         except Exception as e:
             return jsonify({'error': f'Failed to create course: {str(e)}'}), 500
@@ -54,8 +52,7 @@ class CourseController:
     def update_course(course_id):
         """Update course information with optional file uploads"""
         try:
-            course = Course.find_instance_by_id(course_id)
-            if not course:
+            if not Course.find_instance_by_id(course_id):
                 return jsonify({'error': 'Course not found'}), 404
 
             data = request.form.to_dict()
@@ -66,10 +63,10 @@ class CourseController:
                     if upload_result['success']:
                         data['cover_image_url'] = upload_result['file_url']
 
-            if 'major_ids' in data:
-                data['major_ids'] = data['major_ids'].split(',') if isinstance(data['major_ids'], str) else data['major_ids']
-            if 'tag_ids' in data:
-                data['tag_ids'] = data['tag_ids'].split(',') if isinstance(data['tag_ids'], str) else data['tag_ids']
+            if 'major_ids' in data and isinstance(data['major_ids'], str):
+                data['major_ids'] = data['major_ids'].split(',')
+            if 'tag_ids' in data and isinstance(data['tag_ids'], str):
+                data['tag_ids'] = data['tag_ids'].split(',')
             if 'price' in data and data['price']:
                 try:
                     data['price'] = float(data['price'])
@@ -85,8 +82,7 @@ class CourseController:
     def delete_course(course_id):
         """Delete course and all related data"""
         try:
-            course = Course.find_instance_by_id(course_id)
-            if not course:
+            if not Course.find_instance_by_id(course_id):
                 return jsonify({'error': 'Course not found'}), 404
             Course.delete(course_id)
             return jsonify({'message': 'Course deleted successfully'}), 200
@@ -95,7 +91,7 @@ class CourseController:
 
     @staticmethod
     def get_all_courses():
-        """Get all courses (public endpoint)"""
+        """Get all courses with instructor info (public endpoint)"""
         try:
             courses = Course.find_all()
             return jsonify(courses), 200
@@ -108,22 +104,19 @@ class CourseController:
         try:
             user_id = str(g.current_user['_id'])
             role = g.current_user.get('role')
-            if role == 'admin':
-                courses = Course.find_by_user(user_id)
-            elif role == 'instructor':
-                courses = Course.find_by_user(user_id, role='instructor')
-            else:
-                courses = Course.find_by_user(user_id, role='student')
+            courses = Course.find_by_user(user_id, role=role)
             return jsonify(courses), 200
         except Exception as e:
             return jsonify({'error': f'Failed to retrieve user courses: {str(e)}'}), 500
 
     @staticmethod
     def preview_course(course_id):
-        """Get course preview (public information only)"""
+        """Get course preview with instructor details"""
         try:
-            course = Course.find_instance_by_id(course_id)
-            return jsonify(course.to_preview_dict()), 200
+            course_preview = Course.get_preview_details(course_id)
+            if not course_preview:
+                return jsonify({'error': 'Course not found'}), 404
+            return jsonify(course_preview), 200
         except Exception as e:
             return jsonify({'error': f'Failed to get course preview: {str(e)}'}), 500
 
@@ -131,22 +124,27 @@ class CourseController:
     def detail_course(course_id):
         """Get detailed course content for enrolled students"""
         try:
-            course = Course.find_instance_by_id(course_id)
             student_id = str(g.current_user['_id'])
-            course_dict = course.to_student_dict(student_id)
-            return jsonify(course_dict), 200
+            course_details = Course.get_full_details(course_id, student_id_str=student_id)
+            if not course_details:
+                return jsonify({'error': 'Course not found or access denied'}), 404
+            return jsonify(course_details), 200
         except Exception as e:
             return jsonify({'error': f'Failed to get course details: {str(e)}'}), 500
 
     @staticmethod
     def full_course(course_id):
-        """Get full course information for instructors/admins"""
+        """Get full course information for instructors/admins, including all student details"""
         try:
-            course = Course.find_instance_by_id(course_id)
-            if not course:
+            course_full_details = Course.get_full_details(course_id)
+            if not course_full_details:
                 return jsonify({'error': 'Course not found'}), 404
-            return jsonify(course.to_instructor_dict()), 200
+            # Hydrate the response with the rich student list
+            course_full_details['enrolled_students'] = Course.get_enrolled_students_with_details(course_id)
+            return jsonify(course_full_details), 200
         except Exception as e:
+            # For debugging, print the exception to the console
+            print(f"Error in full_course: {e}")
             return jsonify({'error': f'Failed to get full course: {str(e)}'}), 500
 
     @staticmethod
@@ -157,7 +155,7 @@ class CourseController:
             if not course:
                 return jsonify({'error': 'Course not found'}), 404
             student_id = str(g.current_user['_id'])
-            if student_id in [str(s) for s in course.enrolled_students]:
+            if ObjectId(student_id) in course.enrolled_students:
                 return jsonify({'error': 'Already enrolled in this course'}), 400
             Course.enroll_student(course_id, student_id)
             return jsonify({'message': 'Successfully enrolled in course'}), 200
@@ -166,21 +164,11 @@ class CourseController:
 
     @staticmethod
     def get_enrolled_students(course_id):
-        """Get list of enrolled students"""
+        """Get list of enrolled students with full details"""
         try:
-            from models.user_model import User
-            course = Course.find_instance_by_id(course_id)
-            if not course:
+            if not Course.find_instance_by_id(course_id):
                 return jsonify({'error': 'Course not found'}), 404
-            students = []
-            for student_id in course.enrolled_students:
-                student = User.find_by_id(str(student_id))
-                if student:
-                    students.append({
-                        '_id': str(student_id),
-                        'name': student.get('name', 'Unknown'),
-                        'email': student.get('email', 'Unknown')
-                    })
+            students = Course.get_enrolled_students_with_details(course_id)
             return jsonify(students), 200
         except Exception as e:
             return jsonify({'error': f'Failed to get enrolled students: {str(e)}'}), 500
@@ -200,17 +188,18 @@ class CourseController:
                 'course_created': course.created_at.isoformat() if course.created_at else None
             }
             assignment_stats = []
-            for assignment_id in course.assignments:
-                assignment_doc = Assignment._coll().find_one({'_id': assignment_id})
-                if assignment_doc:
-                    assignment = Assignment(assignment_doc)
-                    submitted_count = len([s for s in assignment.submissions if s.status != 'not_submitted'])
-                    assignment_stats.append({
-                        'assignment_id': str(assignment_id),
-                        'title': assignment.title,
-                        'total_submissions': submitted_count,
-                        'submission_rate': (submitted_count / len(course.enrolled_students) * 100) if course.enrolled_students else 0
-                    })
+            if course.enrolled_students:
+                for assignment_id in course.assignments:
+                    assignment_doc = Assignment._coll().find_one({'_id': assignment_id})
+                    if assignment_doc:
+                        assignment = Assignment(assignment_doc)
+                        submitted_count = len([s for s in assignment.submissions if s.status != 'not_submitted'])
+                        assignment_stats.append({
+                            'assignment_id': str(assignment_id),
+                            'title': assignment.title,
+                            'total_submissions': submitted_count,
+                            'submission_rate': (submitted_count / len(course.enrolled_students) * 100)
+                        })
             analytics['assignment_stats'] = assignment_stats
             return jsonify(analytics), 200
         except Exception as e:

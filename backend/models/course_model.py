@@ -3,6 +3,11 @@ from bson import ObjectId
 from services.mongo_service import db
 from utils.date_utils import ensure_datetime, to_iso_string, utc_now
 
+# Assuming these models exist and have to_dict() methods
+# from .module_model import Module
+# from .assignment_model import Assignment
+
+
 class FileType(enum.Enum):
     PDF = "pdf"
     DOCX = "docx"
@@ -12,6 +17,7 @@ class FileType(enum.Enum):
     VIDEO = "video"
     AUDIO = "audio"
     IMAGE = "image"
+
 
 class Course:
     @classmethod
@@ -32,7 +38,6 @@ class Course:
         self.enrolled_students = data.get('enrolled_students', [])
         self.assignments = data.get('assignments', [])
         self.modules = data.get('modules', [])
-        # Ensure dates are datetime objects
         self.created_at = ensure_datetime(data.get('created_at')) or utc_now()
         self.updated_at = ensure_datetime(data.get('updated_at')) or utc_now()
 
@@ -89,6 +94,7 @@ class Course:
     def delete(cls, course_id: str) -> None:
         from .module_model import Module
         from .assignment_model import Assignment
+
         Module._coll().delete_many({'course_id': ObjectId(course_id)})
         Assignment._coll().delete_many({'course_id': ObjectId(course_id)})
         cls._coll().delete_one({'_id': ObjectId(course_id)})
@@ -105,23 +111,148 @@ class Course:
 
     @classmethod
     def find_all(cls) -> list:
-        docs = cls._coll().find()
-        return [cls(d).to_dict() for d in docs]
+        pipeline = [
+            {'$lookup': {
+                'from': 'users',
+                'localField': 'instructor_id',
+                'foreignField': '_id',
+                'as': 'instructor'
+            }},
+            {'$unwind': {'path': '$instructor', 'preserveNullAndEmptyArrays': True}},
+            {'$project': {
+                '_id': {'$toString': '$_id'},
+                'title': 1,
+                'description': 1,
+                'price': 1,
+                'cover_image_url': 1,
+                'instructor_name': '$instructor.name',
+                'instructor_image': '$instructor.profile_image'
+            }}
+        ]
+        return list(cls._coll().aggregate(pipeline))
 
     @classmethod
     def find_by_user(cls, user_id: str, role: str = None) -> list:
         user_oid = ObjectId(user_id)
+        query = {}
         if role == 'instructor':
             query = {'instructor_id': user_oid}
         elif role == 'student':
             query = {'enrolled_students': user_oid}
         else:
-            query = {'$or': [
-                {'instructor_id': user_oid},
-                {'enrolled_students': user_oid}
-            ]}
+            query = {'$or': [{'instructor_id': user_oid}, {'enrolled_students': user_oid}]}
         docs = cls._coll().find(query)
-        return [cls(d).to_dict() for d in docs]
+        return [cls(d).to_preview_dict() for d in docs]
+
+    @classmethod
+    def get_preview_details(cls, course_id: str) -> dict:
+        pipeline = [
+            {'$match': {'_id': ObjectId(course_id)}},
+            {'$lookup': {
+                'from': 'users', 'localField': 'instructor_id', 'foreignField': '_id', 'as': 'instructor_info'
+            }},
+            {'$unwind': {'path': '$instructor_info', 'preserveNullAndEmptyArrays': True}},
+            {'$project': {
+                '_id': {'$toString': '$_id'},
+                'title': 1, 'description': 1, 'price': 1, 'cover_image_url': 1,
+                'instructor': {
+                    'name': '$instructor_info.name',
+                    'email': '$instructor_info.email',
+                    'profile_image': '$instructor_info.profile_image'
+                }
+            }}
+        ]
+        result = list(cls._coll().aggregate(pipeline))
+        return result[0] if result else None
+
+    @classmethod
+    def get_full_details(cls, course_id: str, student_id_str: str = None) -> dict:
+        from .module_model import Module
+        from .assignment_model import Assignment
+
+
+    # Step 1: Run aggregation to get the main course document and instructor details
+        pipeline = [
+            {'$match': {'_id': ObjectId(course_id)}},
+            {'$lookup': {
+                'from': 'users', 'localField': 'instructor_id', 'foreignField': '_id', 'as': 'instructor_info'
+            }},
+            {'$unwind': {'path': '$instructor_info', 'preserveNullAndEmptyArrays': True}},
+            {'$project': {
+                'course': '$$ROOT',
+                'instructor': {
+                    '_id': {'$toString': '$instructor_info._id'},
+                    'name': '$instructor_info.name',
+                    'email': '$instructor_info.email',
+                    'profile_image': '$instructor_info.profile_image'
+                }
+            }}
+        ]
+        result = list(cls._coll().aggregate(pipeline))
+        if not result:
+            return None
+
+        data = result[0]['course']
+        data['instructor'] = result[0]['instructor']
+
+        # Step 2: Hydrate with fully serialized Module and Assignment data
+        modules_data = Module.find_by_course(str(data['_id']))
+        assignments_data = Assignment.find_by_course(str(data['_id']))
+
+        # Ensure modules are serialized
+        data['modules'] = [Module(m).to_dict() for m in modules_data]
+
+        # Ensure assignments are serialized based on the viewer (student vs instructor)
+        if student_id_str:
+            data['assignments'] = [Assignment(a).to_student_dict(student_id_str) for a in assignments_data]
+        else:
+            # FIX: Explicitly call to_dict() for the instructor/full view
+            data['assignments'] = [Assignment(a).to_dict() for a in assignments_data]
+
+        # Step 3: Clean up all ObjectId fields from the main 'data' document
+        data['_id'] = str(data['_id'])
+        data['instructor_id'] = str(data['instructor_id'])
+        if data.get('uploader_id'):
+            data['uploader_id'] = str(data['uploader_id'])
+        if data.get('major_ids'):
+            data['major_ids'] = [str(mid) for mid in data['major_ids']]
+        if data.get('tag_ids'):
+            data['tag_ids'] = [str(tid) for tid in data['tag_ids']]
+
+        # Step 4: Remove raw/temporary fields before returning
+        data.pop('instructor_info', None)
+        data.pop('enrolled_students', None)
+
+        return data
+
+    @classmethod
+    def get_enrolled_students_with_details(cls, course_id: str) -> list:
+        pipeline = [
+            {'$match': {'_id': ObjectId(course_id)}},
+            {'$lookup': {
+                'from': 'users',
+                'localField': 'enrolled_students',
+                'foreignField': '_id',
+                'as': 'student_details'
+            }},
+            {'$project': {
+                '_id': 0,
+                'students': {
+                    '$map': {
+                        'input': '$student_details',
+                        'as': 'student',
+                        'in': {
+                            '_id': {'$toString': '$$student._id'},
+                            'name': '$$student.name',
+                            'email': '$$student.email',
+                            'profile_image': '$$student.profile_image'
+                        }
+                    }
+                }
+            }}
+        ]
+        result = list(cls._coll().aggregate(pipeline))
+        return result[0]['students'] if result and 'students' in result[0] else []
 
     def to_dict(self) -> dict:
         return {
@@ -149,29 +280,3 @@ class Course:
             'cover_image_url': self.cover_image_url,
             'price': self.price,
         }
-
-    def to_student_dict(self, student_id: str = None) -> dict:
-        data = self.to_preview_dict()
-        from .module_model import Module
-        from .assignment_model import Assignment
-        modules = Module.find_by_course(str(self._id))
-        assignments = Assignment.find_by_course(str(self._id))
-        if student_id:
-            assignments = [
-                Assignment(Assignment._coll().find_one({'_id': ObjectId(a_id)}))
-                .to_student_dict(student_id)
-                for a_id in self.assignments
-            ]
-        data.update({
-            'modules': modules,
-            'assignments': assignments,
-        })
-        return data
-
-    def to_instructor_dict(self) -> dict:
-        base = self.to_dict()
-        from .module_model import Module
-        from .assignment_model import Assignment
-        base['modules'] = Module.find_by_course(str(self._id))
-        base['assignments'] = Assignment.find_by_course(str(self._id))
-        return base

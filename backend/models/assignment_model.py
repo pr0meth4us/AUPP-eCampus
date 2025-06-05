@@ -151,10 +151,11 @@ class Assignment:
     @classmethod
     def grade_submission(cls, assignment_id: str, student_id: str, grade: float, feedback: str, grader_id: str) -> None:
         now = utc_now()
+
         cls._coll().update_one(
             {
                 '_id': ObjectId(assignment_id),
-                'submissions.student_id': ObjectId(student_id)
+                'submissions.student_id': student_id
             },
             {
                 '$set': {
@@ -162,11 +163,12 @@ class Assignment:
                     'submissions.$.feedback': feedback,
                     'submissions.$.status': SubmissionStatus.GRADED.value,
                     'submissions.$.graded_at': now,
-                    'submissions.$.graded_by': ObjectId(grader_id),
+                    'submissions.$.graded_by': grader_id,
                     'updated_at': now
                 }
             }
         )
+
 
     @classmethod
     def find_by_course(cls, course_id: str) -> list:
