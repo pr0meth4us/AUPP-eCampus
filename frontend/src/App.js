@@ -12,7 +12,7 @@ import CourseCreate from "pages/CourseCreatePage";
 import AdminSignup from "pages/AdminSignup";
 import AdminLogin from "pages/AdminLogin";
 import MyCourse from "pages/MyCourse";
-import EditCoursePage from "./pages/EditCoursePage";
+import EditCourse from "./pages/InstructorCourseDashboardPage";
 import CoursePage from "./pages/CoursePage";
 import CourseCatalogPage from "pages/CourseCatalogPage";
 import CourseSuccessPage from "pages/CourseSuccessPage";
@@ -51,7 +51,7 @@ const App = () => {
                            element={<CoursePage />}
                     />
                     <Route path="/instructor/course/:id"
-                           element={<PrivateRoute element={<EditCoursePage />} allowedRoles={['instructor', 'admin']} />}
+                           element={<PrivateRoute element={<EditCourse />} allowedRoles={['instructor', 'admin']} />}
                     />
                     <Route path="/instructor/course/create"
                            element={<PrivateRoute element={<CourseCreate />} allowedRoles={['instructor', 'admin']} />}

@@ -12,6 +12,7 @@ def create_app():
     from services.cors_service import init_cors
     init_cors(flask_app)
 
+
     from routes import register_routes
     register_routes(flask_app)
 
@@ -37,16 +38,16 @@ def create_app():
         )
         return resp
 
-    @flask_app.after_request
-    def add_csp_headers(response):
-        response.headers['Content-Security-Policy'] = (
-            "default-src 'self'; "
-            "script-src 'self' https://www.google.com https://www.gstatic.com; "
-            "frame-src 'self' https://www.google.com; "
-            "style-src 'self' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com;"
-        )
-        return response
+    # @flask_app.after_request
+    # def add_csp_headers(response):
+    #     response.headers['Content-Security-Policy'] = (
+    #         "default-src 'self'; "
+    #         "script-src 'self' https://www.google.com https://www.gstatic.com; "
+    #         "frame-src 'self' https://www.google.com; "
+    #         "style-src 'self' https://fonts.googleapis.com; "
+    #         "font-src 'self' https://fonts.gstatic.com;"
+    #     )
+    #     return response
 
     return flask_app
 
