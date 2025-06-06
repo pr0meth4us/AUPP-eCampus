@@ -1,7 +1,5 @@
-// components/EditCourse.jsx
-
 import React, { useState, useEffect, useMemo } from "react";
-import {Spinner, Button, Tabs, Tab} from "@nextui-org/react";
+import { Spinner, Button, Tabs, Tab } from "@nextui-org/react";
 import { useParams } from "react-router-dom";
 
 import { course as CourseApi } from "services";
@@ -16,7 +14,7 @@ import AddAssignmentModal from "./sections/AddAssignmentModal";
 import EnrollStudentModal from "./sections/EnrollStudentModal";
 import SubmissionsModal from "./sections/SubmissionsModal";
 import GradingModal from "./sections/GradingModal";
-import {useCourseDetails} from "../../hooks/useCourseFetch";
+import { useCourseDetails } from "../../hooks/useCourseFetch";
 
 const EditCourse = () => {
   const { id: courseId } = useParams();
@@ -86,7 +84,8 @@ const EditCourse = () => {
     }
   };
   const handleError = (err, action = "perform action") => {
-    const msg = err.response?.data?.error || err.message || "An unexpected error occurred.";
+    const msg =
+        err.response?.data?.error || err.message || "An unexpected error occurred.";
     alert(`Error performing ${action}: ${msg}`);
   };
 
@@ -148,9 +147,15 @@ const EditCourse = () => {
       assignmentFormData.append("title", newAssignmentTitle);
       assignmentFormData.append("description", newAssignmentDescription);
       assignmentFormData.append("assignment_type", newAssignmentType);
-      assignmentFormData.append("points", (parseInt(newAssignmentPoints) || 100).toString());
+      assignmentFormData.append(
+          "points",
+          (parseInt(newAssignmentPoints) || 100).toString()
+      );
       if (newAssignmentDueDate) {
-        assignmentFormData.append("due_date", new Date(newAssignmentDueDate).toISOString());
+        assignmentFormData.append(
+            "due_date",
+            new Date(newAssignmentDueDate).toISOString()
+        );
       }
       await CourseApi.createAssignment(courseId, assignmentFormData);
       setNewAssignmentTitle("");
@@ -168,8 +173,12 @@ const EditCourse = () => {
   // Publish / unpublish an assignment
   const handlePublishAssignment = async (assignmentId, newIsPublishedState) => {
     try {
-      await assignmentApi.publishAssignment(courseId, assignmentId, { is_published: newIsPublishedState });
-      handleDataMutationSuccess(`Assignment ${newIsPublishedState ? "published" : "unpublished"}.`);
+      await assignmentApi.publishAssignment(courseId, assignmentId, {
+        is_published: newIsPublishedState,
+      });
+      handleDataMutationSuccess(
+          `Assignment ${newIsPublishedState ? "published" : "unpublished"}.`
+      );
     } catch (err) {
       handleError(err, "publish assignment");
     }
@@ -219,7 +228,10 @@ const EditCourse = () => {
     setViewingAssignment(assignment);
     setSubmissionsLoading(true);
     try {
-      const submissionsData = await CourseApi.getAssignmentSubmissions(courseId, assignment._id);
+      const submissionsData = await CourseApi.getAssignmentSubmissions(
+          courseId,
+          assignment._id
+      );
       setAssignmentSubmissions(submissionsData || []);
       setIsSubmissionsModalOpen(true);
     } catch (err) {
@@ -242,36 +254,45 @@ const EditCourse = () => {
     setIsGradingModalOpen(true);
   };
 
-  // Submit (or update) a grade
+  // ←–– FIXED: now uses submissionId (not studentId)
   const handleGradeSubmission = async () => {
     if (!currentGradingSubmission || !viewingAssignment) return;
-    const gradeData = {
-      grade: parseFloat(gradeInput),
-      feedback: feedbackInput,
-    };
-    if (isNaN(gradeData.grade)) {
+    const gradeValue = parseFloat(gradeInput);
+    if (isNaN(gradeValue)) {
       alert("Grade must be a valid number.");
       return;
     }
+
+    const gradeData = {
+      grade: gradeValue,
+      feedback: feedbackInput,
+    };
+
     try {
-      await assignmentApi.gradeSubmission(
+      // Pass submissionId instead of studentId
+      await assignmentApi.gradeWithFeedback(
           courseId,
           viewingAssignment._id,
-          currentGradingSubmission.studentId,
-          gradeData
+          currentGradingSubmission.submissionId,
+          gradeData.grade,
+          gradeData.feedback
       );
-      const updatedSubmissions = assignmentSubmissions.map((sub) => {
-        if (sub._id === currentGradingSubmission.submissionId) {
-          return {
-            ...sub,
-            grade: gradeData.grade,
-            feedback: gradeData.feedback,
-            status: "graded",
-          };
-        }
-        return sub;
-      });
-      setAssignmentSubmissions(updatedSubmissions);
+
+      // Update local submissions list so UI refreshes immediately
+      setAssignmentSubmissions((prev) =>
+          prev.map((sub) => {
+            if (sub._id === currentGradingSubmission.submissionId) {
+              return {
+                ...sub,
+                grade: gradeData.grade,
+                feedback: gradeData.feedback,
+                status: "graded",
+              };
+            }
+            return sub;
+          })
+      );
+
       setIsGradingModalOpen(false);
       handleDataMutationSuccess("Submission graded.");
     } catch (err) {
@@ -304,6 +325,18 @@ const EditCourse = () => {
     };
   };
 
+  // --- NEW: compute final_grade for each assignment (highest grade among its submissions)
+  const assignmentsWithFinal = useMemo(() => {
+    if (!course?.assignments) return [];
+    return course.assignments.map((a) => {
+      const grades = (a.submissions || [])
+          .filter((s) => s.grade != null)
+          .map((s) => parseFloat(s.grade));
+      const finalGrade = grades.length ? Math.max(...grades) : null;
+      return { ...a, final_grade: finalGrade };
+    });
+  }, [course]);
+
   // Render‐guard for loading / error / no-course
   if (loading && !course) {
     return (
@@ -315,7 +348,9 @@ const EditCourse = () => {
   if (error) {
     return (
         <div className="text-center p-8">
-          <p className="text-danger text-xl">{error?.message || "Failed to load course details."}</p>
+          <p className="text-danger text-xl">
+            {error?.message || "Failed to load course details."}
+          </p>
           <Button onPress={() => refetchCourse && refetchCourse()}>Try Again</Button>
         </div>
     );
@@ -350,7 +385,11 @@ const EditCourse = () => {
               setNewCoverImage(null);
             }}
             onEdit={() => setEditing(true)}
-            onPublish={() => CourseApi.publishCourse(courseId, !course.is_published).then(handleDataMutationSuccess).catch((err) => handleError(err, "toggle publish"))}
+            onPublish={() =>
+                CourseApi.publishCourse(courseId, !course.is_published)
+                    .then(handleDataMutationSuccess)
+                    .catch((err) => handleError(err, "toggle publish"))
+            }
         />
 
         {/* ====== DASHBOARD CARDS ====== */}
@@ -383,7 +422,9 @@ const EditCourse = () => {
                       rows={5}
                   />
               ) : (
-                  <p className="text-gray-700 whitespace-pre-wrap">{course.description || "No description available."}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {course.description || "No description available."}
+                  </p>
               )}
             </div>
           </Tab>
@@ -406,7 +447,7 @@ const EditCourse = () => {
 
           <Tab key="assignments" title="Assignments">
             <AssignmentsSection
-                assignments={course.assignments || []}
+                assignments={assignmentsWithFinal}
                 onAddAssignment={() => setIsAddAssignmentOpen(true)}
                 onPublishAssignment={handlePublishAssignment}
                 onDeleteAssignment={handleDeleteAssignment}

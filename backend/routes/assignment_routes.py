@@ -64,11 +64,11 @@ def delete_assignment(course_id, assignment_id):
 def submit_assignment(course_id, assignment_id):
     return AssignmentController.submit_assignment(course_id, assignment_id)
 
-@assignment_bp.route('/<assignment_id>/grade/<student_id>', methods=['POST'])
+@assignment_bp.route('/<assignment_id>/grade/<submission_id>', methods=['POST'])
 @login_required
-@require_assignment_access('grade')
-def grade_assignment(course_id, assignment_id, student_id):
-    return AssignmentController.grade_assignment(course_id, assignment_id, student_id)
+@require_course_access('instructor')
+def grade_assignment(course_id, assignment_id, submission_id):
+    return AssignmentController.grade_assignment(course_id, assignment_id, submission_id)
 
 @assignment_bp.route('/<assignment_id>/submissions', methods=['GET'])
 @login_required

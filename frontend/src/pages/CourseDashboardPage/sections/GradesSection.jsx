@@ -1,7 +1,5 @@
-// src/components/GradesSection.jsx
-
-import React from 'react';
-import { Star } from 'lucide-react';
+import React from "react";
+import { Star } from "lucide-react";
 import {
     Table,
     TableHeader,
@@ -10,15 +8,15 @@ import {
     TableRow,
     TableCell,
     Chip,
-} from '@nextui-org/react';
-import { formatDate } from '../../../utils/dateUtils';
+} from "@nextui-org/react";
+import { formatDate } from "../../../utils/dateUtils";
 
 /**
  * Expects `courseData.assignments` to each have:
- *   - title, due_date, max_grade
- *   - my_submissions: [ ... ]  (array of this student’s submissions)
+ *   - title, due_date, points (max grade)
+ *   - final_grade (highest‐graded submission)
  *
- * For grading status, we look at the **latest** submission in `my_submissions`.
+ * We’ll display each assignment’s final_grade directly, and compute a total course grade as the average.
  */
 const GradesSection = ({ courseData }) => {
     // If no assignments at all:
@@ -30,6 +28,19 @@ const GradesSection = ({ courseData }) => {
             </div>
         );
     }
+
+    // Compute course-wide totals
+    let totalPoints = 0;
+    let totalEarned = 0;
+    courseData.assignments.forEach((assignment) => {
+        const maxPoints = assignment.points ?? 0;
+        const earned = assignment.final_grade != null ? parseFloat(assignment.final_grade) : 0;
+        totalPoints += maxPoints;
+        totalEarned += earned;
+    });
+    // If there are assignments, compute average percentage
+    const coursePercentage =
+        totalPoints > 0 ? ((totalEarned / totalPoints) * 100).toFixed(1) : "0.0";
 
     return (
         <div className="bg-white p-6 rounded-lg shadow space-y-4">
@@ -48,46 +59,35 @@ const GradesSection = ({ courseData }) => {
                 </TableHeader>
                 <TableBody>
                     {courseData.assignments.map((assignment) => {
-                        // Pull this student's submissions array:
-                        const submissions = assignment.my_submissions || [];
-                        let latest = null;
-                        if (submissions.length > 0) {
-                            // assume sorted; take last element
-                            latest = submissions[submissions.length - 1];
-                        }
+                        const maxPoints = assignment.points ?? 0;
+                        const finalGradeRaw = assignment.final_grade;
+                        const yourGradeText =
+                            finalGradeRaw != null ? `${finalGradeRaw}/${maxPoints}` : "No Submission";
 
-                        // Determine what to show in “Your Grade” and “Status”:
-                        let yourGradeText = 'No Submission';
-                        let statusChip = (
-                            <Chip size="sm" color="neutral">
-                                No Submission
-                            </Chip>
-                        );
-
-                        if (latest) {
-                            if (latest.grade !== null && latest.grade !== undefined) {
-                                yourGradeText = `${latest.grade}/${assignment.max_grade}`;
-                                const passed = latest.grade >= 70; // or whatever pass threshold
-                                statusChip = (
-                                    <Chip size="sm" color={passed ? 'success' : 'danger'}>
-                                        {passed ? 'Passed' : 'Failed'}
-                                    </Chip>
-                                );
-                            } else {
-                                yourGradeText = 'Pending';
-                                statusChip = (
-                                    <Chip size="sm" color="warning">
-                                        Pending
-                                    </Chip>
-                                );
-                            }
+                        // Determine status
+                        let statusChip;
+                        if (finalGradeRaw == null) {
+                            statusChip = (
+                                <Chip size="sm" color="neutral">
+                                    No Submission
+                                </Chip>
+                            );
+                        } else {
+                            // Example pass threshold: 70% of maxPoints
+                            const threshold = 0.7 * maxPoints;
+                            const passed = parseFloat(finalGradeRaw) >= threshold;
+                            statusChip = (
+                                <Chip size="sm" color={passed ? "success" : "danger"}>
+                                    {passed ? "Passed" : "Failed"}
+                                </Chip>
+                            );
                         }
 
                         return (
                             <TableRow key={assignment._id}>
                                 <TableCell>{assignment.title}</TableCell>
                                 <TableCell>{formatDate(assignment.due_date)}</TableCell>
-                                <TableCell>{assignment.max_grade}</TableCell>
+                                <TableCell>{maxPoints}</TableCell>
                                 <TableCell>{yourGradeText}</TableCell>
                                 <TableCell>{statusChip}</TableCell>
                             </TableRow>
@@ -97,7 +97,10 @@ const GradesSection = ({ courseData }) => {
             </Table>
 
             <div className="mt-4 text-sm text-gray-500">
-                <p>Total Course Grade: Calculation Pending</p>
+                <p>
+                    Total Course Grade: {totalEarned}/{totalPoints} (
+                    {coursePercentage}%)
+                </p>
             </div>
         </div>
     );

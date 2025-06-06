@@ -169,14 +169,13 @@ class Assignment:
         return str(submission._id)
 
     @classmethod
-    def grade_submission(cls, assignment_id: str, student_id: str, grade: float, feedback: str, grader_id: str) -> None:
+    def grade_submission(cls, assignment_id: str, submission_id: str, grade: float, feedback: str, grader_id: str) -> None:
         now = utc_now()
 
-        # Match on student_id as string (because AssignmentSubmission stored student_id as string in to_dict())
         cls._coll().update_one(
             {
                 '_id': ObjectId(assignment_id),
-                'submissions.student_id': student_id
+                'submissions._id': submission_id
             },
             {
                 '$set': {
@@ -184,7 +183,7 @@ class Assignment:
                     'submissions.$.feedback': feedback,
                     'submissions.$.status': SubmissionStatus.GRADED.value,
                     'submissions.$.graded_at': now,
-                    'submissions.$.graded_by': grader_id,
+                    'submissions.$.graded_by': ObjectId(grader_id),
                     'updated_at': now
                 }
             }
@@ -229,11 +228,13 @@ class Assignment:
 
     def to_student_dict(self, student_id: str) -> dict:
         """
-        Return assignment info plus ALL of this student's submissions (sorted by submitted_at).
+        Return assignment info plus ALL of this student's submissions,
+        sorted by 'submitted_at', and also a 'final_grade' field.
         """
-        # 1) Base assignment fields (preview + common properties)
         data = {
             '_id': str(self._id),
+            'course_id': str(self.course_id),
+            'module_id': str(self.module_id) if self.module_id else None,
             'title': self.title,
             'description': self.description,
             'instructions': self.instructions,
@@ -251,17 +252,26 @@ class Assignment:
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
-        # 2) Filter submissions to only those by this student
+        # 1) Filter for this student's submissions
         submissions_for_student = [
             s for s in self.submissions if str(s.student_id) == student_id
         ]
 
-        # 3) Sort them by submitted_at (oldest first → newest last)
+        # 2) Sort them by submitted_at (oldest→newest)
         submissions_for_student.sort(
             key=lambda s: s.submitted_at or datetime.min.replace(tzinfo=timezone.utc)
         )
 
-        # 4) Serialize each one
+        # 3) Serialize each one
         data['my_submissions'] = [s.to_dict() for s in submissions_for_student]
+
+        # 4) Compute final_grade: choose the highest graded submission (or None if none graded)
+        graded_submissions = [s for s in submissions_for_student if s.grade is not None]
+        if graded_submissions:
+            # e.g. pick max grade; you can change logic to “latest” instead if desired
+            best_grade = max(s.grade for s in graded_submissions)
+            data['final_grade'] = best_grade
+        else:
+            data['final_grade'] = None
 
         return data

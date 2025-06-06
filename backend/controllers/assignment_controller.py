@@ -123,22 +123,23 @@ class AssignmentController:
     #         return jsonify({'error': f'Failed to submit assignment: {str(e)}'}), 500
 
     @staticmethod
-    def grade_assignment(course_id, assignment_id, student_id):
-        """Grade a student's assignment submission (instructor only)"""
+    def grade_assignment(course_id, assignment_id, submission_id):
+        """Grade one specific submission (instructor only)."""
         try:
-            data = request.get_json()
-            required_fields = ['grade', 'feedback']
-            for field in required_fields:
-                if field not in data:
-                    return jsonify({'error': f'{field} is required'}), 400
+            data = request.get_json() or {}
+            if 'grade' not in data or 'feedback' not in data:
+                return jsonify({'error': 'Both grade and feedback are required'}), 400
 
             try:
                 grade = float(data['grade'])
             except ValueError:
                 return jsonify({'error': 'Invalid grade format'}), 400
 
+            feedback = data['feedback']
             grader_id = str(g.current_user['_id'])
-            Assignment.grade_submission(assignment_id, student_id, grade, data['feedback'], grader_id)
+
+            # Call the updated grade_submission (which now needs submission_id)
+            Assignment.grade_submission(assignment_id, submission_id, grade, feedback, grader_id)
             return jsonify({'message': 'Assignment graded successfully'}), 200
 
         except Exception as e:

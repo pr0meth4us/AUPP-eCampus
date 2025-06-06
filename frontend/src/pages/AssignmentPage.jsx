@@ -42,6 +42,7 @@ export const AssignmentDetailPage = () => {
             try {
                 const assignmentData = await course.getAssignmentById(courseId, assignmentId);
                 setAssignment(assignmentData);
+                console.log(assignmentData, "yes")
             } catch (error) {
                 console.error('Failed to fetch assignment:', error);
                 setFetchError(error);
