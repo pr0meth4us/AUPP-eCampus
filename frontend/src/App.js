@@ -25,8 +25,9 @@ import { ModuleDetailPage } from './pages/ModulePage';
 import { MaterialDetailPage } from './pages/MaterialPage';
 import { ContentDetailPage } from './pages/ContentPage';
 import ErrorPage from './pages/ErrorPage';
-
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import LoginPage from "./pages/AuthPages/LoginPage";
+import RegisterPage from "./pages/AuthPages/RegisterPage";
 
 const App = () => {
     return (
@@ -36,6 +37,8 @@ const App = () => {
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/admin-signup" element={<AdminSignup />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                     <Route path="/admin-login" element={<AdminLogin />} />
                     <Route path="/course-catalog" element={<CourseCatalogPage />} />
                     <Route path="/course/success" element={<CourseSuccessPage />} />

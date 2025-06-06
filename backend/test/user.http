@@ -1,0 +1,57 @@
+### Get User Profile
+# GET /users/{user_id}
+GET {{BASE_URL}}/users/{{USER_ID}}
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
+###
+
+### Update User Profile
+# PUT /users/{user_id}
+PUT {{BASE_URL}}/users/{{USER_ID}}
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "name": "New Name",
+  "email": "newemail@example.com"
+}
+
+###
+
+### Upload Profile Image
+# POST /users/{user_id}/upload-image
+POST {{BASE_URL}}/users/{{USER_ID}}/upload-image
+Authorization: Bearer {{TOKEN}}
+Content-Type: multipart/form-data
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/profile.jpg
+--boundary--
+
+###
+
+### Delete User
+# DELETE /users/{user_id}
+DELETE {{BASE_URL}}/users/{{USER_ID}}
+Authorization: Bearer {{TOKEN}}
+
+###
+
+### Get All Users (admin only)
+# GET /users/all
+GET {{BASE_URL}}/users/all
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
+###
+
+### Search Users
+# GET /users/search?q={query}&role={role}
+GET {{BASE_URL}}/users/search?q={{QUERY}}&role={{ROLE}}
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
