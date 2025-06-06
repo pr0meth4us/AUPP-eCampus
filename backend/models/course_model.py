@@ -145,6 +145,58 @@ class Course:
         return [cls(d).to_preview_dict() for d in docs]
 
     @classmethod
+    def find_by_user_with_instructor(cls, user_id: str, role: str = None) -> list:
+        user_oid = ObjectId(user_id)
+
+        if role == 'instructor':
+            match_stage = { '$match': { 'instructor_id': user_oid } }
+        elif role == 'student':
+            match_stage = { '$match': { 'enrolled_students': user_oid } }
+        else:
+            match_stage = {
+                '$match': {
+                    '$or': [
+                        { 'instructor_id': user_oid },
+                        { 'enrolled_students': user_oid }
+                    ]
+                }
+            }
+
+        pipeline = [
+            match_stage,
+
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'instructor_id',
+                    'foreignField': '_id',
+                    'as': 'instructor_docs'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$instructor_docs',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$project': {
+                    '_id': { '$toString': '$_id' },
+                    'title': 1,
+                    'description': 1,
+                    'price': 1,
+                    'cover_image_url': 1,
+                    'instructor_id': { '$toString': '$instructor_id' },
+                    'instructor_name': '$instructor_docs.name',
+                }
+            }
+        ]
+
+        docs = list(cls._coll().aggregate(pipeline))
+        return docs
+
+
+    @classmethod
     def get_preview_details(cls, course_id: str) -> dict:
         pipeline = [
             {'$match': {'_id': ObjectId(course_id)}},

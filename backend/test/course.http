@@ -1,66 +1,9 @@
 ###
-GET http://localhost:5328/health
-
-<> 2025-05-17T134707.200.json
-<> 2025-05-16T230639.200.json
-<> 2025-05-16T225423.200.json
-<> 2025-05-16T225231.200.json
-<> 2025-05-16T225218.404.html
-<> 2025-05-16T225131.404.html
-
-###
-GET http://localhost:5328/memory
-
-<> 2025-05-17T134711.200.json
-<> 2025-05-16T230635.404.html
-<> 2025-05-16T225427.404.html
-<> 2025-05-16T225306.404.html
-
-###
 POST http://localhost:5001/admin/register?
     body={"name": "Admin","email": "admin@example.com","password": "password","role": "admin"}
     Content-Type: application/json
 
-###
-POST /admin/register HTTP/1.1
-Host: localhost:5001
-Content-Type: application/json
-Content-Length:  ninety-odd
 
-{
-  "name": "Robert Oppenheimer",
-  "email": "r.oppenheimer@aupp.com",
-  "password": "password",
-  "role": "instructor"
-}
-
-<> 2025-06-04T145048.409.json
-<> 2025-05-23T133102.409.json
-<> 2025-05-23T133041.409.json
-<> 2025-05-23T133035.409.json
-
-###
-POST /auth/login HTTP/1.1
-Host: localhost:5001
-Content-Type: application/json
-Content-Length:  ninety-odd
-
-{
-  "name": "Robert Oppenheimer",
-  "email": "r.oppenheimer@aupp.com",
-  "password": "password",
-  "role": "instructor"
-}
-
-<> 2025-06-04T145055.200.json
-<> 2025-05-23T133108.200.json
-<> 2025-05-23T131615.200.json
-<> 2025-05-23T130439.200.json
-<> 2025-05-23T130324.200.json
-<> 2025-05-22T003531.200.json
-<> 2025-05-22T002355.200.json
-
-###
 ### Create a new course (requires a valid Bearer token)
 POST http://localhost:5001/courses/ HTTP/1.1
 Host: localhost:5001
@@ -89,13 +32,6 @@ Content-Disposition: form-data; name="price"
 <> 2025-05-22T002750.401.json
 <> 2025-05-22T002538.401.json
 
-###
-POST http://localhost:5001/courses/?
-    title={{$placeholder}}&
-    description={{$placeholder}}&
-    instructor_id={{$placeholder}}&
-    price={{$placeholder}}
-    Content-Type: multipart/form-data
 
 ###
 GET http://localhost:5001/course/682e0f0b5357be2fb67182c9/full
@@ -122,9 +58,6 @@ Content-Type: application/json
   "title": "Radioactive element",
   "description": "Identifying which elements are radioactive"
 }
-
-###
-GET http://localhost:5000/course/my
 
 ###
 GET http://localhost:5001/course/my

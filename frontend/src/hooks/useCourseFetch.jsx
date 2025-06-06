@@ -20,7 +20,6 @@ export const useCourseDetails = (mode = "detail") => {
                 setLoading(true);
                 setError(null);
 
-                // pick API method based on mode
                 const fetcher = {
                     preview: CourseApi.getPreviewById,
                     detail: CourseApi.getDetailById,

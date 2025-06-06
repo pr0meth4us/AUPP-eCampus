@@ -9,6 +9,7 @@
     "@emotion/styled": "^11.13.0",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@heroui/react": "^2.7.9",
     "@mantine/core": "^7.14.1",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
@@ -51,7 +52,7 @@
     "eject": "react-scripts eject",
     "start:prod": "cross-env REACT_APP_ENV=production react-scripts start",
     "start:dev": "cross-env REACT_APP_ENV=development react-scripts start"
-},
+  },
   "eslintConfig": {
     "extends": [
       "react-app",

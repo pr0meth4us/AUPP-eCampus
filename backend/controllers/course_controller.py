@@ -101,13 +101,14 @@ class CourseController:
     @staticmethod
     def get_my_courses():
         """Get courses associated with the current logged-in user"""
-        try:
-            user_id = str(g.current_user['_id'])
-            role = g.current_user.get('role')
-            courses = Course.find_by_user(user_id, role=role)
-            return jsonify(courses), 200
-        except Exception as e:
-            return jsonify({'error': f'Failed to retrieve user courses: {str(e)}'}), 500
+        user_id_str = str(g.current_user['_id'])
+        role = g.current_user.get('role')
+
+        courses_with_instructor = Course.find_by_user_with_instructor(
+            user_id_str, role=role
+        )
+
+        return jsonify(courses_with_instructor), 200
 
     @staticmethod
     def preview_course(course_id):

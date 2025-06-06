@@ -12,7 +12,6 @@ import { Lock, LogIn, BookOpen } from "lucide-react";
 
 const CoursePage = () => {
     const { course: courseDetails, loading } = useCourseDetails();
-    console.log(courseDetails)
     const { user, refreshUser } = useAuth();
 
     const navigate = useNavigate();

@@ -1,38 +1,33 @@
 ### Get User Profile
 # GET /users/{user_id}
-GET {{BASE_URL}}/users/{{USER_ID}}
-Authorization: Bearer {{TOKEN}}
+GET {{BASE_URL}}/users/{{STUDENT_USER_ID}}
 Accept: application/json
 
 ###
 
 ### Update User Profile
 # PUT /users/{user_id}
-PUT {{BASE_URL}}/users/{{USER_ID}}
-Authorization: Bearer {{TOKEN}}
+PUT {{BASE_URL}}/users/{{STUDENT_USER_ID}}
 Content-Type: application/json
 
 {
-  "name": "New Name",
-  "email": "newemail@example.com"
+  "name": "Lord Rizzler",
+  "email": "phearaneron.soeung@gmail.com"
 }
 
 ###
 
-### Upload Profile Image
-# POST /users/{user_id}/upload-image
-POST {{BASE_URL}}/users/{{USER_ID}}/upload-image
-Authorization: Bearer {{TOKEN}}
-Content-Type: multipart/form-data
+### Upload Profile Image (manual boundary)
+POST {{BASE_URL}}/users/{{STUDENT_USER_ID}}/upload-image
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
---boundary
-Content-Disposition: form-data; name="image"; filename="profile.jpg"
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="photo_2025-06-05_14-37-02.jpg"
 Content-Type: image/jpeg
 
-< ./path/to/profile.jpg
---boundary--
+@/Users/phear/Downloads/Telegram Desktop/photo_2025-06-05_14-37-02.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
-###
 
 ### Delete User
 # DELETE /users/{user_id}
@@ -44,7 +39,6 @@ Authorization: Bearer {{TOKEN}}
 ### Get All Users (admin only)
 # GET /users/all
 GET {{BASE_URL}}/users/all
-Authorization: Bearer {{TOKEN}}
 Accept: application/json
 
 ###
