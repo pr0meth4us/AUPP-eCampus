@@ -59,9 +59,31 @@ class AuthController:
                 'token': token,
                 'user': {'_id': str(user._id), 'email': user.email, 'role': user.role, 'name': user.name}
             }), 200)
-            response.set_cookie('auth_token', token, httponly=True, secure=True, samesite='Strict')
+
+            # For cross-origin requests, use samesite='None' and ensure secure=True
+            response.set_cookie(
+                'auth_token',
+                token,
+                httponly=True,
+                secure=True,
+                samesite='None',  # Changed from 'Strict' to 'None'
+                max_age=3600  # 1 hour
+            )
             return response
         return jsonify({'message': 'Invalid credentials'}), 401
+
+    @staticmethod
+    def logout():
+        response = make_response(jsonify({"message": "Logged out successfully"}), 200)
+        response.set_cookie(
+            'auth_token',
+            '',
+            expires=0,
+            httponly=True,
+            secure=True,
+            samesite='None'  # Changed from 'Strict' to 'None'
+        )
+        return response
 
     @staticmethod
     def check_auth():
@@ -72,9 +94,3 @@ class AuthController:
         if user_data:
             return jsonify({"authenticated": True, "user": user_data}), 200
         return jsonify({"authenticated": False, "message": "Invalid or expired token"}), 401
-
-    @staticmethod
-    def logout():
-        response = make_response(jsonify({"message": "Logged out successfully"}), 200)
-        response.set_cookie('auth_token', '', expires=0, httponly=True, secure=True, samesite='Strict')
-        return response

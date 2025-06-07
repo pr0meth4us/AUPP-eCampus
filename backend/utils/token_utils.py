@@ -1,5 +1,5 @@
 import jwt
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from flask import request, current_app
 
 
@@ -9,7 +9,7 @@ def create_token(user):
         'role': user['role'],
         'courses': [str(course_id) for course_id in user['courses']],
         'name': user['name'],
-        'exp': datetime.now(UTC) + timedelta(hours=1)
+        'exp': datetime.now(timezone.utc) + timedelta(hours=1)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -22,7 +22,6 @@ def decode_token(token):
 
 
 def get_token_from_request():
-
     auth_header = request.headers.get('Authorization')
     if auth_header and auth_header.startswith('Bearer '):
         return auth_header.split(' ')[1]
