@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../../assets/css/elements/login.css';
-import {useAuth} from "../../context/authContext";
 import Recaptcha from "../../components/features/Recaptcha";
+import {useAuth} from "context/authContext";
 
 const LoginPage = () => {
     const { login, user } = useAuth();
@@ -192,8 +192,11 @@ const LoginPage = () => {
                             </div>
 
                             <div className="flex justify-center">
+                                <p className="text-sm text-white/60 italic">
+                                    (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                </p>
                                 <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                    <Recaptcha onVerify={setCaptchaValue} />
+                                    <Recaptcha onVerify={setCaptchaValue}/>
                                 </div>
                             </div>
 

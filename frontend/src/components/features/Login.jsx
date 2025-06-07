@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../context/authContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Recaptcha from './Recaptcha';
 import '../../assets/css/elements/login.css';
+import {useAuth} from "context/authContext";
 
 const LoginPage = () => {
     const { login } = useAuth();
@@ -107,7 +107,10 @@ const LoginPage = () => {
                                 />
                                 <a href="#" className="d-block mt-2">Forgot password?</a>
                             </div>
-                            <Recaptcha onVerify={setCaptchaValue} />
+                            <p className="text-sm text-white/60 italic">
+                                (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                            </p>
+                            <Recaptcha onVerify={setCaptchaValue}/>
                             {error && <p className="text-danger mt-3">{error}</p>}
                         </form>
                     </div>

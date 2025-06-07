@@ -202,7 +202,8 @@ const Signup = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="verificationCode" className="form-label">Verification Code</label>
+                                        <label htmlFor="verificationCode" className="form-label">Verification
+                                            Code</label>
                                         <div className="d-flex align-items-center">
                                             <input
                                                 type="text"
@@ -219,10 +220,11 @@ const Signup = () => {
                                                 className={`btn btn-outline-secondary ${!canResend ? 'disabled' : ''}`}
                                                 onClick={handleResendOtp}
                                                 disabled={!canResend || isLoading}
-                                                style={{ minWidth: '100px' }}
+                                                style={{minWidth: '100px'}}
                                             >
                                                 {isLoading ? (
-                                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    <span className="spinner-border spinner-border-sm" role="status"
+                                                          aria-hidden="true"></span>
                                                 ) : canResend ? (
                                                     'Resend'
                                                 ) : (
@@ -260,8 +262,11 @@ const Signup = () => {
                                             required
                                         />
                                     </div>
+                                    <p className="text-sm text-white/60 italic">
+                                        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                    </p>
                                     <div className="mb-3">
-                                        <Recaptcha onVerify={setCaptchaValue} />
+                                        <Recaptcha onVerify={setCaptchaValue}/>
                                     </div>
                                 </>
                             )}

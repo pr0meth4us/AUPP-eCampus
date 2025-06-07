@@ -28,12 +28,12 @@ def require_recaptcha(f):
         if not request.headers.get('Origin'):
             return f(*args, **kwargs)
 
-        recaptcha_response = request.json.get('recaptcha_response')
-        if not recaptcha_response:
-            return jsonify({'message': 'reCAPTCHA response is required'}), 400
-
-        if not verify_recaptcha(recaptcha_response):
-            return jsonify({'message': 'reCAPTCHA verification failed'}), 400
+        # recaptcha_response = request.json.get('recaptcha_response')
+        # if not recaptcha_response:
+        #     return jsonify({'message': 'reCAPTCHA response is required'}), 400
+        #
+        # if not verify_recaptcha(recaptcha_response):
+        #     return jsonify({'message': 'reCAPTCHA verification failed'}), 400
 
         return f(*args, **kwargs)
 

@@ -332,8 +332,11 @@ const RegisterPage = () => {
 
                                 {/* reCAPTCHA */}
                                 <div className="flex justify-center">
+                                    <p className="text-sm text-white/60 italic">
+                                        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                    </p>
                                     <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                                        <Recaptcha onVerify={setCaptchaValue} />
+                                        <Recaptcha onVerify={setCaptchaValue}/>
                                     </div>
                                 </div>
 
