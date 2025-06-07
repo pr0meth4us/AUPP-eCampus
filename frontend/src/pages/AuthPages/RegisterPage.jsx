@@ -122,11 +122,11 @@ const RegisterPage = () => {
         setError('');
         setSuccess('');
         try {
-            if (!captchaValue) {
-                setError("Please complete the reCAPTCHA.");
-                setIsLoading(false);
-                return;
-            }
+            // if (!captchaValue) {
+            //     setError("Please complete the reCAPTCHA.");
+            //     setIsLoading(false);
+            //     return;
+            // }
 
             const signupResult = await signup(name, email, password, userType, verificationCode, captchaValue);
 
@@ -262,7 +262,8 @@ const RegisterPage = () => {
 
                                 {/* Verification Code */}
                                 <div className="space-y-2">
-                                    <label htmlFor="verificationCode" className="block text-white/90 text-sm font-medium">
+                                    <label htmlFor="verificationCode"
+                                           className="block text-white/90 text-sm font-medium">
                                         Verification Code
                                     </label>
                                     <div className="flex space-x-2">
@@ -283,7 +284,8 @@ const RegisterPage = () => {
                                             className="px-4 py-3 bg-white/5 text-white/80 font-medium rounded-lg border border-white/20 hover:bg-white/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px]"
                                         >
                                             {isLoading ? (
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                                                <div
+                                                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
                                             ) : canResend ? (
                                                 'Resend'
                                             ) : (
@@ -331,13 +333,21 @@ const RegisterPage = () => {
                                 </div>
 
                                 {/* reCAPTCHA */}
-                                <div className="flex justify-center">
-                                    <p className="text-sm text-white/60 italic">
-                                        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
-                                    </p>
+                                {/*<div className="flex justify-center">*/}
+                                {/*    <p className="text-sm text-white/60 italic">*/}
+                                {/*        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)*/}
+                                {/*    </p>*/}
+                                {/*    <div className="p-3 bg-white/5 rounded-lg border border-white/10">*/}
+                                {/*        <Recaptcha onVerify={setCaptchaValue}/>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+                                <div className="space-y-3">
                                     <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                                         <Recaptcha onVerify={setCaptchaValue}/>
                                     </div>
+                                    <p className="text-xs text-white/50 text-center">
+                                                (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                    </p>
                                 </div>
 
                                 {success && (
@@ -374,7 +384,8 @@ const RegisterPage = () => {
                                     >
                                         {isLoading ? (
                                             <div className="flex items-center justify-center space-x-2">
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                <div
+                                                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                                 <span>Creating...</span>
                                             </div>
                                         ) : (

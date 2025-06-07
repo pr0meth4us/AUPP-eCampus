@@ -58,9 +58,9 @@ const LoginPage = () => {
             if (!role) {
                 throw new Error('Please select a role.');
             }
-            if (!captchaValue) {
-                throw new Error('Please complete the reCAPTCHA.');
-            }
+            // if (!captchaValue) {
+            //     throw new Error('Please complete the reCAPTCHA.');
+            // }
 
             const loginResult = await login(email, password, role, captchaValue);
 
@@ -127,7 +127,8 @@ const LoginPage = () => {
                                     >
                                         <span className="relative z-10 capitalize">Student</span>
                                         {role === 'student' && (
-                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
+                                            <div
+                                                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
                                         )}
                                     </button>
                                     <button
@@ -141,7 +142,8 @@ const LoginPage = () => {
                                     >
                                         <span className="relative z-10 capitalize">Instructor</span>
                                         {role === 'instructor' && (
-                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
+                                            <div
+                                                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
                                         )}
                                     </button>
                                 </div>
@@ -162,7 +164,8 @@ const LoginPage = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
                                     />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    <div
+                                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                                 </div>
                             </div>
 
@@ -190,15 +193,20 @@ const LoginPage = () => {
                                     </a>
                                 </div>
                             </div>
-
-                            <div className="flex justify-center">
-                                <p className="text-sm text-white/60 italic">
-                                    (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
-                                </p>
+                            <div className="space-y-3">
                                 <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                                     <Recaptcha onVerify={setCaptchaValue}/>
                                 </div>
+                                <p className="text-xs text-white/50 text-center">
+                                    (Just ignore reCAPTCHA — it's boring, so I disabled it.)
+                                </p>
                             </div>
+
+                            {/*<div className="flex justify-center">*/}
+                            {/*    <div className="p-4 bg-white/5 rounded-xl border border-white/10">*/}
+                            {/*        <Recaptcha onVerify={setCaptchaValue} />*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
 
                             {error && (
                                 <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-xl">
@@ -213,7 +221,8 @@ const LoginPage = () => {
                                 <span className="flex items-center justify-center space-x-2">
                                     <span>Sign In</span>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                              d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                     </svg>
                                 </span>
                             </button>

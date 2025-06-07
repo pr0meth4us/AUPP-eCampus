@@ -86,11 +86,11 @@ const Signup = () => {
         setIsLoading(true);
         setError('');
         try {
-            if (!captchaValue) {
-                setError("Please complete the reCAPTCHA.");
-                setIsLoading(false);
-                return;
-            }
+            // if (!captchaValue) {
+            //     setError("Please complete the reCAPTCHA.");
+            //     setIsLoading(false);
+            //     return;
+            // }
             await signup(name, email, password, userType, verificationCode, captchaValue);
 
             // Redirect to the previous page or the home page if no referrer
@@ -267,7 +267,11 @@ const Signup = () => {
                                     </p>
                                     <div className="mb-3">
                                         <Recaptcha onVerify={setCaptchaValue}/>
+                                        <small className="text-muted">reCAPTCHA verification (optional for demo)</small>
                                     </div>
+                                    {/*<div className="mb-3">*/}
+                                    {/*    <Recaptcha onVerify={setCaptchaValue}/>*/}
+                                    {/*</div>*/}
                                 </>
                             )}
                             {error && (

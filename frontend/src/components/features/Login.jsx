@@ -27,9 +27,9 @@ const LoginPage = () => {
             if (!role) {
                 throw new Error('Please select a role.');
             }
-            if (!captchaValue) {
-                throw new Error('Please complete the reCAPTCHA.');
-            }
+            // if (!captchaValue) {
+            //     throw new Error('Please complete the reCAPTCHA.');
+            // }
             await login(email, password, role, captchaValue);
 
             if (closeButtonRef.current) {
@@ -107,10 +107,12 @@ const LoginPage = () => {
                                 />
                                 <a href="#" className="d-block mt-2">Forgot password?</a>
                             </div>
-                            <p className="text-sm text-white/60 italic">
-                                (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
-                            </p>
-                            <Recaptcha onVerify={setCaptchaValue}/>
+                            <div className="mb-3">
+                                <Recaptcha onVerify={setCaptchaValue}/>
+                                <small className="text-muted form-text">reCAPTCHA verification (optional for
+                                    demo)</small>
+                            </div>
+                            {/*<Recaptcha onVerify={setCaptchaValue}/>*/}
                             {error && <p className="text-danger mt-3">{error}</p>}
                         </form>
                     </div>
