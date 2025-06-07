@@ -1,0 +1,1628 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AUPP eCampus API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Use same host & port as this UI"
+    }
+  ],
+  "paths": {
+    "/admin/users": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all users",
+        "description": "Retrieves a list of all users. Requires admin privileges.",
+        "responses": {
+          "200": {
+            "description": "A list of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/register": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Register a new user as an admin",
+        "description": "Allows an admin to register a new user with a specified role.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRegister"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully."
+          },
+          "409": {
+            "description": "Email already exists."
+          }
+        }
+      }
+    },
+    "/admin/users/{user_id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update a user's information",
+        "description": "Updates a user's name, email, or password. Requires admin privileges.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Delete a user",
+        "description": "Deletes a user by their ID. Requires admin privileges.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      }
+    },
+    "/admin/videos": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all videos from Cloudinary",
+        "description": "Retrieves a list of all videos from Cloudinary. Requires admin privileges.",
+        "responses": {
+          "200": {
+            "description": "A list of videos."
+          }
+        }
+      }
+    },
+    "/admin/videos/{video_id}": {
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Delete a video from Cloudinary",
+        "description": "Deletes a video from Cloudinary by its ID. Requires admin privileges.",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video deleted successfully."
+          },
+          "500": {
+            "description": "Error deleting video."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Create a new assignment",
+        "description": "Creates a new assignment for a specific course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assignment created successfully."
+          }
+        }
+      },
+      "get": {
+        "tags": ["Assignments"],
+        "summary": "Get all assignments for a course",
+        "description": "Retrieves all assignments for a given course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of assignments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Assignment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/student": {
+      "get": {
+        "tags": ["Assignments"],
+        "summary": "Get student assignments for a course",
+        "description": "Retrieves all assignments for a course from a student's perspective. Requires enrollment or instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of assignments with student-specific data."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}": {
+      "get": {
+        "tags": ["Assignments"],
+        "summary": "Get assignment details",
+        "description": "Retrieves the details of a specific assignment. Requires assignment view access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment details."
+          }
+        }
+      },
+      "put": {
+        "tags": ["Assignments"],
+        "summary": "Update an assignment",
+        "description": "Updates the details of a specific assignment. Requires assignment grade access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Assignments"],
+        "summary": "Delete an assignment",
+        "description": "Deletes a specific assignment. Requires assignment grade access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment deleted successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/submit": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Submit an assignment",
+        "description": "Allows a student to submit their work for an assignment. Requires assignment submission access and must be before the deadline.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment submitted successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/grade/{submission_id}": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Grade a submission",
+        "description": "Allows an instructor to grade a student's submission for an assignment. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment graded successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/submissions": {
+      "get": {
+        "tags": ["Assignments"],
+        "summary": "Get all submissions for an assignment",
+        "description": "Retrieves all submissions for a given assignment. Requires assignment grade access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of submissions."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/assignments/{assignment_id}/publish": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Publish an assignment",
+        "description": "Publishes a given assignment, making it visible to students. Requires assignment grade access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assignment published successfully."
+          }
+        }
+      }
+    },
+    "/auth/send-otp": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Send OTP",
+        "description": "Sends a one-time password to the user's email for verification.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully."
+          },
+          "400": {
+            "description": "Email is required."
+          },
+          "409": {
+            "description": "Email already registered."
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Registers a new user with the provided details.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegister"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully."
+          },
+          "400": {
+            "description": "Invalid input."
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User login",
+        "description": "Authenticates a user and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful."
+          },
+          "401": {
+            "description": "Invalid credentials."
+          }
+        }
+      }
+    },
+    "/auth/check": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Check authentication status",
+        "description": "Checks if the user is authenticated based on the provided token.",
+        "responses": {
+          "200": {
+            "description": "User is authenticated."
+          },
+          "401": {
+            "description": "User is not authenticated."
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User logout",
+        "description": "Logs out the current user.",
+        "responses": {
+          "200": {
+            "description": "Logged out successfully."
+          }
+        }
+      }
+    },
+    "/course/": {
+      "post": {
+        "tags": ["Courses"],
+        "summary": "Create a new course",
+        "description": "Creates a new course. Requires user to be logged in.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Course created successfully."
+          }
+        }
+      },
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get all courses",
+        "description": "Retrieves a list of all courses.",
+        "responses": {
+          "200": {
+            "description": "A list of courses."
+          }
+        }
+      }
+    },
+    "/course/{course_id}": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get course by ID",
+        "description": "Retrieves a single course by its ID.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course details."
+          }
+        }
+      },
+      "put": {
+        "tags": ["Courses"],
+        "summary": "Update a course",
+        "description": "Updates a course's details. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Course updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Courses"],
+        "summary": "Delete a course",
+        "description": "Deletes a course. Requires owner access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course deleted successfully."
+          }
+        }
+      }
+    },
+    "/course/my": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get my courses",
+        "description": "Retrieves courses the current user is enrolled in or teaching.",
+        "responses": {
+          "200": {
+            "description": "A list of user's courses."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/preview": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Preview a course",
+        "description": "Retrieves a preview of a course, including instructor details.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course preview."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/detail": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get course details for enrolled students",
+        "description": "Retrieves detailed course content for enrolled students.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed course content."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/full": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get full course details for instructors",
+        "description": "Retrieves the full course management view for instructors.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full course details."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/enroll": {
+      "post": {
+        "tags": ["Courses"],
+        "summary": "Enroll in a course",
+        "description": "Enrolls the current user in a course.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully enrolled."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/students": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get enrolled students",
+        "description": "Retrieves a list of students enrolled in a course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of enrolled students."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/analytics": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get course analytics",
+        "description": "Retrieves analytics for a course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course analytics data."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/progress": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get course progress",
+        "description": "Retrieves the current user's progress in a course. Requires enrollment or instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User's course progress."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/publish": {
+      "put": {
+        "tags": ["Courses"],
+        "summary": "Publish a course",
+        "description": "Publishes or unpublishes a course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course publish status updated."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/": {
+      "post": {
+        "tags": ["Modules"],
+        "summary": "Create a module",
+        "description": "Creates a new module within a course. Requires instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Module created successfully."
+          }
+        }
+      },
+      "get": {
+        "tags": ["Modules"],
+        "summary": "Get all modules in a course",
+        "description": "Retrieves all modules for a given course. Requires enrollment or instructor access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of modules."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}": {
+      "get": {
+        "tags": ["Modules"],
+        "summary": "Get module details",
+        "description": "Retrieves details for a specific module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Module details."
+          }
+        }
+      },
+      "put": {
+        "tags": ["Modules"],
+        "summary": "Update a module",
+        "description": "Updates a module's details. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Module updated successfully."
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Modules"],
+        "summary": "Edit a module",
+        "description": "Partially updates a module's details. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Module edited successfully."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Modules"],
+        "summary": "Delete a module",
+        "description": "Deletes a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Module deleted successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}/content": {
+      "post": {
+        "tags": ["Modules"],
+        "summary": "Add content to a module",
+        "description": "Adds new content to a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Content added successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}/content/{content_id}": {
+      "put": {
+        "tags": ["Modules"],
+        "summary": "Update module content",
+        "description": "Updates a piece of content within a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content updated successfully."
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Modules"],
+        "summary": "Partially update module content",
+        "description": "Partially updates a piece of content within a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Modules"],
+        "summary": "Delete module content",
+        "description": "Deletes a piece of content from a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content deleted successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}/content/order": {
+      "patch": {
+        "tags": ["Modules"],
+        "summary": "Reorder module content",
+        "description": "Reorders the content within a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content reordered successfully."
+          }
+        }
+      }
+    },
+    "/course/{course_id}/modules/{module_id}/publish": {
+      "put": {
+        "tags": ["Modules"],
+        "summary": "Publish a module",
+        "description": "Publishes or unpublishes a module. Requires module access.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Module publish status updated."
+          }
+        }
+      }
+    },
+    "/payment/create": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Create a payment",
+        "description": "Creates a new payment record.",
+        "responses": {
+          "201": {
+            "description": "Payment created successfully."
+          }
+        }
+      }
+    },
+    "/payment/success": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Handle successful payment",
+        "description": "Handles the callback after a successful payment.",
+        "responses": {
+          "200": {
+            "description": "Payment successful."
+          }
+        }
+      }
+    },
+    "/payment/{payment_id}": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get payment details",
+        "description": "Retrieves details for a specific payment.",
+        "parameters": [
+          {
+            "name": "payment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details."
+          }
+        }
+      }
+    },
+    "/payment/{course_id}": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get course payment details",
+        "description": "Retrieves payment details for a specific course.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course payment details."
+          }
+        }
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user profile",
+        "description": "Retrieves the profile of a user.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile."
+          }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user profile",
+        "description": "Updates the profile of a user.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete a user",
+        "description": "Deletes a user's account.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully."
+          }
+        }
+      }
+    },
+    "/users/{user_id}/upload-image": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Upload profile image",
+        "description": "Uploads a profile image for a user.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully."
+          }
+        }
+      }
+    },
+    "/users/all": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users (admin)",
+        "description": "Retrieves a list of all users. Requires admin privileges.",
+        "responses": {
+          "200": {
+            "description": "A list of all users."
+          }
+        }
+      }
+    },
+    "/users/search": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Search for users",
+        "description": "Searches for users based on a query.",
+        "responses": {
+          "200": {
+            "description": "A list of matching users."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["student", "instructor", "admin"]
+          }
+        }
+      },
+      "AdminRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["student", "instructor", "admin"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["email", "role", "name", "password"]
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "course_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "AssignmentCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["title", "description"]
+      },
+      "AssignmentUpdate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "UserRegister": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "otp": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["student", "instructor", "admin"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["email", "otp", "role", "name", "password"]
+      },
+      "UserLogin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["student", "instructor", "admin"]
+          }
+        },
+        "required": ["email", "password", "role"]
+      },
+      "CourseCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cover_image": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": ["title", "description"]
+      },
+      "CourseUpdate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cover_image": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      }
+    }
+  }
+}

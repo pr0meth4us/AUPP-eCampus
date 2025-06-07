@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - AUPP eCampus</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="60" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="2.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="90" r="1.5" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .content {
+            padding: 50px 40px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .message {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .otp-container {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+            border: 2px dashed #3498db;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+        }
+        .otp-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .validity {
+            font-size: 14px;
+            color: #e74c3c;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .instructions h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        .instructions p {
+            margin: 0;
+            color: #555;
+            line-height: 1.5;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .social-links {
+            margin-top: 20px;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #666;
+            font-size: 18px;
+            text-decoration: none;
+        }
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #ddd, transparent);
+            margin: 30px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                border-radius: 16px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .footer {
+                padding: 20px;
+            }
+            .otp-code {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://raw.githubusercontent.com/pr0meth4us/AUPP-eCampus/711111d2e17771a2f9a9a6e0fb787717cf99075c/frontend/public/aupp_ecampus_logo.png" alt="AUPP eCampus Logo" class="logo">
+        <h1>AUPP eCampus</h1>
+        <p>American University of Phnom Penh</p>
+    </div>
+
+    <div class="content">
+        <div class="greeting">Welcome to AUPP eCampus! 🎓</div>
+
+        <div class="message">
+            <p>Thank you for joining our learning community. To complete your registration and secure your account, please verify your email address using the verification code below:</p>
+        </div>
+
+        <div class="otp-container">
+            <div class="otp-label">Your Verification Code</div>
+            <div class="otp-code">{OTP_CODE}</div>
+            <div class="validity">⏰ This code expires in 10 minutes</div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Next Steps:</h3>
+            <p>
+                1. Return to the registration page<br>
+                2. Enter this 6-digit code in the verification field<br>
+                3. Complete your profile setup<br>
+                4. Start exploring our courses!
+            </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <p style="color: #666; font-size: 14px;">
+            <strong>Didn't request this code?</strong><br>
+            If you didn't create an account with AUPP eCampus, you can safely ignore this email.
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>
+            <strong>AUPP eCampus</strong><br>
+            American University of Phnom Penh<br>
+        </p>
+
+        <div class="divider"></div>
+
+        <p>
+            Need help? Contact us at <a href="mailto:auppecampus@icloud.com">auppecampus@icloud.com</a><br>
+            Visit our website: <a href="https://aupp.edu.kh">aupp.edu.kh</a>
+        </p>
+
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            © 2025 American University of Phnom Penh. All rights reserved.<br>
+            This email was sent to you as part of your AUPP eCampus registration process.
+        </p>
+    </div>
+</div>
+</body>
+</html>

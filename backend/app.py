@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, render_template
 from services.mongo_service import init_mongo
 from config import Config
 import traceback
@@ -11,7 +11,6 @@ def create_app():
     init_mongo()
     from services.cors_service import init_cors
     init_cors(flask_app)
-
 
     from routes import register_routes
     register_routes(flask_app)
@@ -37,6 +36,10 @@ def create_app():
             httponly=True
         )
         return resp
+
+    @flask_app.route('/')
+    def index():
+        return render_template('index.html')
 
     # @flask_app.after_request
     # def add_csp_headers(response):

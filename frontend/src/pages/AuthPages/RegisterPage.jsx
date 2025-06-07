@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/authContext";
 import Recaptcha from "../../components/features/Recaptcha";
+import {useAuth} from "context/authContext";
 
 const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [userType, setUserType] = useState('student');
     const [verificationCode, setVerificationCode] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
+    const [resendTimer, setResendTimer] = useState(0);
+    const [canResend, setCanResend] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { signup, sendOtp, user } = useAuth();
@@ -28,6 +32,30 @@ const RegisterPage = () => {
             emailInputRef.current.focus();
         }
     }, [user, navigate]);
+
+    // Countdown timer for resend button
+    useEffect(() => {
+        let interval = null;
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer(timer => {
+                    if (timer <= 1) {
+                        setCanResend(true);
+                        return 0;
+                    }
+                    return timer - 1;
+                });
+            }, 1000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [resendTimer]);
+
+    const startResendTimer = () => {
+        setResendTimer(60);
+        setCanResend(false);
+    };
 
     const getRedirectPath = (userRole = 'student') => {
         const from = location.state?.from;
@@ -51,11 +79,39 @@ const RegisterPage = () => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+        setSuccess('');
+
+        // Check if user selected instructor
+        if (userType === 'instructor') {
+            setError('Instructor accounts are created by administrators only. Please contact admin@aupp.edu.kh for instructor access.');
+            setIsLoading(false);
+            return;
+        }
+
         try {
             await sendOtp(email);
             setOtpSent(true);
+            startResendTimer();
+            setSuccess('Verification code sent successfully! Check your email.');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to send verification code');
+        }
+        setIsLoading(false);
+    };
+
+    const handleResendOtp = async () => {
+        if (!canResend) return;
+
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            await sendOtp(email);
+            startResendTimer();
+            setSuccess('Verification code resent successfully!');
+            setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend verification code');
         }
         setIsLoading(false);
     };
@@ -64,6 +120,7 @@ const RegisterPage = () => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+        setSuccess('');
         try {
             if (!captchaValue) {
                 setError("Please complete the reCAPTCHA.");
@@ -71,9 +128,9 @@ const RegisterPage = () => {
                 return;
             }
 
-            const signupResult = await signup(name, email, password, "student", verificationCode, captchaValue);
+            const signupResult = await signup(name, email, password, userType, verificationCode, captchaValue);
 
-            const redirectPath = getRedirectPath(signupResult.user?.role || 'student');
+            const redirectPath = getRedirectPath(signupResult.user?.role || userType);
 
             navigate(redirectPath, { replace: true });
 
@@ -111,7 +168,44 @@ const RegisterPage = () => {
 
                         {/* Step 1: Email verification */}
                         {!otpSent ? (
-                            <div onSubmit={handleSendOtp} className="space-y-6">
+                            <div className="space-y-6">
+                                {/* User Type Selection */}
+                                <div className="space-y-3">
+                                    <label className="block text-white/90 text-sm font-medium">I am a:</label>
+                                    <div className="flex space-x-4">
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="userType"
+                                                value="student"
+                                                checked={userType === 'student'}
+                                                onChange={(e) => setUserType(e.target.value)}
+                                                className="w-4 h-4 text-blue-600 bg-white/10 border-white/30 focus:ring-blue-500 focus:ring-2"
+                                            />
+                                            <span className="text-white/90">Student</span>
+                                        </label>
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="userType"
+                                                value="instructor"
+                                                checked={userType === 'instructor'}
+                                                onChange={(e) => setUserType(e.target.value)}
+                                                className="w-4 h-4 text-blue-600 bg-white/10 border-white/30 focus:ring-blue-500 focus:ring-2"
+                                            />
+                                            <span className="text-white/90">Instructor</span>
+                                        </label>
+                                    </div>
+                                    {userType === 'instructor' && (
+                                        <div className="p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
+                                            <p className="text-blue-200 text-sm">
+                                                <strong>Note:</strong> Instructor accounts are created by administrators.
+                                                Please contact <strong>admin@aupp.edu.kh</strong> to request instructor access.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="space-y-2">
                                     <label htmlFor="email" className="block text-white/90 text-sm font-medium">
                                         Email Address
@@ -128,6 +222,12 @@ const RegisterPage = () => {
                                     />
                                 </div>
 
+                                {success && (
+                                    <div className="p-3 bg-green-500/20 border border-green-400/30 rounded-lg">
+                                        <p className="text-green-200 text-sm">{success}</p>
+                                    </div>
+                                )}
+
                                 {error && (
                                     <div className="p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
                                         <p className="text-red-200 text-sm">{error}</p>
@@ -137,7 +237,7 @@ const RegisterPage = () => {
                                 <button
                                     type="button"
                                     onClick={handleSendOtp}
-                                    disabled={isLoading}
+                                    disabled={isLoading || userType === 'instructor'}
                                     className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? (
@@ -152,11 +252,11 @@ const RegisterPage = () => {
                             </div>
                         ) : (
                             /* Step 2: Complete registration */
-                            <div onSubmit={handleSignup} className="space-y-6">
+                            <div className="space-y-6">
                                 {/* Success message */}
                                 <div className="p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
                                     <p className="text-blue-200 text-sm">
-                                        Verification code sent to <strong>{email}</strong>
+                                        📧 Verification code sent to <strong>{email}</strong>
                                     </p>
                                 </div>
 
@@ -165,16 +265,37 @@ const RegisterPage = () => {
                                     <label htmlFor="verificationCode" className="block text-white/90 text-sm font-medium">
                                         Verification Code
                                     </label>
-                                    <input
-                                        type="text"
-                                        id="verificationCode"
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm text-center tracking-widest"
-                                        placeholder="Enter 6-digit code"
-                                        value={verificationCode}
-                                        onChange={(e) => setVerificationCode(e.target.value)}
-                                        maxLength="6"
-                                        required
-                                    />
+                                    <div className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            id="verificationCode"
+                                            className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm text-center tracking-widest"
+                                            placeholder="Enter 6-digit code"
+                                            value={verificationCode}
+                                            onChange={(e) => setVerificationCode(e.target.value)}
+                                            maxLength="6"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleResendOtp}
+                                            disabled={!canResend || isLoading}
+                                            className="px-4 py-3 bg-white/5 text-white/80 font-medium rounded-lg border border-white/20 hover:bg-white/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px]"
+                                        >
+                                            {isLoading ? (
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                                            ) : canResend ? (
+                                                'Resend'
+                                            ) : (
+                                                `${resendTimer}s`
+                                            )}
+                                        </button>
+                                    </div>
+                                    {!canResend && resendTimer > 0 && (
+                                        <p className="text-white/60 text-xs">
+                                            You can resend the code in {resendTimer} seconds
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Name */}
@@ -216,6 +337,12 @@ const RegisterPage = () => {
                                     </div>
                                 </div>
 
+                                {success && (
+                                    <div className="p-3 bg-green-500/20 border border-green-400/30 rounded-lg">
+                                        <p className="text-green-200 text-sm">{success}</p>
+                                    </div>
+                                )}
+
                                 {error && (
                                     <div className="p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
                                         <p className="text-red-200 text-sm">{error}</p>
@@ -225,7 +352,13 @@ const RegisterPage = () => {
                                 <div className="flex space-x-3">
                                     <button
                                         type="button"
-                                        onClick={() => setOtpSent(false)}
+                                        onClick={() => {
+                                            setOtpSent(false);
+                                            setResendTimer(0);
+                                            setCanResend(false);
+                                            setError('');
+                                            setSuccess('');
+                                        }}
                                         className="flex-1 py-3 bg-white/5 text-white/80 font-medium rounded-lg border border-white/20 hover:bg-white/10 transition-all duration-200"
                                     >
                                         Back
