@@ -6,8 +6,7 @@ def init_cors(app: Flask):
     CORS(app,
          resources={r"/*": {
              "origins": [
-                 "https://ecampusauppedu.vercel.app",
-                 "https://long-benedetta-aupp-f2be75c3.koyeb.app",
+                 "https://auppecampus.vercel.app/",
                  "http://localhost:3000"
              ],
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
