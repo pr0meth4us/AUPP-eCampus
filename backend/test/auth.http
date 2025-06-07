@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:5001/auth/login
+POST https://irrelevant-bonnibelle-aupp-6d0e6d6c.koyeb.app//auth/login
 Content-Type: application/json
 
 {
@@ -18,3 +18,6 @@ Content-Type: application/json
   "password": "?VRb%j'2E5Eu8]~",
   "role": "student"
 }
+
+###
+GET https://irrelevant-bonnibelle-aupp-6d0e6d6c.koyeb.app/users/682d741ed0bd8de4d915e097
