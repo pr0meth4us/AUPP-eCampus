@@ -10,13 +10,6 @@ const endpoint = (path = '') => {
 
     instance.interceptors.request.use(cfg => {
         if (cfg.url) cfg.url = cfg.url.replace(/([^:]\/)\/+/g, '$1');
-
-        const token = localStorage.getItem('token');
-        if (token) {
-            cfg.headers = cfg.headers || {};
-            cfg.headers.Authorization = `Bearer ${token}`;
-        }
-
         return cfg;
     });
 

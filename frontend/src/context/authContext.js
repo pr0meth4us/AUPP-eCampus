@@ -53,11 +53,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role, recaptchaResponse) => {
     const data = await auth.login(email, password, role, recaptchaResponse);
+    localStorage.setItem('token', data.token);
+    console.log(data.token, "kdmv")
+
     if (data.user) {
       // After obtaining basic user, fetch full profile
       const profile = await userService.getProfile(data.user._id);
       const merged = { ...data.user, ...profile };
       setUser(merged);
+
       localStorage.setItem('user', JSON.stringify(merged));
     }
     window.location.reload();

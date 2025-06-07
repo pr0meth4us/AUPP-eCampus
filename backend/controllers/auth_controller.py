@@ -43,8 +43,6 @@ class AuthController:
     @staticmethod
     def login():
         data = request.get_json()
-        print("RAW BODY:", request.data)
-        print("PARSED JSON:", data)
         required = ['email', 'password', 'role']
         if not all(data.get(k) for k in required):
             return jsonify({'message': 'Missing required fields'}), 400
