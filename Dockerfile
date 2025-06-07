@@ -12,4 +12,7 @@ ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5001
 
-CMD ["gunicorn", "-b", "0.0.0.0:5001", "--workers", "4", "--threads", "2", "--log-level", "debug", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+CMD ["python", "-m", "gunicorn",
+     "-b", "0.0.0.0:5001",
+     "--workers", "4",
+     "app:app"]
