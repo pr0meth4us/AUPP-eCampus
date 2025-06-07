@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Instructors from "./sections/Instructors";
+import {handleUnderConstructionClick} from "../../utils/handleUnderconstructionClick";
 
 const Home = () => {
     return (
@@ -28,9 +29,12 @@ const Home = () => {
                                 >
                                     Start Learning
                                 </Link>
-                                <button className="btn border-straight btn-outline-danger color-red flex-grow-1 mx-2">
+                                <a
+                                    onClick={handleUnderConstructionClick}
+                                    className="btn border-straight btn-outline-danger color-red flex-grow-1 mx-2"
+                                >
                                     Explore Subjects
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>

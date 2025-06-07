@@ -5,7 +5,7 @@ import {useAuth} from "../../context/authContext";
 import Recaptcha from "../../components/features/Recaptcha";
 
 const LoginPage = () => {
-    const { login } = useAuth();
+    const { login, user } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
@@ -15,16 +15,40 @@ const LoginPage = () => {
     const location = useLocation();
     const firstInputRef = useRef(null);
 
-    // Save the previous path so we can redirect back after login
     useEffect(() => {
+        if (user) {
+            const redirectPath = getRedirectPath(user.role);
+            navigate(redirectPath, { replace: true });
+            return;
+        }
+
         if (location.pathname !== '/login') {
             localStorage.setItem('previousPath', location.pathname + location.search);
         }
-        // Focus on the email input when page loads
+
         if (firstInputRef.current) {
             firstInputRef.current.focus();
         }
-    }, [location]);
+    }, [user, location, navigate]);
+
+    const getRedirectPath = (userRole) => {
+        const previousPath = localStorage.getItem('previousPath');
+
+        if (previousPath && !previousPath.includes('/login') && !previousPath.includes('/register')) {
+            return previousPath;
+        }
+
+        switch (userRole) {
+            case 'admin':
+                return '/admin/dashboard';
+            case 'instructor':
+                return '/course-i-teach';
+            case 'student':
+                return '/my-courses';
+            default:
+                return '/';
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -38,28 +62,28 @@ const LoginPage = () => {
                 throw new Error('Please complete the reCAPTCHA.');
             }
 
-            // Attempt login
-            await login(email, password, role, captchaValue);
+            const loginResult = await login(email, password, role, captchaValue);
 
-            // On success, redirect to previous or home
-            const previousPath = localStorage.getItem('previousPath') || '/';
+            const redirectPath = getRedirectPath(loginResult.user?.role || role);
+
             localStorage.removeItem('previousPath');
-            navigate(previousPath);
+
+            navigate(redirectPath, { replace: true });
+
         } catch (err) {
             setError(err.message || 'Login failed. Please check your credentials.');
         }
     };
 
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
                 <div className="absolute top-40 left-40 w-60 h-60 bg-slate-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
             </div>
 
-            {/* Floating particles */}
             {[...Array(15)].map((_, i) => (
                 <div
                     key={i}
@@ -73,15 +97,11 @@ const LoginPage = () => {
                 ></div>
             ))}
 
-            {/* Main login card */}
             <div className="relative w-full max-w-md">
-                {/* Glassmorphism card */}
                 <div className="backdrop-blur-xl bg-white/5 rounded-2xl shadow-2xl border border-white/10 p-8 relative overflow-hidden">
-                    {/* Card glow effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-2xl"></div>
 
                     <div className="relative z-10">
-                        {/* Header with logo/icon */}
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg">
                                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +113,6 @@ const LoginPage = () => {
                         </div>
 
                         <form onSubmit={handleLogin} className="space-y-6">
-                            {/* Role Selection */}
                             <div>
                                 <label className="block text-white/90 text-sm font-semibold mb-3">Login as</label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -128,7 +147,6 @@ const LoginPage = () => {
                                 </div>
                             </div>
 
-                            {/* Email Input */}
                             <div className="space-y-2">
                                 <label htmlFor="loginEmail" className="block text-white/90 text-sm font-semibold">
                                     Email
@@ -148,7 +166,6 @@ const LoginPage = () => {
                                 </div>
                             </div>
 
-                            {/* Password Input */}
                             <div className="space-y-2">
                                 <label htmlFor="loginPassword" className="block text-white/90 text-sm font-semibold">
                                     Password
@@ -174,21 +191,18 @@ const LoginPage = () => {
                                 </div>
                             </div>
 
-                            {/* reCAPTCHA */}
                             <div className="flex justify-center">
                                 <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                                     <Recaptcha onVerify={setCaptchaValue} />
                                 </div>
                             </div>
 
-                            {/* Error Message */}
                             {error && (
                                 <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-xl">
                                     <p className="text-red-200 text-sm text-center">{error}</p>
                                 </div>
                             )}
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent"

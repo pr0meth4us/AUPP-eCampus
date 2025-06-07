@@ -95,7 +95,7 @@ const App = () => {
                     />
 
                     {/* Course Preview (public) */}
-                    <Route path="/courseoverview/:id" element={<CoursePage />} />
+                    <Route path="/course/preview/:id" element={<CoursePage mode="preview" />} />
 
                     {/* Instructor: Edit or Create Course */}
                     <Route
@@ -153,6 +153,7 @@ const App = () => {
 
 
                     <Route path="/protected" element={<ErrorPage code={403} />} />
+                    <Route path="/under-construction" element={<ErrorPage type="construction" />} />
 
                     {/* Catch‐all for 404 (must be last) */}
                     <Route path="*" element={<ErrorPage code={404} />} />

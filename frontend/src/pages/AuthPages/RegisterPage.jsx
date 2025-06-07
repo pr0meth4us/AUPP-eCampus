@@ -14,14 +14,38 @@ const RegisterPage = () => {
     const [captchaValue, setCaptchaValue] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const { signup, sendOtp } = useAuth();
+    const { signup, sendOtp, user } = useAuth();
     const emailInputRef = useRef(null);
 
     useEffect(() => {
+        if (user) {
+            const redirectPath = getRedirectPath(user.role);
+            navigate(redirectPath, { replace: true });
+            return;
+        }
+
         if (emailInputRef.current) {
             emailInputRef.current.focus();
         }
-    }, []);
+    }, [user, navigate]);
+
+    const getRedirectPath = (userRole = 'student') => {
+        const from = location.state?.from;
+        if (from && !from.includes('/login') && !from.includes('/register')) {
+            return from;
+        }
+
+        switch (userRole) {
+            case 'admin':
+                return '/admin/dashboard';
+            case 'instructor':
+                return '/instructor/course/create';
+            case 'student':
+                return '/course-catalog';
+            default:
+                return '/';
+        }
+    };
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
@@ -46,10 +70,13 @@ const RegisterPage = () => {
                 setIsLoading(false);
                 return;
             }
-            await signup(name, email, password, "student", verificationCode, captchaValue);
 
-            const from = location.state?.from || "/";
-            navigate(from);
+            const signupResult = await signup(name, email, password, "student", verificationCode, captchaValue);
+
+            const redirectPath = getRedirectPath(signupResult.user?.role || 'student');
+
+            navigate(redirectPath, { replace: true });
+
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
         }

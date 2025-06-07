@@ -15,7 +15,7 @@ const CourseCard = ({ data, userRole }) => {
     >
       <div className="relative">
         <img
-          src={data.cover_image_url || "https://via.placeholder.com/300"}
+          src={data.cover_image_url || "/Course-Placeholder.jpg"}
           alt={data.title}
           className="h-48 w-full object-cover"
         />

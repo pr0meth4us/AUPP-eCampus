@@ -16,26 +16,40 @@ export const useCourseDetails = (mode = "detail") => {
         }
 
         const fetchCourse = async () => {
+            setLoading(true);
+            setError(null);
+
+            const fetcher = {
+                preview: CourseApi.getPreviewById,
+                detail:  CourseApi.getDetailById,
+                full:    CourseApi.getFullById,
+            }[mode];
+
+            if (!fetcher) {
+                setError(new Error(`Invalid mode: ${mode}`));
+                setLoading(false);
+                return;
+            }
+
             try {
-                setLoading(true);
-                setError(null);
-
-                const fetcher = {
-                    preview: CourseApi.getPreviewById,
-                    detail: CourseApi.getDetailById,
-                    full: CourseApi.getFullById,
-                }[mode];
-
-                if (!fetcher) {
-                    throw new Error(`Invalid mode: ${mode}`);
-                }
-
                 const data = await fetcher(id);
                 setCourse(data);
             } catch (err) {
-                console.error('Error fetching course:', err);
-                setError(err);
-                setCourse(null);
+                const status = err.response?.status;
+                if (mode === "detail" && status === 403) {
+                    // detail forbidden → silent fallback to preview
+                    try {
+                        const previewData = await CourseApi.getPreviewById(id);
+                        setCourse(previewData);
+                        // note: we do NOT call setError here
+                    } catch (previewErr) {
+                        setError(previewErr);
+                        setCourse(null);
+                    }
+                } else {
+                    setError(err);
+                    setCourse(null);
+                }
             } finally {
                 setLoading(false);
             }
