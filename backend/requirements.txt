@@ -10,3 +10,4 @@ redis
 google-api-python-client
 python-dotenv
 Flask-Cors
+gunicorn
