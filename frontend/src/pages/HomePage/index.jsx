@@ -3,6 +3,8 @@ import Instructors from "./sections/Instructors";
 import {handleUnderConstructionClick} from "../../utils/handleUnderconstructionClick";
 
 const Home = () => {
+    console.log(document.cookie, "defsdf");
+
     return (
         <>
             <div className="row">

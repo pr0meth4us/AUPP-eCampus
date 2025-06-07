@@ -56,6 +56,7 @@ class AuthController:
             token = create_token(user.to_dict())
             response = make_response(jsonify({
                 'message': 'Login successful',
+                'token': token,
                 'user': {'_id': str(user._id), 'email': user.email, 'role': user.role, 'name': user.name}
             }), 200)
             response.set_cookie('auth_token', token, httponly=True, secure=True, samesite='Strict')
