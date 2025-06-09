@@ -28,10 +28,14 @@ import ErrorPage from './pages/ErrorPage';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import LoginPage from "./pages/AuthPages/LoginPage";
 import RegisterPage from "./pages/AuthPages/RegisterPage";
+import LoadingProvider from "context/LoadingContext";
 
 const App = () => {
     return (
-        <Router>
+          <Router>
+
+            <LoadingProvider>
+
             <Layout>
                 <Routes>
                     {/* Public Routes */}
@@ -159,7 +163,9 @@ const App = () => {
                     <Route path="*" element={<ErrorPage code={404} />} />
                 </Routes>
             </Layout>
-        </Router>
+            </LoadingProvider>
+                      </Router>
+
     );
 };
 

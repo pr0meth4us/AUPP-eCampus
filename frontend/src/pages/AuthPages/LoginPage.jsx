@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../../assets/css/elements/login.css';
 import Recaptcha from "../../components/features/Recaptcha";
 import {useAuth} from "context/authContext";
+import {LoadingContext} from "context/LoadingContext";
+import {Button} from "@nextui-org/react";
 
 const LoginPage = () => {
+    const { loading } = useContext(LoadingContext);
     const { login, user } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -213,19 +216,18 @@ const LoginPage = () => {
                                     <p className="text-red-200 text-sm text-center">{error}</p>
                                 </div>
                             )}
-
-                            <button
+                            <div className="flex justify-center mt-6">
+                              <Button
                                 type="submit"
-                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent"
-                            >
-                                <span className="flex items-center justify-center space-x-2">
-                                    <span>Sign In</span>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                                    </svg>
-                                </span>
-                            </button>
+                                isLoading={loading}
+                                color="primary"
+                                size="lg"                  // larger button
+                                className="w-1/2 max-w-xs" // half the form width, max width constraint
+                              >
+                                Sign In
+                              </Button>
+                            </div>
+
                         </form>
 
                         {/* Footer Links */}

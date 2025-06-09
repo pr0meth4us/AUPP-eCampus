@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useState, useRef, useEffect, useContext} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Recaptcha from './Recaptcha';
 import '../../assets/css/elements/login.css';
 import {useAuth} from "context/authContext";
+import {Button} from "@nextui-org/react";
+import {LoadingContext} from "context/LoadingContext";
 
 const LoginPage = () => {
     const { login } = useAuth();
@@ -14,6 +16,8 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const closeButtonRef = useRef(null);
+    const { loading } = useContext(LoadingContext);
+
 
     useEffect(() => {
         if (location.pathname !== '/login') {
@@ -125,13 +129,17 @@ const LoginPage = () => {
                         >
                             Close
                         </button>
-                        <button
-                            type="button"
+                        {/* ...inside your form, replace the Button with: */}
+                          <Button
+                            type="submit"
+                            isLoading={loading}
+                            color="primary"
+                            size="lg"                  // larger button
                             className="btn btn-primary flex-grow-1"
                             onClick={handleLogin}
-                        >
-                            Login
-                        </button>
+                          >
+                            Sign In
+                          </Button>
                     </div>
                     <p className="text-center mt-3 mb-3">
                         New to AUPP eCampus? <a href="#">Click Here Register Now</a>
