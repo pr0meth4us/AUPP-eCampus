@@ -6,7 +6,7 @@ const LoginPage = () => {
     // IMPORTANT: matches the client_id you created in Bifrost Admin
     const BIFROST_URL = "https://objective-denna-auppecampus-9a7d86fc.koyeb.app/auth/ui/login";
     // This must match the Client ID you put in your Backend .env
-    const CLIENT_ID = "aupp_ecampus_a1b2c3d4"; // REPLACE THIS WITH YOUR REAL BIFROST CLIENT ID
+    const CLIENT_ID = "aupp_ecampus_ee9c3153"; // REPLACE THIS WITH YOUR REAL BIFROST CLIENT ID
 
     const handleBifrostLogin = () => {
         window.location.href = `${BIFROST_URL}?client_id=${CLIENT_ID}`;
