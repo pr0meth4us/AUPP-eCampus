@@ -7,8 +7,16 @@ load_dotenv(dotenv_path='.env')
 class Config:
     MONGO_URI = os.getenv('MONGO_URI')
     SECRET_KEY = os.getenv('SECRET_KEY')
-    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,*').split(',')
+    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS',
+                                     'http://localhost:3000,https://auppecampus.vercel.app,*').split(',')
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
+
+    # --- BIFROST CONFIGURATION ---
+    BIFROST_INTERNAL_URL = os.getenv('BIFROST_INTERNAL_URL', 'http://localhost:5000')
+    BIFROST_CLIENT_ID = os.getenv('BIFROST_CLIENT_ID')
+    BIFROST_CLIENT_SECRET = os.getenv('BIFROST_CLIENT_SECRET')
+
+    # --- EXISTING SERVICES ---
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
     REDIS_HOST = os.getenv('REDIS_HOST')
     REDIS_PORT = os.getenv('REDIS_PORT')
@@ -17,6 +25,8 @@ class Config:
     JWT_TOKEN_LOCATION = ['headers']
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'
+
+    # Google / Cloudinary / AWS / PayPal / Cloudflare configs...
     GOOGLE_SERVICE_ACCOUNT_TYPE = os.getenv('TYPE')
     GOOGLE_PROJECT_ID = os.getenv('PROJECT_ID')
     GOOGLE_PRIVATE_KEY_ID = os.getenv('PRIVATE_KEY_ID')
@@ -44,7 +54,7 @@ class Config:
     CLOUDFLARE_ENDPOINT_URL = os.getenv('CLOUDFLARE_ENDPOINT_URL')
     CLOUDFLARE_PUBLIC_URL = os.getenv('CLOUDFLARE_PUBLIC_URL')
     SUPABASE_S3_ENDPOINT = os.getenv("SUPABASE_S3_ENDPOINT")
-    SUPABASE_S3_REGION = os.getenv("SUPABASE_S3_REGION", "us-east-1")  # Default region
+    SUPABASE_S3_REGION = os.getenv("SUPABASE_S3_REGION", "us-east-1")
     SUPABASE_S3_ACCESS_KEY = os.getenv("SUPABASE_S3_ACCESS_KEY")
     SUPABASE_S3_SECRET_KEY = os.getenv("SUPABASE_S3_SECRET_KEY")
     SUPABASE_S3_BUCKET = os.getenv("SUPABASE_S3_BUCKET", "submissions")

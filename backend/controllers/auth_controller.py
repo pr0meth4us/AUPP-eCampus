@@ -1,96 +1,81 @@
-from flask import jsonify, request, make_response
+from flask import jsonify, request, make_response, g
 from models.user_model import User
-from services.mail_service import send_mail
-from models.otp_model import OTP
-from utils.token_utils import create_token, decode_token
-from config import Config
+from services.bifrost_service import BifrostService
+
 
 class AuthController:
     @staticmethod
-    def send_otp():
-        data = request.get_json()
-        email = data.get('email')
-        if not email:
-            return jsonify({'message': 'Email is required'}), 400
-        if User.find_by_email(email):
-            return jsonify({'message': 'Email already registered'}), 409
-        otp = OTP.create_otp(email)
-        send_mail(email, otp)
-        return jsonify({'message': 'OTP sent to your email'}), 200
+    def sync_session():
+        """
+        Called by the Frontend after receiving a JWT from Bifrost.
+        1. Validates the JWT with Bifrost.
+        2. Ensures the user exists in AUPP's local DB (Sync).
+        3. Returns the local user profile.
+        """
+        # 1. Get Token
+        auth_header = request.headers.get('Authorization')
+        token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
 
-    @staticmethod
-    def register():
-        data = request.get_json()
-        required = ['email', 'otp', 'role', 'name', 'password']
-        if not all(data.get(k) for k in required):
-            return jsonify({'message': 'Missing required fields'}), 400
+        if not token:
+            return jsonify({'message': 'Missing token'}), 401
 
-        email, received_otp, role = data['email'], data['otp'], data['role']
-        name, password = data['name'], data['password']
-        token = data.get('token') if role == 'admin' else None
+        # 2. Validate with Bifrost
+        bifrost_data = BifrostService.validate_token(token)
 
-        if not OTP.verify_otp(email, received_otp):
-            return jsonify({'message': 'Invalid OTP'}), 400
-        if role not in ['student', 'instructor', 'admin']:
-            return jsonify({'message': 'Invalid role'}), 400
-        if role == 'admin' and token != Config.ADMIN_TOKEN:
-            return jsonify({'message': 'Invalid admin token'}), 403
+        if not bifrost_data or not bifrost_data.get('is_valid'):
+            return jsonify({'message': 'Invalid or expired Bifrost token'}), 401
 
-        user = User(name=name, email=email, password=password, role=role)
-        user.save()
-        return jsonify({'message': f'{role.capitalize()} registered successfully'}), 201
+        # Extract data from Bifrost response
+        # bifrost_data = { is_valid: True, account_id: "...", app_specific_role: "...", email: "..." }
+        account_id = bifrost_data['account_id']
+        email = bifrost_data.get('email')
+        role = bifrost_data.get('app_specific_role', 'student')  # Default to student if role missing
 
-    @staticmethod
-    def login():
-        data = request.get_json()
-        required = ['email', 'password', 'role']
-        if not all(data.get(k) for k in required):
-            return jsonify({'message': 'Missing required fields'}), 400
+        # 3. Sync to Local DB (Upsert)
+        # We try to find the user by ID.
+        user = User.find_by_id(account_id)
 
-        email, password, role = data['email'], data['password'], data['role']
-        if role not in ['student', 'instructor', 'admin']:
-            return jsonify({'message': 'Invalid role'}), 400
-
-        user = User.find_by_email(email)
-        if user and User.verify_password(user.password_hash, password) and user.role == role:
-            token = create_token(user.to_dict())
-            response = make_response(jsonify({
-                'message': 'Login successful',
-                'token': token,
-                'user': {'_id': str(user._id), 'email': user.email, 'role': user.role, 'name': user.name}
-            }), 200)
-
-            # For cross-origin requests, use samesite='None' and ensure secure=True
-            response.set_cookie(
-                'auth_token',
-                token,
-                httponly=True,
-                secure=True,
-                samesite='None',  # Changed from 'Strict' to 'None'
-                max_age=3600  # 1 hour
+        if not user:
+            # First time login for this user on AUPP
+            # We create a local profile using the Bifrost ID
+            user = User(
+                _id=account_id,
+                email=email,
+                name=email.split('@')[0],  # Placeholder name
+                role=role
             )
-            return response
-        return jsonify({'message': 'Invalid credentials'}), 401
+            user.save()
+        else:
+            # User exists, we might want to sync role if it changed in Bifrost
+            if user.role != role:
+                user.role = role
+                user.save()
+
+        # 4. Return Response
+        # We rely on the Bifrost JWT for auth, so we just return user data here
+        response = make_response(jsonify({
+            'message': 'Session synced',
+            'user': user.to_dict()
+        }), 200)
+
+        return response
 
     @staticmethod
     def logout():
+        # AUPP is stateless regarding the token, but we clear cookies if any
         response = make_response(jsonify({"message": "Logged out successfully"}), 200)
-        response.set_cookie(
-            'auth_token',
-            '',
-            expires=0,
-            httponly=True,
-            secure=True,
-            samesite='None'  # Changed from 'Strict' to 'None'
-        )
         return response
 
     @staticmethod
     def check_auth():
-        token = request.cookies.get('auth_token')
-        if not token:
-            return jsonify({"authenticated": False, "message": "No token provided"}), 401
-        user_data = decode_token(token)
-        if user_data:
-            return jsonify({"authenticated": True, "user": user_data}), 200
-        return jsonify({"authenticated": False, "message": "Invalid or expired token"}), 401
+        """
+        Used by the frontend to verify if the stored token is still valid.
+        Delegates to the Middleware (which calls Bifrost).
+        """
+        # If the request reaches here, it passed the middleware validation
+        if hasattr(g, 'current_user'):
+            return jsonify({"authenticated": True, "user": g.current_user}), 200
+
+        return jsonify({"authenticated": False, "message": "Not authenticated"}), 401
