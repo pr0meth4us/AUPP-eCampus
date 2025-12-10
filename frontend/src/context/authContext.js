@@ -13,27 +13,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
+        const token = localStorage.getItem('token');
+        if (!token) {
           setLoading(false);
           return;
         }
 
-        // Check authentication (returns basic user info)
+        // Check authentication
         const data = await auth.checkAuth();
         if (data.authenticated && data.user) {
-          // Fetch full profile details
-          const profile = await userService.getProfile(data.user._id);
-          const merged = { ...data.user, ...profile };
-          setUser(merged);
-          localStorage.setItem('user', JSON.stringify(merged));
+          // Merge with full profile if needed
+          setUser(data.user);
+          localStorage.setItem('user', JSON.stringify(data.user));
         } else {
-          setUser(null);
-          localStorage.removeItem('user');
+          logout();
         }
       } catch {
-        setUser(null);
-        localStorage.removeItem('user');
+        logout();
       } finally {
         setLoading(false);
       }
@@ -42,58 +38,48 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  const sendOtp = async (email) => {
-    await auth.sendOtp(email);
-  };
+  // New method called by AuthCallbackPage
+  const loginWithToken = async (token) => {
+    localStorage.setItem('token', token);
 
-  const signup = async (name, email, password, role, verificationCode) => {
-    await auth.register(name, email, password, role, verificationCode);
-    await login(email, password, role);
-  };
-
-  const login = async (email, password, role, recaptchaResponse) => {
-    const data = await auth.login(email, password, role, recaptchaResponse);
-    localStorage.setItem('token', data.token);
-    console.log(data.token, "kdmv")
+    // Call backend to sync (create/update local user)
+    const data = await auth.syncSession(token);
 
     if (data.user) {
-      // After obtaining basic user, fetch full profile
-      const profile = await userService.getProfile(data.user._id);
-      const merged = { ...data.user, ...profile };
-      setUser(merged);
-
-      localStorage.setItem('user', JSON.stringify(merged));
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
     }
-    window.location.reload();
     return data;
   };
 
   const logout = async () => {
-    await auth.logout();
+    try {
+        await auth.logout();
+    } catch (e) {
+        console.error(e);
+    }
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    window.location.href = '/';
   };
 
-  const refreshUser = async () => {
-    try {
-      const data = await auth.checkAuth();
-      if (data.authenticated && data.user) {
-        const profile = await userService.getProfile(data.user._id);
-        const merged = { ...data.user, ...profile };
-        setUser(merged);
-        localStorage.setItem('user', JSON.stringify(merged));
-      } else {
-        setUser(null);
-        localStorage.removeItem('user');
-      }
-    } catch {
-      setUser(null);
-      localStorage.removeItem('user');
-    }
-  };
+  // Legacy stubs to prevent crashes if components still call them
+  const sendOtp = async () => console.warn("OTP is deprecated. Use Bifrost.");
+  const signup = async () => console.warn("Signup is deprecated. Use Bifrost.");
+  const login = async () => console.warn("Login is deprecated. Use Bifrost.");
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, sendOtp, refreshUser }}>
+    <AuthContext.Provider value={{
+        user,
+        loading,
+        loginWithToken,
+        logout,
+        // Keep these for backward compatibility during refactor, but they do nothing now
+        login,
+        signup,
+        sendOtp
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

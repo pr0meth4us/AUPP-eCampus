@@ -1,249 +1,42 @@
-import React, {useState, useEffect, useRef, useContext} from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import '../../assets/css/elements/login.css';
-import Recaptcha from "../../components/features/Recaptcha";
-import {useAuth} from "context/authContext";
-import {LoadingContext} from "context/LoadingContext";
-import {Button} from "@nextui-org/react";
+import React from 'react';
+import { Button } from "@nextui-org/react";
 
 const LoginPage = () => {
-    const { loading } = useContext(LoadingContext);
-    const { login, user } = useAuth();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
-    const [error, setError] = useState('');
-    const [captchaValue, setCaptchaValue] = useState(null);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const firstInputRef = useRef(null);
+    // HARDCODED BIFROST URL (Update this if your Bifrost URL is different)
+    // IMPORTANT: matches the client_id you created in Bifrost Admin
+    const BIFROST_URL = "https://objective-denna-auppecampus-9a7d86fc.koyeb.app/auth/ui/login";
+    // This must match the Client ID you put in your Backend .env
+    const CLIENT_ID = "aupp_ecampus_a1b2c3d4"; // REPLACE THIS WITH YOUR REAL BIFROST CLIENT ID
 
-    useEffect(() => {
-        if (user) {
-            const redirectPath = getRedirectPath(user.role);
-            navigate(redirectPath, { replace: true });
-            return;
-        }
-
-        if (location.pathname !== '/login') {
-            localStorage.setItem('previousPath', location.pathname + location.search);
-        }
-
-        if (firstInputRef.current) {
-            firstInputRef.current.focus();
-        }
-    }, [user, location, navigate]);
-
-    const getRedirectPath = (userRole) => {
-        const previousPath = localStorage.getItem('previousPath');
-
-        if (previousPath && !previousPath.includes('/login') && !previousPath.includes('/register')) {
-            return previousPath;
-        }
-
-        switch (userRole) {
-            case 'admin':
-                return '/admin/dashboard';
-            case 'instructor':
-                return '/course-i-teach';
-            case 'student':
-                return '/my-courses';
-            default:
-                return '/';
-        }
+    const handleBifrostLogin = () => {
+        window.location.href = `${BIFROST_URL}?client_id=${CLIENT_ID}`;
     };
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        try {
-            if (!role) {
-                throw new Error('Please select a role.');
-            }
-            // if (!captchaValue) {
-            //     throw new Error('Please complete the reCAPTCHA.');
-            // }
-
-            const loginResult = await login(email, password, role, captchaValue);
-
-            const redirectPath = getRedirectPath(loginResult.user?.role || role);
-
-            localStorage.removeItem('previousPath');
-
-            navigate(redirectPath, { replace: true });
-
-        } catch (err) {
-            setError(err.message || 'Login failed. Please check your credentials.');
-        }
-    };
-
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-                <div className="absolute top-40 left-40 w-60 h-60 bg-slate-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+                <img
+                    src="/aupp_ecampus_logo.png"
+                    alt="AUPP Logo"
+                    className="w-20 h-20 mx-auto mb-6"
+                />
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome to eCampus</h1>
+                <p className="text-gray-600 mb-8">
+                    We have updated our login system. Please sign in using your unified Bifrost ID.
+                </p>
 
-            {[...Array(15)].map((_, i) => (
-                <div
-                    key={i}
-                    className="absolute w-1 h-1 bg-white rounded-full opacity-30 animate-pulse"
-                    style={{
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        animationDelay: `${Math.random() * 3}s`,
-                        animationDuration: `${2 + Math.random() * 3}s`
-                    }}
-                ></div>
-            ))}
+                <Button
+                    size="lg"
+                    color="primary"
+                    className="w-full font-bold shadow-lg"
+                    onPress={handleBifrostLogin}
+                >
+                    Sign In with Bifrost
+                </Button>
 
-            <div className="relative w-full max-w-md">
-                <div className="backdrop-blur-xl bg-white/5 rounded-2xl shadow-2xl border border-white/10 p-8 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-2xl"></div>
-
-                    <div className="relative z-10">
-                        <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
-                            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back!</h1>
-                            <p className="text-white/70">Sign in to continue your learning journey</p>
-                        </div>
-
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div>
-                                <label className="block text-white/90 text-sm font-semibold mb-3">Login as</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('student')}
-                                        className={`relative py-3 px-4 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                                            role === 'student'
-                                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
-                                                : 'bg-white/5 text-white/80 hover:bg-white/10 border border-white/20'
-                                        }`}
-                                    >
-                                        <span className="relative z-10 capitalize">Student</span>
-                                        {role === 'student' && (
-                                            <div
-                                                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
-                                        )}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('instructor')}
-                                        className={`relative py-3 px-4 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                                            role === 'instructor'
-                                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
-                                                : 'bg-white/5 text-white/80 hover:bg-white/10 border border-white/20'
-                                        }`}
-                                    >
-                                        <span className="relative z-10 capitalize">Instructor</span>
-                                        {role === 'instructor' && (
-                                            <div
-                                                className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl animate-pulse opacity-20"></div>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label htmlFor="loginEmail" className="block text-white/90 text-sm font-semibold">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        ref={firstInputRef}
-                                        type="email"
-                                        id="loginEmail"
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                                        placeholder="Enter your email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                    <div
-                                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label htmlFor="loginPassword" className="block text-white/90 text-sm font-semibold">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        id="loginPassword"
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                                        placeholder="Enter your password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="text-right">
-                                    <a
-                                        href="/forgot-password"
-                                        className="text-sm text-white/70 hover:text-white transition-colors duration-300 hover:underline"
-                                    >
-                                        Forgot password?
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                    <Recaptcha onVerify={setCaptchaValue}/>
-                                </div>
-                                <p className="text-xs text-white/50 text-center">
-                                    (Just ignore reCAPTCHA — it's boring, so I disabled it.)
-                                </p>
-                            </div>
-
-                            {/*<div className="flex justify-center">*/}
-                            {/*    <div className="p-4 bg-white/5 rounded-xl border border-white/10">*/}
-                            {/*        <Recaptcha onVerify={setCaptchaValue} />*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
-
-                            {error && (
-                                <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-xl">
-                                    <p className="text-red-200 text-sm text-center">{error}</p>
-                                </div>
-                            )}
-                            <div className="flex justify-center mt-6">
-                              <Button
-                                type="submit"
-                                isLoading={loading}
-                                color="primary"
-                                size="lg"                  // larger button
-                                className="w-1/2 max-w-xs" // half the form width, max width constraint
-                              >
-                                Sign In
-                              </Button>
-                            </div>
-
-                        </form>
-
-                        {/* Footer Links */}
-                        <div className="mt-8 pt-6 border-t border-white/10">
-                            <p className="text-center text-white/70">
-                                New to eCampus?{' '}
-                                <a
-                                    href="/register"
-                                    className="text-white font-semibold hover:text-blue-300 transition-colors duration-300 hover:underline"
-                                >
-                                    Register Now
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <p className="mt-4 text-xs text-gray-400">
+                    Secure Identity Provider
+                </p>
             </div>
         </div>
     );

@@ -27,22 +27,28 @@ import { ContentDetailPage } from './pages/ContentPage';
 import ErrorPage from './pages/ErrorPage';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import LoginPage from "./pages/AuthPages/LoginPage";
-import RegisterPage from "./pages/AuthPages/RegisterPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage"; // <--- NEW IMPORT
 import LoadingProvider from "context/LoadingContext";
+
+// Note: RegisterPage is deprecated, we redirect to Login
+import RegisterPage from "./pages/AuthPages/LoginPage";
 
 const App = () => {
     return (
           <Router>
-
             <LoadingProvider>
-
             <Layout>
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
+                    {/* Reuse Login Page for Register since Bifrost handles both */}
+                    <Route path="/register" element={<LoginPage />} />
+
+                    {/* --- NEW ROUTE FOR BIFROST CALLBACK --- */}
+                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
                     <Route path="/admin-login" element={<AdminLogin />} />
                     <Route path="/course-catalog" element={<CourseCatalogPage />} />
                     <Route path="/course/success" element={<CourseSuccessPage />} />
@@ -164,8 +170,7 @@ const App = () => {
                 </Routes>
             </Layout>
             </LoadingProvider>
-                      </Router>
-
+        </Router>
     );
 };
 
