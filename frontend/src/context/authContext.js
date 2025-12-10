@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, user as userService } from '../services';
+import { auth } from '../services';
 
 const AuthContext = createContext();
 
@@ -19,17 +19,16 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        // Check authentication
+        // Check authentication validity
         const data = await auth.checkAuth();
         if (data.authenticated && data.user) {
-          // Merge with full profile if needed
           setUser(data.user);
           localStorage.setItem('user', JSON.stringify(data.user));
         } else {
-          logout();
+          await logout();
         }
       } catch {
-        logout();
+        await logout();
       } finally {
         setLoading(false);
       }
@@ -38,50 +37,83 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  // New method called by AuthCallbackPage
+  // --- ACTIONS ---
+
+  // 1. Login via Token (from Bifrost or local storage)
   const loginWithToken = async (token) => {
     localStorage.setItem('token', token);
-
-    // Call backend to sync (create/update local user)
-    const data = await auth.syncSession(token);
-
-    if (data.user) {
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
+    try {
+      const data = await auth.syncSession(token);
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      return data;
+    } catch (e) {
+      console.error("Sync session failed", e);
+      throw e;
     }
-    return data;
   };
 
+  // 2. Standard Login (Email/Pass)
+  const login = async (email, password) => {
+    try {
+      const data = await auth.login(email, password);
+      if (data.jwt) {
+        await loginWithToken(data.jwt);
+      }
+      return data;
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  // 3. Logout
   const logout = async () => {
     try {
-        await auth.logout();
+      await auth.logout();
     } catch (e) {
-        console.error(e);
+      console.error(e);
     }
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.href = '/';
+    // Optional: Redirect to home or refresh
+    // window.location.href = '/';
   };
 
-  // Legacy stubs to prevent crashes if components still call them
-  const sendOtp = async () => console.warn("OTP is deprecated. Use Bifrost.");
-  const signup = async () => console.warn("Signup is deprecated. Use Bifrost.");
-  const login = async () => console.warn("Login is deprecated. Use Bifrost.");
+  // --- EXPOSE DIRECT SERVICE METHODS ---
+  // These pass through directly to the auth service so components can use them
+  const sendOtp = auth.sendOtp;
+  const verifyOtp = auth.verifyOtp;
+  const completeRegistration = async (proofToken, password, displayName) => {
+    const data = await auth.completeRegistration(proofToken, password, displayName);
+    if (data.jwt) {
+      await loginWithToken(data.jwt);
+    }
+    return data;
+  };
+  const resetPassword = auth.resetPassword;
 
   return (
-    <AuthContext.Provider value={{
+      <AuthContext.Provider value={{
         user,
         loading,
-        loginWithToken,
-        logout,
-        // Keep these for backward compatibility during refactor, but they do nothing now
         login,
-        signup,
-        sendOtp
-    }}>
-      {!loading && children}
-    </AuthContext.Provider>
+        logout,
+        loginWithToken,
+        // Expose the new Bifrost methods
+        sendOtp,
+        verifyOtp,
+        completeRegistration,
+        resetPassword,
+        // Keep generic "signup" for compatibility if needed, aliased to nothing or a wrapper
+        signup: (name, email, pass, role, code, captcha) => {
+          console.warn("Please use completeRegistration flow.");
+        }
+      }}>
+        {!loading && children}
+      </AuthContext.Provider>
   );
 };
 
