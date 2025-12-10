@@ -27,148 +27,150 @@ import { ContentDetailPage } from './pages/ContentPage';
 import ErrorPage from './pages/ErrorPage';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import LoginPage from "./pages/AuthPages/LoginPage";
-import AuthCallbackPage from "./pages/AuthCallbackPage"; // <--- NEW IMPORT
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import LoadingProvider from "context/LoadingContext";
+import ForgotPasswordPage from "./pages/AuthPages/ForgotPasswordPage"; // <--- NEW IMPORT
 
-// Note: RegisterPage is deprecated, we redirect to Login
-import RegisterPage from "./pages/AuthPages/LoginPage";
+// Note: RegisterPage is deprecated, we use Signup.jsx or redirect
+import RegisterPage from "./pages/AuthPages/RegisterPage";
 
 const App = () => {
     return (
-          <Router>
+        <Router>
             <LoadingProvider>
-            <Layout>
-                <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/admin-signup" element={<AdminSignup />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    {/* Reuse Login Page for Register since Bifrost handles both */}
-                    <Route path="/register" element={<LoginPage />} />
+                <Layout>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/admin-signup" element={<AdminSignup />} />
+                        <Route path="/login" element={<LoginPage />} />
 
-                    {/* --- NEW ROUTE FOR BIFROST CALLBACK --- */}
-                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                        {/* --- NEW ROUTE FOR FORGOT PASSWORD --- */}
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-                    <Route path="/admin-login" element={<AdminLogin />} />
-                    <Route path="/course-catalog" element={<CourseCatalogPage />} />
-                    <Route path="/course/success" element={<CourseSuccessPage />} />
-                    <Route path="/course/confirmation" element={<CourseConfirmationPage />} />
-                    <Route path="/unauthorized" element={<ErrorPage code={403} />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-                    <Route
-                        path="/admin/dashboard"
-                        element={
-                            <PrivateRoute
-                                element={<AdminPage />}
-                                allowedRoles={['admin']}
-                            />
-                        }
-                    />
+                        <Route path="/admin-login" element={<AdminLogin />} />
+                        <Route path="/course-catalog" element={<CourseCatalogPage />} />
+                        <Route path="/course/success" element={<CourseSuccessPage />} />
+                        <Route path="/course/confirmation" element={<CourseConfirmationPage />} />
+                        <Route path="/unauthorized" element={<ErrorPage code={403} />} />
 
-                    {/* Profile and Edit (student, instructor, admin) */}
-                    <Route
-                        path="/profile/:id"
-                        element={
-                            <PrivateRoute
-                                element={<ProfilePage />}
-                                allowedRoles={['student', 'instructor', 'admin']}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/edit-profile"
-                        element={
-                            <PrivateRoute
-                                element={<EditProfile />}
-                                allowedRoles={['student', 'instructor', 'admin']}
-                            />
-                        }
-                    />
+                        <Route
+                            path="/admin/dashboard"
+                            element={
+                                <PrivateRoute
+                                    element={<AdminPage />}
+                                    allowedRoles={['admin']}
+                                />
+                            }
+                        />
 
-                    <Route
-                        path="/my-courses"
-                        element={
-                            <PrivateRoute
-                                element={<MyCourse role="student" />}
-                                allowedRoles={['student', 'instructor', 'admin']}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/course-i-teach"
-                        element={
-                            <PrivateRoute
-                                element={<MyCourse role="instructor" />}
-                                allowedRoles={['instructor', 'admin']}
-                            />
-                        }
-                    />
+                        {/* Profile and Edit (student, instructor, admin) */}
+                        <Route
+                            path="/profile/:id"
+                            element={
+                                <PrivateRoute
+                                    element={<ProfilePage />}
+                                    allowedRoles={['student', 'instructor', 'admin']}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/edit-profile"
+                            element={
+                                <PrivateRoute
+                                    element={<EditProfile />}
+                                    allowedRoles={['student', 'instructor', 'admin']}
+                                />
+                            }
+                        />
 
-                    {/* Course Preview (public) */}
-                    <Route path="/course/preview/:id" element={<CoursePage mode="preview" />} />
+                        <Route
+                            path="/my-courses"
+                            element={
+                                <PrivateRoute
+                                    element={<MyCourse role="student" />}
+                                    allowedRoles={['student', 'instructor', 'admin']}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/course-i-teach"
+                            element={
+                                <PrivateRoute
+                                    element={<MyCourse role="instructor" />}
+                                    allowedRoles={['instructor', 'admin']}
+                                />
+                            }
+                        />
 
-                    {/* Instructor: Edit or Create Course */}
-                    <Route
-                        path="/instructor/course/:id"
-                        element={
-                            <PrivateRoute
-                                element={<EditCourse />}
-                                allowedRoles={['instructor', 'admin']}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/instructor/course/create"
-                        element={
-                            <PrivateRoute
-                                element={<CourseCreate />}
-                                allowedRoles={['instructor', 'admin']}
-                            />
-                        }
-                    />
+                        {/* Course Preview (public) */}
+                        <Route path="/course/preview/:id" element={<CoursePage mode="preview" />} />
 
-                    {/* Course Study (enrolled only) */}
-                    <Route
-                        path="/course/:id"
-                        element={
-                            <PrivateRoute
-                                element={<CourseDashboardPage />}
-                                allowedRoles={['student', 'instructor', 'admin']}
-                            />
-                        }
-                    />
+                        {/* Instructor: Edit or Create Course */}
+                        <Route
+                            path="/instructor/course/:id"
+                            element={
+                                <PrivateRoute
+                                    element={<EditCourse />}
+                                    allowedRoles={['instructor', 'admin']}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/instructor/course/create"
+                            element={
+                                <PrivateRoute
+                                    element={<CourseCreate />}
+                                    allowedRoles={['instructor', 'admin']}
+                                />
+                            }
+                        />
 
-                    {/* Assignment / Module / Material / Content Detail (all require login) */}
-                    <Route
-                        path="/courses/:courseId/assignments/:assignmentId"
-                        element={<AssignmentDetailPage />}
-                    />
-                    <Route
-                        path="/courses/:courseId/modules/:moduleId"
-                        element={<ModuleDetailPage />}
-                    />
-                    <Route
-                        path="/courses/:courseId/modules/:moduleId/materials/:materialId"
-                        element={<MaterialDetailPage />}
-                    />
-                    <Route
-                        path="/courses/:courseId/modules/:moduleId/contents/:contentId"
-                        element={
-                            <PrivateRoute
-                                element={<ContentDetailPage />}
-                                allowedRoles={['student', 'instructor', 'admin']}
-                            />
-                        }
-                    />
+                        {/* Course Study (enrolled only) */}
+                        <Route
+                            path="/course/:id"
+                            element={
+                                <PrivateRoute
+                                    element={<CourseDashboardPage />}
+                                    allowedRoles={['student', 'instructor', 'admin']}
+                                />
+                            }
+                        />
+
+                        {/* Assignment / Module / Material / Content Detail (all require login) */}
+                        <Route
+                            path="/courses/:courseId/assignments/:assignmentId"
+                            element={<AssignmentDetailPage />}
+                        />
+                        <Route
+                            path="/courses/:courseId/modules/:moduleId"
+                            element={<ModuleDetailPage />}
+                        />
+                        <Route
+                            path="/courses/:courseId/modules/:moduleId/materials/:materialId"
+                            element={<MaterialDetailPage />}
+                        />
+                        <Route
+                            path="/courses/:courseId/modules/:moduleId/contents/:contentId"
+                            element={
+                                <PrivateRoute
+                                    element={<ContentDetailPage />}
+                                    allowedRoles={['student', 'instructor', 'admin']}
+                                />
+                            }
+                        />
 
 
-                    <Route path="/protected" element={<ErrorPage code={403} />} />
-                    <Route path="/under-construction" element={<ErrorPage type="construction" />} />
+                        <Route path="/protected" element={<ErrorPage code={403} />} />
+                        <Route path="/under-construction" element={<ErrorPage type="construction" />} />
 
-                    {/* Catch‐all for 404 (must be last) */}
-                    <Route path="*" element={<ErrorPage code={404} />} />
-                </Routes>
-            </Layout>
+                        {/* Catch‐all for 404 (must be last) */}
+                        <Route path="*" element={<ErrorPage code={404} />} />
+                    </Routes>
+                </Layout>
             </LoadingProvider>
         </Router>
     );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Recaptcha from "./Recaptcha";
-import {useAuth} from "context/authContext";
+import { useAuth } from "context/authContext";
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -9,15 +9,20 @@ const Signup = () => {
     const [name, setName] = useState('');
     const [userType, setUserType] = useState('student');
     const [verificationCode, setVerificationCode] = useState('');
+    const [verificationId, setVerificationId] = useState(null); // NEW: Store ID from Bifrost
+
     const [error, setError] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
     const [resendTimer, setResendTimer] = useState(0);
     const [canResend, setCanResend] = useState(false);
+
     const navigate = useNavigate();
     const location = useLocation();
-    const { signup, sendOtp } = useAuth();
+
+    // Deconstruct methods from our updated auth service
+    const { sendOtp, verifyOtp, completeRegistration } = useAuth();
 
     // Countdown timer for resend button
     useEffect(() => {
@@ -43,11 +48,11 @@ const Signup = () => {
         setCanResend(false);
     };
 
+    // --- STEP 1: REQUEST OTP ---
     const handleSendOtp = async () => {
         setIsLoading(true);
         setError('');
 
-        // Check if user selected instructor
         if (userType === 'instructor') {
             setError('Instructor accounts are created by administrators only. Please contact auppecampus@icloud.com for instructor access.');
             setIsLoading(false);
@@ -55,51 +60,72 @@ const Signup = () => {
         }
 
         try {
-            await sendOtp(email);
-            setOtpSent(true);
-            startResendTimer();
+            // Updated: Capture the verification_id from response
+            const data = await sendOtp(email);
+            if (data.verification_id) {
+                setVerificationId(data.verification_id);
+                setOtpSent(true);
+                startResendTimer();
+            } else {
+                throw new Error("Invalid server response (missing verification ID)");
+            }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to send verification code');
+            setError(err.response?.data?.error || err.message || 'Failed to send verification code');
         }
         setIsLoading(false);
     };
 
     const handleResendOtp = async () => {
         if (!canResend) return;
-
         setIsLoading(true);
         setError('');
         try {
-            await sendOtp(email);
+            const data = await sendOtp(email);
+            if(data.verification_id) setVerificationId(data.verification_id);
             startResendTimer();
-            setError(''); // Clear any previous errors
-            // Show success message temporarily
-            const successMsg = 'Verification code resent successfully!';
-            setError(''); // This will be replaced with a success state if you want
+            setError('');
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to resend verification code');
+            setError(err.response?.data?.error || 'Failed to resend verification code');
         }
         setIsLoading(false);
     };
 
+    // --- STEP 2 & 3: VERIFY & REGISTER ---
     const handleSignup = async () => {
         setIsLoading(true);
         setError('');
-        try {
-            // if (!captchaValue) {
-            //     setError("Please complete the reCAPTCHA.");
-            //     setIsLoading(false);
-            //     return;
-            // }
-            await signup(name, email, password, userType, verificationCode, captchaValue);
 
-            // Redirect to the previous page or the home page if no referrer
+        try {
+            if (!verificationId) {
+                throw new Error("Session expired. Please request a new code.");
+            }
+
+            // 1. Verify OTP to get Proof Token
+            const verifyResponse = await verifyOtp(verificationId, verificationCode);
+            const proofToken = verifyResponse.proof_token;
+
+            if (!proofToken) {
+                throw new Error("Verification failed. Invalid code.");
+            }
+
+            // 2. Use Proof Token to create account and get Login JWT
+            // Note: completeRegistration also handles the syncSession internally in auth.js
+            await completeRegistration(proofToken, password, name);
+
+            // 3. Redirect
             const from = location.state?.from || "/";
-            navigate(from);
+            // Close modal if using Bootstrap modal (simulated by clicking close button or reloading)
+            // Ideally we just navigate, and the App router handles unmounting this modal.
+
+            // Force a hard reload or clean navigation to ensure auth state updates
+            window.location.href = from;
+
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            console.error("Signup flow error:", err);
+            setError(err.response?.data?.error || err.message || 'Registration failed');
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     return (
@@ -202,8 +228,7 @@ const Signup = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="verificationCode" className="form-label">Verification
-                                            Code</label>
+                                        <label htmlFor="verificationCode" className="form-label">Verification Code</label>
                                         <div className="d-flex align-items-center">
                                             <input
                                                 type="text"
@@ -223,8 +248,7 @@ const Signup = () => {
                                                 style={{minWidth: '100px'}}
                                             >
                                                 {isLoading ? (
-                                                    <span className="spinner-border spinner-border-sm" role="status"
-                                                          aria-hidden="true"></span>
+                                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 ) : canResend ? (
                                                     'Resend'
                                                 ) : (
@@ -262,18 +286,15 @@ const Signup = () => {
                                             required
                                         />
                                     </div>
-                                    <p className="text-sm text-white/60 italic">
-                                        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                    <p className="text-sm text-gray-500 italic">
+                                        (Note: reCAPTCHA is currently disabled for this demo)
                                     </p>
-                                    <div className="mb-3">
+                                    {/* <div className="mb-3">
                                         <Recaptcha onVerify={setCaptchaValue}/>
-                                        <small className="text-muted">reCAPTCHA verification (optional for demo)</small>
-                                    </div>
-                                    {/*<div className="mb-3">*/}
-                                    {/*    <Recaptcha onVerify={setCaptchaValue}/>*/}
-                                    {/*</div>*/}
+                                    </div> */}
                                 </>
                             )}
+
                             {error && (
                                 <div className={`alert ${error.includes('successfully') ? 'alert-success' : 'alert-danger'}`} role="alert">
                                     {error}
@@ -286,7 +307,10 @@ const Signup = () => {
                         {otpSent && (
                             <button type="button" className="btn btn-primary" onClick={handleSignup} disabled={isLoading}>
                                 {isLoading ? (
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Registering...
+                                    </>
                                 ) : (
                                     'Sign Up'
                                 )}

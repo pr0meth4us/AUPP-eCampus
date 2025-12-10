@@ -1,8 +1,6 @@
 from bson import ObjectId
-from werkzeug.security import generate_password_hash, check_password_hash
 from services.mongo_service import db
 from typing import List, Optional, Dict, Any
-
 
 class User:
     @classmethod
@@ -20,7 +18,7 @@ class User:
         self.bio = bio or ""
         self.profile_image = profile_image or ""
         self.courses = [ObjectId(cid) for cid in (courses or [])]
-        self.expertise = expertise or []  # Only for instructors
+        self.expertise = expertise or []
 
     def to_dict(self) -> Dict[str, Any]:
         data = {
@@ -50,23 +48,28 @@ class User:
         )
 
     def save(self) -> str:
-        # Check for existing email using the collection method
-        if self._coll().find_one({'email': self.email}):
-            # If we are updating an existing user (we have an ID), ensure we aren't clashing with ANOTHER user
-            if not self._id:
-                raise ValueError(f"Email '{self.email}' is already in use.")
-
-            # If we have an ID, we might be saving an existing object, but usually save() is for new inserts.
-            # Ideally, upsert logic handles this, but sticking to your pattern:
-            # If this is a new insert (no self._id), fail.
-            pass
-
+        """
+        Saves or Upserts the user.
+        If self._id is set (from Bifrost), we upsert based on that ID.
+        """
         data = self.to_dict()
-        data.pop('_id', None)
+        doc_id = data.pop('_id', None)
 
-        # Insert
-        result = self._coll().insert_one(data)
-        self._id = result.inserted_id
+        if doc_id:
+            # Sync Logic: Update if exists, Insert if not, using the Bifrost ID
+            self._coll().update_one(
+                {'_id': ObjectId(doc_id)},
+                {'$set': data},
+                upsert=True
+            )
+            self._id = ObjectId(doc_id)
+        else:
+            # Fallback for manual creation without ID (should be rare now)
+            if self._coll().find_one({'email': self.email}):
+                raise ValueError(f"Email '{self.email}' is already in use.")
+            result = self._coll().insert_one(data)
+            self._id = result.inserted_id
+
         return str(self._id)
 
     @classmethod
@@ -77,6 +80,8 @@ class User:
         except:
             return None
 
+    # ... (Keep find_by_email, search_users, update, delete, get_all, add_course, remove_course as they were) ...
+    # (Just ensure they use cls._coll() instead of db.users directly if you changed that pattern)
     @classmethod
     def find_by_email(cls, email: str) -> Optional['User']:
         data = cls._coll().find_one({'email': email})
@@ -84,16 +89,15 @@ class User:
 
     @classmethod
     def search_users(cls, query: str, role: Optional[str] = None) -> List['User']:
-        """Search users by name or email with optional role filter."""
         search_filter = {
             '$or': [
-                {'name': {'$regex': query, '$options': 'i'}},  # Case-insensitive
+                {'name': {'$regex': query, '$options': 'i'}},
                 {'email': {'$regex': query, '$options': 'i'}}
             ]
         }
         if role:
             search_filter['role'] = role
-        data = cls._coll().find(search_filter).limit(50)  # Limit for performance
+        data = cls._coll().find(search_filter).limit(50)
         return [cls.from_dict(user) for user in data]
 
     def update(self, **kwargs) -> None:
@@ -108,10 +112,7 @@ class User:
             if self._coll().find_one({'email': update_data['email'], '_id': {'$ne': self._id}}):
                 raise ValueError(f"Email '{update_data['email']}' is already in use.")
 
-        result = self._coll().update_one({'_id': self._id}, {'$set': update_data})
-        if result.modified_count == 0 and result.matched_count == 0:
-            # matched_count == 0 means user didn't exist
-            pass
+        self._coll().update_one({'_id': self._id}, {'$set': update_data})
 
     def delete(self) -> None:
         result = self._coll().delete_one({'_id': self._id})
@@ -120,15 +121,12 @@ class User:
 
     @classmethod
     def get_all(cls, role: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get all users, optionally filtered by role."""
         query = {'role': role} if role else {}
         pipeline = [
             {'$match': query},
             {'$project': {
                 '_id': {'$toString': '$_id'},
-                'name': 1,
-                'email': 1,
-                'role': 1
+                'name': 1, 'email': 1, 'role': 1
             }}
         ]
         return list(cls._coll().aggregate(pipeline))

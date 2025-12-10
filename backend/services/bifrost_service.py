@@ -4,7 +4,6 @@ from config import Config
 
 logger = logging.getLogger(__name__)
 
-
 class BifrostService:
     @staticmethod
     def validate_token(token):
@@ -14,15 +13,17 @@ class BifrostService:
         try:
             url = f"{Config.BIFROST_INTERNAL_URL}/internal/validate-token"
 
-            # Using Basic Auth with Client ID/Secret as defined in Bifrost's internal_bp
+            # Authenticate as the AUPP Service using Client ID/Secret
             auth = (Config.BIFROST_CLIENT_ID, Config.BIFROST_CLIENT_SECRET)
 
             payload = {"jwt": token}
 
+            # Server-to-Server call
             response = requests.post(url, json=payload, auth=auth, timeout=5)
 
             if response.status_code == 200:
-                return response.json()  # Returns { is_valid, account_id, app_specific_role, email }
+                # Returns: { "is_valid": True, "account_id": "...", "app_specific_role": "...", "email": "..." }
+                return response.json()
 
             logger.warning(f"Bifrost validation failed: {response.status_code} - {response.text}")
             return None
