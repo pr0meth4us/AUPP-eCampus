@@ -1,7 +1,7 @@
 // components/ModulesSection.jsx
 
 import React from "react";
-import { Card, CardHeader, CardBody, Button, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Button, Tooltip } from "@heroui/react";
 import { PlusIcon, TrashIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const ModulesSection = ({ modules, onAddModule, onDeleteModule }) => {

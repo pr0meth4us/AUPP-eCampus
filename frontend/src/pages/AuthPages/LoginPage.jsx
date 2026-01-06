@@ -1,138 +1,108 @@
-import React, { useState } from 'react';
-import { Button, Input, Link } from "@nextui-org/react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/authContext";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import React, { useState } from "react";
+import {
+    Card, CardHeader, CardBody, CardFooter,
+    Input, Button, Checkbox, Link, Divider
+} from "@heroui/react";
+import { Mail, Lock, LogIn, ChevronLeft } from "lucide-react";
+import { useAuth } from "context/authContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { login } = useAuth();
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isVisible, setIsVisible] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
-    const toggleVisibility = () => setIsVisible(!isVisible);
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
         setIsLoading(true);
+        setError("");
 
         try {
             await login(email, password);
-
-            // Redirect after successful login
-            const from = location.state?.from || "/";
-            navigate(from, { replace: true });
+            navigate("/");
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
+            setError(err.response?.data?.message || "Invalid email or password");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-                <div className="text-center mb-8">
-                    <img
-                        src="/aupp_ecampus_logo.png"
-                        alt="AUPP Logo"
-                        className="w-20 h-20 mx-auto mb-4"
-                    />
-                    <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
-                    <p className="text-gray-500 text-sm mt-1">Sign in to continue to eCampus</p>
-                </div>
+        <div className="min-h-[80vh] flex items-center justify-center px-4 bg-gray-50/50">
+            <Card className="w-full max-w-[400px] p-4 shadow-2xl">
+                <CardHeader className="flex flex-col gap-1 items-start">
+                    <Link
+                        href="/"
+                        className="text-default-400 text-sm mb-4 flex items-center gap-1 hover:text-primary transition-colors"
+                    >
+                        <ChevronLeft size={16} /> Back to Home
+                    </Link>
+                    <h1 className="text-2xl font-bold">Welcome Back</h1>
+                    <p className="text-default-500 text-sm">Enter your credentials to access your courses</p>
+                </CardHeader>
 
-                {error && (
-                    <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <Input
-                        label="Email"
-                        placeholder="Enter your email"
-                        variant="bordered"
-                        value={email}
-                        onValueChange={setEmail}
-                        isRequired
-                        classNames={{
-                            label: "text-black/50 dark:text-white/90",
-                            input: [
-                                "bg-transparent",
-                                "text-black/90 dark:text-white/90",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focus=true]:bg-default-200/50",
-                                "dark:group-data-[focus=true]:bg-default/60",
-                                "!cursor-text",
-                            ],
-                        }}
-                    />
-
-                    <div className="space-y-1">
+                <CardBody>
+                    <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                        {error && (
+                            <div className="bg-danger-50 text-danger text-xs p-3 rounded-lg border border-danger-100">
+                                {error}
+                            </div>
+                        )}
                         <Input
-                            label="Password"
-                            placeholder="Enter your password"
+                            isRequired
+                            type="email"
+                            label="Email"
+                            placeholder="you@aupp.edu.kh"
                             variant="bordered"
+                            labelPlacement="outside"
+                            startContent={<Mail className="text-default-400" size={18}/>}
+                            value={email}
+                            onValueChange={setEmail}
+                        />
+                        <Input
+                            isRequired
+                            type="password"
+                            label="Password"
+                            placeholder="********"
+                            variant="bordered"
+                            labelPlacement="outside"
+                            startContent={<Lock className="text-default-400" size={18}/>}
                             value={password}
                             onValueChange={setPassword}
-                            endContent={
-                                <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-                                    {isVisible ? (
-                                        <EyeSlashIcon className="text-2xl text-default-400 pointer-events-none w-5 h-5" />
-                                    ) : (
-                                        <EyeIcon className="text-2xl text-default-400 pointer-events-none w-5 h-5" />
-                                    )}
-                                </button>
-                            }
-                            type={isVisible ? "text" : "password"}
-                            isRequired
                         />
-                        <div className="flex justify-end">
-                            <Link
-                                href="/forgot-password"
-                                size="sm"
-                                className="text-blue-600 hover:text-blue-800"
-                            >
+                        <div className="flex justify-between items-center px-1">
+                            <Checkbox size="sm">Remember me</Checkbox>
+                            <Link href="/forgot-password" size="sm" className="text-primary">
                                 Forgot password?
                             </Link>
                         </div>
-                    </div>
+                        <Button
+                            type="submit"
+                            color="primary"
+                            className="w-full font-bold mt-2"
+                            isLoading={isLoading}
+                            startContent={!isLoading && <LogIn size={18}/>}
+                        >
+                            Sign In
+                        </Button>
+                    </form>
+                </CardBody>
 
-                    <Button
-                        type="submit"
-                        size="lg"
-                        color="primary"
-                        className="w-full font-bold shadow-lg"
-                        isLoading={isLoading}
-                    >
-                        Sign In
-                    </Button>
-                </form>
+                <Divider className="my-4" />
 
-                <div className="mt-8 text-center text-sm text-gray-500">
-                    Don't have an account?{" "}
-                    <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-800">
-                        Create Account
-                    </Link>
-                </div>
-            </div>
+                <CardFooter className="flex flex-col gap-4">
+                    <p className="text-sm text-center text-default-500">
+                        Don't have an account?{" "}
+                        <Link href="/register" size="sm" className="font-bold">
+                            Create Account
+                        </Link>
+                    </p>
+                </CardFooter>
+            </Card>
         </div>
     );
 };

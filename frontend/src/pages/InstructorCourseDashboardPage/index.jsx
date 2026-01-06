@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Spinner, Button, Tabs, Tab } from "@nextui-org/react";
+import { Spinner, Button, Tabs, Tab } from "@heroui/react";
 import { useParams } from "react-router-dom";
 
 import { course as CourseApi } from "services";

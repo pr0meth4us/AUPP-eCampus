@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
   Spinner,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import {
   UserIcon,
   AcademicCapIcon,

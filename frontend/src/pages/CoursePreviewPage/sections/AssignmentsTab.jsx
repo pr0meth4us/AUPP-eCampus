@@ -6,7 +6,7 @@ import {
     Button,
     Chip,
     Tooltip
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
     BookOpen,
     Download,

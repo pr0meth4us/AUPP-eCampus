@@ -1,33 +1,36 @@
 import requests
-import logging
-from config import Config
-
-logger = logging.getLogger(__name__)
+from flask import current_app
 
 class BifrostService:
     @staticmethod
-    def validate_token(token):
-        """
-        Calls Bifrost's internal validation endpoint to verify a JWT.
-        """
+    def _get_base_url():
+        return current_app.config['BIFROST_URL']
+
+    @staticmethod
+    def authenticate_user(email, password):
+        """Calls Bifrost Headless API to verify credentials."""
+        url = f"{BifrostService._get_base_url()}/auth/api/login"
+        payload = {
+            "email": email,
+            "password": password,
+            "client_id": current_app.config['BIFROST_CLIENT_ID'],
+            "client_secret": current_app.config['BIFROST_CLIENT_SECRET']
+        }
         try:
-            url = f"{Config.BIFROST_INTERNAL_URL}/internal/validate-token"
-
-            # Authenticate as the AUPP Service using Client ID/Secret
-            auth = (Config.BIFROST_CLIENT_ID, Config.BIFROST_CLIENT_SECRET)
-
-            payload = {"jwt": token}
-
-            # Server-to-Server call
-            response = requests.post(url, json=payload, auth=auth, timeout=5)
-
+            response = requests.post(url, json=payload)
             if response.status_code == 200:
-                # Returns: { "is_valid": True, "account_id": "...", "app_specific_role": "...", "email": "..." }
-                return response.json()
-
-            logger.warning(f"Bifrost validation failed: {response.status_code} - {response.text}")
+                return response.json() # Should return { "jwt": "...", "user": {...} }
+            return None
+        except Exception:
             return None
 
-        except Exception as e:
-            logger.error(f"Error connecting to Bifrost: {e}")
+    @staticmethod
+    def validate_token(token):
+        """Asks Bifrost if the provided JWT is still valid."""
+        url = f"{BifrostService._get_base_url()}/auth/api/validate-token"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            response = requests.get(url, headers=headers)
+            return response.json() if response.status_code == 200 else None
+        except Exception:
             return None

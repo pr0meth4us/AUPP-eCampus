@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, Avatar, Chip } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Chip } from "@heroui/react";
 import { GraduationCap, Users, Mail, Award } from "lucide-react";
 
 const PeopleTab = ({ course }) => {

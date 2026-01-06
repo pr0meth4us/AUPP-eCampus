@@ -12,9 +12,9 @@ class Config:
     ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'yfuyiuytu')
 
     # --- BIFROST CONFIGURATION ---
-    BIFROST_INTERNAL_URL = os.getenv('BIFROST_INTERNAL_URL', 'http://localhost:5000')
-    BIFROST_CLIENT_ID = os.getenv('BIFROST_CLIENT_ID')
-    BIFROST_CLIENT_SECRET = os.getenv('BIFROST_CLIENT_SECRET')
+    BIFROST_URL ='https://objective-denna-auppecampus-9a7d86fc.koyeb.app'
+    BIFROST_CLIENT_ID = os.environ.get('BIFROST_CLIENT_ID')
+    BIFROST_CLIENT_SECRET = os.environ.get('BIFROST_CLIENT_SECRET')
 
     # --- EXISTING SERVICES ---
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')

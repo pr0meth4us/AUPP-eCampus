@@ -1,7 +1,7 @@
 // components/DashboardCards.jsx
 
 import React from "react";
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody } from "@heroui/react";
 import {
   UsersIcon,
   BookOpenIcon,

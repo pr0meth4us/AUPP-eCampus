@@ -1,7 +1,7 @@
 // components/StudentsSection.jsx
 
 import React from "react";
-import { Card, CardHeader, CardBody, Button, Avatar, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Button, Avatar, Tooltip } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const StudentsSection = ({ enrolledStudents, onEnroll, onUnenroll }) => {

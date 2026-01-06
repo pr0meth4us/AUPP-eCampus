@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useNavigate } from 'react-router-dom';
 import { course as courseService } from '../services';
 

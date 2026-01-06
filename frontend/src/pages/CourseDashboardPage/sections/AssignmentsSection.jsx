@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Clipboard, Download, ExternalLink } from 'lucide-react';
-import { Chip, Button, Tooltip } from '@nextui-org/react';
+import { Chip, Button, Tooltip } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, getDaysUntilDue } from '../../../utils/dateUtils';
 

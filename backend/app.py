@@ -1,60 +1,39 @@
-from flask import Flask, jsonify, make_response, render_template
+from flask import Flask, jsonify
 from services.mongo_service import init_mongo
 from config import Config
-import traceback
-
+import logging
 
 def create_app():
     flask_app = Flask(__name__)
-
     flask_app.config.from_object(Config)
+
+    # Initialize MongoDB connection
     init_mongo()
+
+    # Initialize CORS for frontend communication
     from services.cors_service import init_cors
     init_cors(flask_app)
 
+    # Register all application routes
     from routes import register_routes
     register_routes(flask_app)
 
+    # SECURE ERROR HANDLER: Prevents leaking tracebacks to users
     @flask_app.errorhandler(500)
     def internal_error(error):
-        return jsonify(
-            {'error': 'Internal Server Error', 'details': traceback.format_exc(), 'exception': str(error)}
-        ), 500
+        logging.error(f"Server Error: {error}")
+        return jsonify({
+            'error': 'Internal Server Error',
+            'message': 'An unexpected error occurred. Please try again later.'
+        }), 500
 
     @flask_app.route('/health')
     def health_check():
-        return jsonify(status="healthy"), 200
-
-    @flask_app.route('/set_cookie')
-    def set_cookie():
-        resp = make_response("Setting cookie")
-        resp.set_cookie(
-            '__vercel_live_token',
-            value='auth_token',
-            samesite='None',
-            secure=True,
-            httponly=True
-        )
-        return resp
-
-    @flask_app.route('/')
-    def index():
-        return render_template('index.html')
-
-    # @flask_app.after_request
-    # def add_csp_headers(response):
-    #     response.headers['Content-Security-Policy'] = (
-    #         "default-src 'self'; "
-    #         "script-src 'self' https://www.google.com https://www.gstatic.com; "
-    #         "frame-src 'self' https://www.google.com; "
-    #         "style-src 'self' https://fonts.googleapis.com; "
-    #         "font-src 'self' https://fonts.gstatic.com;"
-    #     )
-    #     return response
+        return jsonify(status="healthy", service="aupp-backend"), 200
 
     return flask_app
 
-
+# Create the app instance for Gunicorn/Production
 app = create_app()
 
 if __name__ == '__main__':

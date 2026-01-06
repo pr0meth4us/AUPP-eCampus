@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, Avatar } from "@nextui-org/react";
+import { Card, CardBody, Avatar } from "@heroui/react";
 
 const InstructorCard = ({ instructor_name, instructor_pfp }) => (
     <Card className="shadow-md">

@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, Progress, Button } from "@nextui-org/react";
+import { Card, CardBody, Progress, Button } from "@heroui/react";
 import { BookOpen, TrendingUp, Award, FileText } from "lucide-react";
 
 const GradesTab = ({ assignments }) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import Select from 'react-select';
 import MultiSelectWithSearchAndCreate from "components/common/MultiSelectWithSearchAndCreate";
 

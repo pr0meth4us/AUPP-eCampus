@@ -1,7 +1,7 @@
 // components/Modals/EnrollStudentModal.jsx
 
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from "@heroui/react";
 
 const EnrollStudentModal = ({ isOpen, onClose, studentId, setStudentId, onEnroll }) => {
   return (

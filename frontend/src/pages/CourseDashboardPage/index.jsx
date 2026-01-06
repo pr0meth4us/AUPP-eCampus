@@ -1,7 +1,7 @@
 // src/pages/CourseDashboardPage.jsx
 
 import React, { useState } from 'react';
-import { Spinner } from '@nextui-org/react';
+import { Spinner } from '@heroui/react';
 import OverviewSection from "./sections/OverviewSection";
 import ModulesSection from "./sections/ModulesSection";
 import AssignmentsSection from "./sections/AssignmentsSection";

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BookOpen, File, Users, Clipboard, Star } from 'lucide-react';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import {formatDate} from "../../../utils/dateUtils";
 
 const CourseSidebar = ({ courseData, activeSection, onSelectSection }) => {

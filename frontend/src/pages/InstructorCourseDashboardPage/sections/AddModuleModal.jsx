@@ -1,7 +1,7 @@
 // components/Modals/AddModuleModal.jsx
 
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea } from "@heroui/react";
 
 const AddModuleModal = ({
   isOpen,

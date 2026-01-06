@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from "../../context/authContext";
-import { Avatar, AvatarIcon } from "@nextui-org/react";
+import { Avatar, AvatarIcon } from "@heroui/react";
 import {
     User,
     BookOpen,

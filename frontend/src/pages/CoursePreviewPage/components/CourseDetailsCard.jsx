@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, Divider } from "@nextui-org/react";
+import { Card, CardBody, Divider } from "@heroui/react";
 
 const CourseDetailsCard = ({ course }) => (
     <Card className="shadow-md sticky top-6">

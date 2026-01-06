@@ -1,7 +1,7 @@
 // components/CourseHeader.jsx
 
 import React from "react";
-import { Card, CardBody, Input, Button, Chip, Image, Avatar } from "@nextui-org/react";
+import { Card, CardBody, Input, Button, Chip, Image, Avatar } from "@heroui/react";
 import { CheckCircleIcon, ClockIcon, PencilIcon } from "@heroicons/react/24/outline";
 import {UploadIcon} from "lucide-react";
 

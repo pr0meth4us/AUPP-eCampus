@@ -1,7 +1,7 @@
 // components/AssignmentsSection.jsx
 
 import React from "react";
-import { Card, CardHeader, CardBody, Button, Chip, Switch, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Button, Chip, Switch, Tooltip } from "@heroui/react";
 import { PlusIcon, EyeIcon, TrashIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 const AssignmentsSection = ({

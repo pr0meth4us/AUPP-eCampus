@@ -1,9 +1,9 @@
 import { useAuth } from 'context/authContext';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
-import { Spacer } from "@nextui-org/spacer";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Spacer } from "@heroui/spacer";
 
 const AdminLogin = () => {
     const { login } = useAuth();

@@ -11,7 +11,7 @@ import {
     Spinner,
     Avatar,
     Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const SubmissionsModal = ({

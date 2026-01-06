@@ -16,7 +16,7 @@ import {
     ModalFooter,
     Spinner,
     Tooltip,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { Upload, Clock, CheckCircle, XCircle, Eye, Download } from 'lucide-react';
 
 export const AssignmentDetailPage = () => {

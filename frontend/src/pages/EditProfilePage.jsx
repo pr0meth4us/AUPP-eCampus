@@ -8,7 +8,7 @@ import {
   CardHeader,
   Spinner,
   Textarea,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import {
   CameraIcon,
   UserIcon,

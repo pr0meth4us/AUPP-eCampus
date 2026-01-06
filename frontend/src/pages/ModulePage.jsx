@@ -6,7 +6,7 @@ import {
     CardBody,
     Button,
     Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
     FileText,
     XCircle,

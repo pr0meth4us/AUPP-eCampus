@@ -8,7 +8,7 @@ import {
     TableRow,
     TableCell,
     Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { formatDate } from "../../../utils/dateUtils";
 
 /**

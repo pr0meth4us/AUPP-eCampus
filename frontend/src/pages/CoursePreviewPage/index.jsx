@@ -9,8 +9,8 @@ import {
     ModalBody,
     ModalFooter,
     Spinner,
-} from "@nextui-org/react";
-import { useDisclosure } from "@nextui-org/react";
+} from "@heroui/react";
+import { useDisclosure } from "@heroui/react";
 import { Lock, LogIn, BookOpen } from "lucide-react";
 
 import { useAuth } from "../../context/authContext";

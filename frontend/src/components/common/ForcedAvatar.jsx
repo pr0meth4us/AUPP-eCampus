@@ -1,6 +1,6 @@
 // src/components/ForcedAvatar.jsx
 import React, { useState } from 'react';
-import { Avatar } from '@nextui-org/react';
+import { Avatar } from '@heroui/react';
 import { UserIcon } from '@heroicons/react/24/outline';
 
 const ForcedAvatar = ({ src, size = 144 }) => {

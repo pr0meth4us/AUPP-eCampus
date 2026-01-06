@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BookOpen, ExternalLink } from 'lucide-react';
-import { Chip, Button } from '@nextui-org/react';
+import { Chip, Button } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 
 const ModulesSection = ({ courseData }) => {

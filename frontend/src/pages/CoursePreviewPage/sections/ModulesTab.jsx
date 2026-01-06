@@ -6,7 +6,7 @@ import {
     CardFooter,
     Button,
     Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
     Lock,
     ExternalLink

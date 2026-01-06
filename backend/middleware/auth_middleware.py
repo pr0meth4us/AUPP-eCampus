@@ -1,40 +1,23 @@
 from functools import wraps
 from flask import request, jsonify, g
+from utils.token_utils import get_token_from_request
 from services.bifrost_service import BifrostService
-from models.user_model import User
+from models.user_model import User # Assuming you have a User model for local sync
 
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
-
-        # Check Header
-        auth_header = request.headers.get('Authorization')
-        if auth_header and auth_header.startswith('Bearer '):
-            token = auth_header.split(' ')[1]
-
-        # Check Cookie (Fallback)
+        token = get_token_from_request()
         if not token:
-            token = request.cookies.get('auth_token')
+            return jsonify({'message': 'Authentication required'}), 401
 
-        if not token:
-            return jsonify({'message': 'Authentication token missing'}), 401
+        # Delegate validation to Bifrost
+        bifrost_session = BifrostService.validate_token(token)
+        if not bifrost_session or not bifrost_session.get('valid'):
+            return jsonify({'message': 'Session expired or invalid'}), 401
 
-        # Validate with Bifrost
-        bifrost_data = BifrostService.validate_token(token)
-
-        if not bifrost_data or not bifrost_data.get('is_valid'):
-            return jsonify({'message': 'Invalid or expired token'}), 401
-
-        # Token is valid. Fetch local user profile to attach to request context.
-        user_id = bifrost_data['account_id']
-        local_user = User.find_by_id(user_id)
-
-        if not local_user:
-            # Edge case: Token valid, but local profile not synced yet.
-            return jsonify({'message': 'User profile not found. Please re-login.'}), 401
-
-        g.current_user = local_user.to_dict()
+        # Sync/Find local user info
+        user_data = bifrost_session.get('user')
+        g.current_user = user_data
         return f(*args, **kwargs)
-
     return decorated

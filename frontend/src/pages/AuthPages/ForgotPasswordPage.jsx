@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Link } from "@nextui-org/react";
+import { Button, Input, Link } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../services/auth"; // Direct import to avoid context loop if user is null
 import { CheckCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";

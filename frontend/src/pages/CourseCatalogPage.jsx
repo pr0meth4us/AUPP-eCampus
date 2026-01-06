@@ -9,7 +9,7 @@ import {
     CardFooter,
     CardHeader,
     Pagination,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import CardVideoSkeleton from "../components/skeletons/CardVideoSkeleton";
 import { User, BookOpen } from "lucide-react";
 

@@ -8,7 +8,7 @@ import {
   Button,
   Input,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 const GradingModal = ({
                         isOpen,

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Recaptcha from './Recaptcha';
 import '../../assets/css/elements/login.css';
 import {useAuth} from "context/authContext";
-import {Button} from "@nextui-org/react";
+import {Button} from "@heroui/react";
 import {LoadingContext} from "context/LoadingContext";
 
 const LoginPage = () => {
