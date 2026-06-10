@@ -1,42 +1,22 @@
 # Changelog
 
-All notable changes to the AUPP-eCampus project will be documented in this file.
+## [Neo-Brutalist Overhaul] - 2026-06-10
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Phase 1: Core Foundation & Aesthetics
+- **Architecture**: Wiped old `frontend/src` directory (safely backed up to `src_backup`).
+- **Services**: Built a robust Axios factory pattern in `services/api.js` to manage all endpoint instantiations and centralized global loading states.
+- **Styling Engine**: Configured `tailwind.config.js` and `index.css` with a custom ED/CORE Neo-Brutalist design system (heavy black borders, stark yellow/blue/red accent blocks, massive fonts).
+- **Home Page**: Rebuilt the landing page (`HomePage.jsx`) with brutalist hero sections, moving marquee banners, and aggressive styling.
+- **Navigation**: Replaced glassmorphic Navbar with a stark, sticky brutalist header.
 
-## [Unreleased]
+### Phase 2: Authentication Flow
+- **Services/Context**: Restored `services/auth.js` and `context/authContext.js` and wired them to the new `api.js` factory pattern. Wrapped the app in `AuthProvider`.
+- **Login Page**: Rebuilt `LoginPage.jsx` with aggressive typography and custom `animate-shake` error states.
+- **Registration**: Overhauled the complex 3-step OTP registration flow (`RegisterPage.jsx`) into a stark visual progress tracker (Email -> OTP -> Profile).
 
-### Added
-- Auth and Payment features outsourced to the centralized Bifrost Identity Provider.
-- Instructor dashboard management and course capabilities.
-- Course creation features including tags, majors, modules, assignments, and submissions.
-- PayPal and alternative checkout gateways natively integrated (now migrating to Bifrost).
-- Cloudflare R2 and Supabase storage configurations.
-- Admin dashboard interface.
-- Social media and partner sections in the footer.
-- Comprehensive loading states across the application.
-
-### Changed
-- Backend deeply restructured to follow the Flask Application Factory pattern (`backend/app`).
-- Restructured profile page API routes and controllers.
-- Simplified enrollment methods inside the `user_model`.
-- Updated database queries for robust error handling.
-- Migrated the application database from local to MongoDB Cloud.
-- Relocated Docker configurations.
-
-### Fixed
-- Fixed authentication state syncing between the backend and frontend.
-- Resolved various local environment setup bugs and unneeded files (globally ignoring `.DS_Store`, `.idea`, and `.pytest_cache`).
-- Fixed course update and video upload issues.
-- Fixed instructor registration edge case bugs.
-- TCP Health checks and production environment configurations.
-- Numerous CORS headers and policy issues fixed for Koyeb and Vercel hosting.
-- Secured frontend title handling.
-- **Hotfix:** Resolved residual PayPal dependencies and corrected relative imports inside the new Application Factory structure to ensure the backend boots properly.
-- **Security:** Completely removed Google reCAPTCHA and replaced it with Cloudflare Turnstile verification across the entire stack (both frontend UI and backend API).
-
-### Removed
-- Removed legacy PayPal direct routing.
-- Stripped local password logic and direct token validation in favor of headless Bifrost validation.
-- Deleted obsolete test configurations and `__pycache__` artifacts from git.
+### Phase 3: Course Catalog
+- **Services**: Restored `services/course.js` and all API methods.
+- **Components**: Added `CardVideoSkeleton.jsx` for a brutalist loading skeleton.
+- **Catalog Page**: Completely redesigned `CourseCatalogPage.jsx`. Replaced generic course cards with massive `.brutal-card` blocks, glitch-hover thumbnails, and heavy block pagination.
+- **Error Handling**: Implemented graceful error catching to display a stark red "SERVER OFFLINE" warning when the backend (or MongoDB) is down, rather than causing an unhandled promise rejection.
+- **Environment Configuration**: Added `.env` configuration to securely point the frontend to the live Koyeb deployment.

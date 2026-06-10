@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+import re
 
 
 def init_cors(app: Flask):
@@ -8,7 +9,7 @@ def init_cors(app: Flask):
              "origins": [
                  "https://auppecampus.vercel.app",
                  "https://auppecampus-git-dev-nickys-projects-77821a79.vercel.app",
-                 r"https://auppecampus-.*\.vercel\.app",
+                 re.compile(r"https://auppecampus-.*\.vercel\.app"),
                  "http://localhost:3000"
              ],
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
