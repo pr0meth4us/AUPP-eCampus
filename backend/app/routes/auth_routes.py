@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, make_response
 from app.services.bifrost_service import BifrostService
+from app.middleware.turnstile_middleware import require_turnstile
 
 auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/login', methods=['POST'])
+@require_turnstile
 def login():
     data = request.get_json()
     email = data.get('email')

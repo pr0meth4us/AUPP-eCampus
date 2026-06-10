@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerous CORS headers and policy issues fixed for Koyeb and Vercel hosting.
 - Secured frontend title handling.
 - **Hotfix:** Resolved residual PayPal dependencies and corrected relative imports inside the new Application Factory structure to ensure the backend boots properly.
+- **Security:** Completely removed Google reCAPTCHA and replaced it with Cloudflare Turnstile verification across the entire stack (both frontend UI and backend API).
 
 ### Removed
 - Removed legacy PayPal direct routing.

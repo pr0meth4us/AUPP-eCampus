@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-    const login = async (email, password) => {
-        const res = await api.post('/auth/login', { email, password });
+    const login = async (email, password, role, turnstile_token) => {
+        const res = await api.post('/auth/login', { email, password, role, turnstile_token });
         setUser(res.data.user); // The cookie is set automatically by the browser
         return res.data;
     };
@@ -45,11 +45,12 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     };
 
-    const completeRegistration = async (proofToken, password, name) => {
+    const completeRegistration = async (proofToken, password, name, turnstile_token) => {
         const res = await api.post('/auth/complete-registration', {
             proof_token: proofToken,
             password,
-            name
+            name,
+            turnstile_token
         });
         setUser(res.data.user);
         return res.data;
