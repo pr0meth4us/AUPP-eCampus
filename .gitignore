@@ -1,6 +1,11 @@
 backend/venv
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Global
+.DS_Store
+.idea/
+.pytest_cache/
+
 # Frontend
 
 # dependencies
@@ -94,3 +99,5 @@ backend/build/
 /backend/*.key
 /backend/*.crt
 /backend/youtube-credentials.json.DS_Store
+
+/bifrost
