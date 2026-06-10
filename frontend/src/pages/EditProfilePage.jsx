@@ -21,7 +21,7 @@ import { useAuth } from '../context/authContext';
 import { user as userService } from '../services';
 
 const EditProfilePage = () => {
-  const { user: contextUser, loading: authLoading, logout, updateUser } = useAuth();
+  const { user: contextUser, loading: authLoading, updateUser } = useAuth();
 
   // Local form fields
   const [name, setName] = useState('');

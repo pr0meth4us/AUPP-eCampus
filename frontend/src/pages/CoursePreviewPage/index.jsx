@@ -1,6 +1,6 @@
 // src/pages/CoursePage.jsx
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     Button,
     Modal,
@@ -24,7 +24,6 @@ import TabsContainer from "./sections";
 import CourseDetailsCard from "./components/CourseDetailsCard";
 
 const CoursePage = ({ mode = "preview" }) => {
-    const { id } = useParams();
     const { course, loading, error } = useCourseDetails(mode);
     const { user, refreshUser } = useAuth();
     const navigate = useNavigate();

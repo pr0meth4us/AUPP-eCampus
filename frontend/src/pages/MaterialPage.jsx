@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { course } from "../services";
 import { Card, CardBody, Textarea, Button } from "@heroui/react";
-import { XCircle, FileText, Link as LinkIcon } from 'lucide-react';
+import { XCircle, Link as LinkIcon } from 'lucide-react';
 
 export const MaterialDetailPage = () => {
     const { courseId, moduleId, materialId } = useParams();

@@ -21,6 +21,24 @@ const RegisterPage = () => {
     const { signup, sendOtp, user } = useAuth();
     const emailInputRef = useRef(null);
 
+    const getRedirectPath = (userRole = 'student') => {
+        const from = location.state?.from;
+        if (from && !from.includes('/login') && !from.includes('/register')) {
+            return from;
+        }
+
+        switch (userRole) {
+            case 'admin':
+                return '/admin/dashboard';
+            case 'instructor':
+                return '/instructor/course/create';
+            case 'student':
+                return '/course-catalog';
+            default:
+                return '/';
+        }
+    };
+
     useEffect(() => {
         if (user) {
             const redirectPath = getRedirectPath(user.role);
@@ -31,6 +49,7 @@ const RegisterPage = () => {
         if (emailInputRef.current) {
             emailInputRef.current.focus();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, navigate]);
 
     // Countdown timer for resend button
@@ -57,23 +76,8 @@ const RegisterPage = () => {
         setCanResend(false);
     };
 
-    const getRedirectPath = (userRole = 'student') => {
-        const from = location.state?.from;
-        if (from && !from.includes('/login') && !from.includes('/register')) {
-            return from;
-        }
 
-        switch (userRole) {
-            case 'admin':
-                return '/admin/dashboard';
-            case 'instructor':
-                return '/instructor/course/create';
-            case 'student':
-                return '/course-catalog';
-            default:
-                return '/';
-        }
-    };
+
 
     const handleSendOtp = async (e) => {
         e.preventDefault();

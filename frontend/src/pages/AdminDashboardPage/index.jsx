@@ -44,22 +44,20 @@ const AdminPage = () => {
                     <span className="navbar-brand">Manage</span>
                     <ul className="navbar-nav">
                         <li className="nav-item">
-                            <a
-                                className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
-                                href="#"
+                            <button
+                                className={`nav-link btn btn-link p-0 ${activeTab === 'users' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('users')}
                             >
                                 Users
-                            </a>
+                            </button>
                         </li>
                         <li className="nav-item">
-                            <a
-                                className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
-                                href="#"
+                            <button
+                                className={`nav-link btn btn-link p-0 ${activeTab === 'courses' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('courses')}
                             >
                                 Courses
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>

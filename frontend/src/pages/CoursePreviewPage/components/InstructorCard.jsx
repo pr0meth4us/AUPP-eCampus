@@ -8,6 +8,7 @@ const InstructorCard = ({ instructor_name, instructor_pfp }) => (
                 {instructor_pfp ? (
                     <img
                         src={instructor_pfp}
+                        alt={instructor_name || 'Instructor'}
                         className="w-16 h-16 object-cover rounded-full border-3 border-primary transition-opacity duration-500 "
                     />
                 ) : (

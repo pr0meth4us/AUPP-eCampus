@@ -10,23 +10,11 @@ const MyCourses = ({ role }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const fetchedCourses = await course.getMyCourses();
-
-        setDebugInfo({
-          fetchedCount: Array.isArray(fetchedCourses)
-            ? fetchedCourses.length
-            : "not an array",
-          fetchedType: typeof fetchedCourses,
-          firstItem:
-            Array.isArray(fetchedCourses) && fetchedCourses.length > 0
-              ? JSON.stringify(fetchedCourses[0]).substring(0, 100) + "..."
-              : "none",
-        });
 
         const coursesArray = Array.isArray(fetchedCourses)
           ? fetchedCourses

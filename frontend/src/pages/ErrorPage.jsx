@@ -3,7 +3,6 @@ import {
     XCircle,        // for 403
     AlertTriangle,  // for 404 (or general warning)
     AlertCircle,    // for any other generic error
-    Construction    // for under construction
 } from 'lucide-react';
 
 const ErrorPage = ({ code = 500, message, type }) => {

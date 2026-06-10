@@ -31,12 +31,12 @@ const Home = () => {
                                 >
                                     Start Learning
                                 </Link>
-                                <a
+                                <button
                                     onClick={handleUnderConstructionClick}
                                     className="btn border-straight btn-outline-danger color-red flex-grow-1 mx-2"
                                 >
                                     Explore Subjects
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>

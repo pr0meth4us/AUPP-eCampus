@@ -15,6 +15,7 @@ export const ContentDetailPage = () => {
 
     useEffect(() => {
         fetchContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [courseId, moduleId, contentId]);
 
     const fetchContent = async () => {

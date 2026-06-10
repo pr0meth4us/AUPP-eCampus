@@ -1,32 +1,8 @@
 import React from "react";
-import { Card, CardBody, Chip, Avatar } from "@heroui/react";
-import { BookText, Tags, Target, Calendar, Clock, User } from "lucide-react";
+import { Card, CardBody, Chip } from "@heroui/react";
+import { BookText, Tags } from "lucide-react";
 
 const OverviewTab = ({ course }) => {
-    // Derive course details with fallback values
-    const courseDetails = [
-        {
-            icon: <BookText size={20} className="text-primary" />,
-            label: "Description",
-            value: course?.description || "No description available"
-        },
-        {
-            icon: <Target size={20} className="text-green-500" />,
-            label: "Course Length",
-            value: course?.course_length || "Not specified"
-        },
-        {
-            icon: <Calendar size={20} className="text-blue-500" />,
-            label: "Created",
-            value: course?.created_at
-                ? new Date(course.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })
-                : "Date not available"
-        }
-    ];
 
     return (
         <div className="space-y-6">
