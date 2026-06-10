@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect, useContext} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Recaptcha from './Recaptcha';
+import TurnstileCaptcha from "./TurnstileCaptcha";
 import '../../assets/css/elements/login.css';
 import {useAuth} from "context/authContext";
 import {Button} from "@heroui/react";
@@ -32,7 +32,7 @@ const LoginPage = () => {
                 throw new Error('Please select a role.');
             }
             // if (!captchaValue) {
-            //     throw new Error('Please complete the reCAPTCHA.');
+            //     throw new Error('Please complete the Cloudflare Turnstile.');
             // }
             await login(email, password, role, captchaValue);
 
@@ -112,11 +112,11 @@ const LoginPage = () => {
                                 <a href="#" className="d-block mt-2">Forgot password?</a>
                             </div>
                             <div className="mb-3">
-                                <Recaptcha onVerify={setCaptchaValue}/>
-                                <small className="text-muted form-text">reCAPTCHA verification (optional for
+                                <TurnstileCaptcha onVerify={setCaptchaValue}/>
+                                <small className="text-muted form-text">Cloudflare Turnstile verification (optional for
                                     demo)</small>
                             </div>
-                            {/*<Recaptcha onVerify={setCaptchaValue}/>*/}
+                            {/*<TurnstileCaptcha onVerify={setCaptchaValue}/>*/}
                             {error && <p className="text-danger mt-3">{error}</p>}
                         </form>
                     </div>

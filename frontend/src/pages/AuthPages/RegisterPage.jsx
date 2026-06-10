@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Recaptcha from "../../components/features/Recaptcha";
+import TurnstileCaptcha from "../../components/features/TurnstileCaptcha";
 import {useAuth} from "context/authContext";
 
 const RegisterPage = () => {
@@ -123,7 +123,7 @@ const RegisterPage = () => {
         setSuccess('');
         try {
             // if (!captchaValue) {
-            //     setError("Please complete the reCAPTCHA.");
+            //     setError("Please complete the Cloudflare Turnstile.");
             //     setIsLoading(false);
             //     return;
             // }
@@ -332,21 +332,21 @@ const RegisterPage = () => {
                                     />
                                 </div>
 
-                                {/* reCAPTCHA */}
+                                {/* Cloudflare Turnstile */}
                                 {/*<div className="flex justify-center">*/}
                                 {/*    <p className="text-sm text-white/60 italic">*/}
-                                {/*        (Just ignore reCAPTCHA — it’s boring, so I disabled it.)*/}
+                                {/*        (Just ignore Cloudflare Turnstile — it’s boring, so I disabled it.)*/}
                                 {/*    </p>*/}
                                 {/*    <div className="p-3 bg-white/5 rounded-lg border border-white/10">*/}
-                                {/*        <Recaptcha onVerify={setCaptchaValue}/>*/}
+                                {/*        <TurnstileCaptcha onVerify={setCaptchaValue}/>*/}
                                 {/*    </div>*/}
                                 {/*</div>*/}
                                 <div className="space-y-3">
                                     <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                                        <Recaptcha onVerify={setCaptchaValue}/>
+                                        <TurnstileCaptcha onVerify={setCaptchaValue}/>
                                     </div>
                                     <p className="text-xs text-white/50 text-center">
-                                                (Just ignore reCAPTCHA — it’s boring, so I disabled it.)
+                                                (Just ignore Cloudflare Turnstile — it’s boring, so I disabled it.)
                                     </p>
                                 </div>
 

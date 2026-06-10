@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Recaptcha from "./Recaptcha";
+import TurnstileCaptcha from "./TurnstileCaptcha";
 import { useAuth } from "context/authContext";
 
 const Signup = () => {
@@ -287,10 +287,10 @@ const Signup = () => {
                                         />
                                     </div>
                                     <p className="text-sm text-gray-500 italic">
-                                        (Note: reCAPTCHA is currently disabled for this demo)
+                                        (Note: Cloudflare Turnstile is currently disabled for this demo)
                                     </p>
                                     {/* <div className="mb-3">
-                                        <Recaptcha onVerify={setCaptchaValue}/>
+                                        <TurnstileCaptcha onVerify={setCaptchaValue}/>
                                     </div> */}
                                 </>
                             )}
