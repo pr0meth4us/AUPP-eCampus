@@ -11,11 +11,11 @@ def create_app():
     init_mongo()
 
     # Initialize CORS for frontend communication
-    from services.cors_service import init_cors
+    from app.services.cors_service import init_cors
     init_cors(flask_app)
 
     # Register all application routes
-    from routes import register_routes
+    from app.routes import register_routes
     register_routes(flask_app)
 
     # SECURE ERROR HANDLER: Prevents leaking tracebacks to users

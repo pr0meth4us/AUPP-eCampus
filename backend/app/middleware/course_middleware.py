@@ -270,7 +270,7 @@ def check_assignment_deadline(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from datetime import datetime, timezone
-        from models.assignment_model import Assignment
+        from app.models.assignment_model import Assignment
 
         assignment_id = kwargs.get('assignment_id')
         if not assignment_id:

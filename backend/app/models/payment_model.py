@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from bson import ObjectId
-from app.services.paypal_service import PaymentService, PayPalFees
 import json
 import logging
 from app.services.redis_service import redis_client
@@ -18,6 +17,10 @@ class Payment:
     PAYMENT_KEY_PREFIX = "payment:"
     PAYMENT_EXPIRY = 3600
 
+    @classmethod
+    def _coll(cls):
+        return db.payments
+
     @staticmethod
     def create_payment_record(user_id, course_id, price, currency,
                               status='pending'):
@@ -27,8 +30,6 @@ class Payment:
 
         if not price:
             return None
-
-        paypal_payment = PaymentService.create_payment(course_id, price, currency)
 
         payment_id = str(ObjectId())
 
@@ -40,10 +41,10 @@ class Payment:
             'status': status,
             'created_at': datetime.now(timezone.utc).isoformat(),
             'updated_at': datetime.now(timezone.utc).isoformat(),
-            'payment_method': 'paypal',
-            'paypal_payment_id': paypal_payment.id,
-            'approval_url': next(link.href for link in paypal_payment.links if link.rel == 'approval_url'),
-            'payment_state': paypal_payment.state
+            'payment_method': 'bifrost',
+            'bifrost_transaction_id': None,
+            'approval_url': None,
+            'payment_state': 'created'
         }
 
         payment_key = f"{Payment.PAYMENT_KEY_PREFIX}{payment_id}"
@@ -99,6 +100,14 @@ class Payment:
 
         if payment_data_str:
             return json.loads(payment_data_str)
+        
+        # Check DB if not in redis
+        doc = db.payments.find_one({'_id': ObjectId(payment_id)})
+        if doc:
+            doc['_id'] = str(doc['_id'])
+            doc['user_id'] = str(doc['user_id'])
+            doc['course_id'] = str(doc['course_id'])
+            return doc
         return None
 
     @staticmethod
@@ -115,7 +124,7 @@ class Payment:
                 payment_data_str = redis_client.get(key)
                 if payment_data_str:
                     payment_data = json.loads(payment_data_str)
-                    if payment_data.get('paypal_payment_id') == paypal_payment_id:
+                    if payment_data.get('bifrost_transaction_id') == paypal_payment_id or payment_data.get('paypal_payment_id') == paypal_payment_id:
                         return payment_data
 
             if cursor == 0:
@@ -130,15 +139,12 @@ class Payment:
 
     @staticmethod
     def execute_payment_completion(payment_data, paypal_payment_id, payer_id):
-        payment_result = PaymentService.execute_payment(paypal_payment_id, payer_id)
-        if not payment_result:
-            raise PaymentException("Failed to execute PayPal payment")
         payment_data.update({
             'user_id': ObjectId(payment_data['user_id']),
             'course_id': ObjectId(payment_data['course_id']),
             'status': 'completed',
             'payer_id': payer_id,
-            'payment_state': payment_result.state,
+            'payment_state': 'approved',
             'completed_at': datetime.now(timezone.utc),
             'updated_at': datetime.now(timezone.utc)
         })
@@ -167,27 +173,19 @@ class Payment:
     @staticmethod
     def generate_receipt(payment_data):
         receipt = {
-            "Receipt ID": str(payment_data.get("_id", payment_data.get("paypal_payment_id", "N/A"))),
+            "Receipt ID": str(payment_data.get("_id", payment_data.get("bifrost_transaction_id", "N/A"))),
             "Date": payment_data.get("completed_at", payment_data.get("updated_at", datetime.now(timezone.utc).isoformat())),
-            "Transaction Type": "PayPal Checkout",
+            "Transaction Type": "Bifrost Checkout",
             "Course ID": str(payment_data.get("course_id", "N/A")),
             "Price": payment_data.get("price", 0),
             "Currency": payment_data.get("currency", "USD"),
             "Status": payment_data.get("status", "Unknown"),
-            "Payment Method": payment_data.get("payment_method", "PayPal"),
-            "PayPal Payment ID": payment_data.get("paypal_payment_id", "N/A"),
+            "Payment Method": payment_data.get("payment_method", "Bifrost"),
+            "Bifrost Payment ID": payment_data.get("bifrost_transaction_id", "N/A"),
             "Payer ID": payment_data.get("payer_id", "N/A"),
             "Approval URL": payment_data.get("approval_url", "N/A"),
             "Created At": payment_data.get("created_at"),
             "Updated At": payment_data.get("updated_at")
         }
-
-        if 'price' in payment_data:
-            try:
-                fees = PayPalFees.calculate_fees(payment_data['price'], payment_data.get('currency', 'USD'))
-                receipt["Transaction Fees"] = f"{fees:.2f} {payment_data.get('currency', 'USD')}"
-                receipt["Total Amount"] = f"{payment_data['price'] + fees:.2f} {payment_data.get('currency', 'USD')}"
-            except Exception as fee_error:
-                logger.warning(f"Could not calculate fees: {fee_error}")
 
         return receipt
