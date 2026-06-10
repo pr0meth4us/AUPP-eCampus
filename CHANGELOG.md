@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TCP Health checks and production environment configurations.
 - Numerous CORS headers and policy issues fixed for Koyeb and Vercel hosting.
 - Secured frontend title handling.
+- **Hotfix:** Resolved residual PayPal dependencies and corrected relative imports inside the new Application Factory structure to ensure the backend boots properly.
 
 ### Removed
 - Removed legacy PayPal direct routing.
