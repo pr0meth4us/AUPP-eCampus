@@ -122,11 +122,11 @@ const RegisterPage = () => {
         setError('');
         setSuccess('');
         try {
-            // if (!captchaValue) {
-            //     setError("Please complete the Cloudflare Turnstile.");
-            //     setIsLoading(false);
-            //     return;
-            // }
+            if (!captchaValue) {
+                setError("Please complete the Cloudflare Turnstile.");
+                setIsLoading(false);
+                return;
+            }
 
             const signupResult = await signup(name, email, password, userType, verificationCode, captchaValue);
 

@@ -31,9 +31,9 @@ const LoginPage = () => {
             if (!role) {
                 throw new Error('Please select a role.');
             }
-            // if (!captchaValue) {
-            //     throw new Error('Please complete the Cloudflare Turnstile.');
-            // }
+            if (!captchaValue) {
+                throw new Error('Please complete the Cloudflare Turnstile.');
+            }
             await login(email, password, role, captchaValue);
 
             if (closeButtonRef.current) {
